@@ -94,8 +94,8 @@ def query_detailed_info_of_song_in_range(l: int, r: int):
                 e1x.data.ids = "[" + e1x.data.id + "]"
             }
     },
-	:param l: 左边
-	:param r: 右边
+	:param l: 左闭端点
+	:param r: 右开端点
 	:return: None
 	"""
 	# [33399045, 2150468782, 2622292778, 2622295278, 2622295928] 是可以用的
@@ -105,10 +105,10 @@ def query_detailed_info_of_song_in_range(l: int, r: int):
 	time.sleep(random.randint(1, 2))
 	res = requests.get(f'{song_target}{cluster}', headers=header)
 	songs_detail = load_json_from_str(res.text)
-	if songs_detail is None:
-		print(f'[error happened before writing into {tmp_file_name}]')
-		return
 	with open(tmp_file_name, 'w', encoding='utf-8') as fd:
+		if songs_detail is None:
+			print(f'[error happened before writing into {tmp_file_name}]')
+			return
 		for a_song in songs_detail['songs']:
 			name, album = a_song['name'], a_song['album']['name']
 			duration = a_song['duration']

@@ -63,8 +63,8 @@ msg_on_mv_interface = "https://interface.music.163.com/weapi/privilege/message/m
 
 weblog_interface = "https://interface.music.163.com/weapi/feedback/weblog" + private_token
 
-# 带有多个参数
-get_followers_interface = "https://interface.music.163.com/weapi/user/getfollows/567580752" + private_token
+# 带有多个参数。
+get_followers_interface = f"https://interface.music.163.com/weapi/user/getfollows/{PRIVATE_CONFIG['cloudmusic']['user-id']}" + private_token
 
 # 暂时看不懂这个是干什么的
 # {
