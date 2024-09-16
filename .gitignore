@@ -1,0 +1,12 @@
+config.json
+analysis.txt
+wtf.txt
+*.tmp
+.idea
+.vscode
+songs-list.txt
+.dist
+# 默认忽略的文件
+/shelf/
+/workspace.xml
+__pycache__
