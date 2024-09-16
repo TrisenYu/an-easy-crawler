@@ -3,6 +3,7 @@
 # (c) Author: kisfg@hotmail.com
 import logging
 
+
 class CustomFormatter(logging.Formatter):
 	"""
 	Logging colored formatter, adapted from:
@@ -21,17 +22,18 @@ class CustomFormatter(logging.Formatter):
 		super().__init__()
 		self.fmt = fmt
 		self.FORMATS = {
-		    logging.DEBUG: self.grey + self.fmt + self.reset,
-		    logging.INFO: self.blue + self.fmt + self.reset,
-		    logging.WARNING: self.yellow + self.fmt + self.reset,
-		    logging.ERROR: self.red + self.fmt + self.reset,
-		    logging.CRITICAL: self.bold_red + self.fmt + self.reset
+			logging.DEBUG   : self.grey + self.fmt + self.reset,
+			logging.INFO    : self.blue + self.fmt + self.reset,
+			logging.WARNING : self.yellow + self.fmt + self.reset,
+			logging.ERROR   : self.red + self.fmt + self.reset,
+			logging.CRITICAL: self.bold_red + self.fmt + self.reset
 		}
 
 	def format(self, record):
 		log_fmt = self.FORMATS.get(record.levelno)
 		formatter = logging.Formatter(log_fmt)
 		return formatter.format(record)
+
 
 # Define format for logs
 _format = ' %(asctime)s [%(levelname)s]: %(message)s'

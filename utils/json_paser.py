@@ -3,8 +3,6 @@ import os.path
 
 from utils.throw_err import die_if_err, throw_err_if_exist
 
-PAYLOAD: dict = {}
-
 
 @die_if_err
 def load_config(inp: str) -> dict:

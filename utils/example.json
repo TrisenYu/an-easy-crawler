@@ -6,7 +6,7 @@
 		"list-id": 1,
 		"target": "/playlist",
 		"path-for-backup": "./songs-list.txt",
-		"npm-path": "PATHTO:\\To\\YOUR\\npm\\node_modules",
+		"npm-path": "PATH:\\To\\YOUR\\npm\\node_modules",
 		"csrf_token": ""
 	}
 }

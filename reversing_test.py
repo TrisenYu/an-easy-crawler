@@ -3,7 +3,7 @@
 # (c) Author: <kisfg@hotmail.com in 2024>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 """
-PoC 验证。
+对 js 中的 PoC 验证。
 """
 import requests
 from crypto.bicrypto import (
@@ -13,6 +13,7 @@ from crypto.bicrypto import (
 )
 from utils.json_paser import PRIVATE_CONFIG
 
+# TODO: 清理以下这里的结构。
 private_token = f"?csrf_token={PRIVATE_CONFIG['cloudmusic']['csrf_token']}"
 cdns_interface = "https://interface.music.163.com/weapi/cdns" + private_token
 # 返回 CDN 连接
@@ -82,24 +83,22 @@ clientconfig_interface = "https://interface.music.163.com/weapi/middle/clientcfg
 # 传一堆参数
 comment_below_songslist_interface = "https://interface.music.163.com/weapi/comment/resource/comments/get" + private_token
 
-"""
-破案了 core_52f85c5f5153a7880e60155739395661.js?52f85c5f5153a7880e60155739395661.js 下的
-第 69 行匿名函数 (function()) 里头有个
-```
-	"res-playlist-get": {
-        type: "GET",
-        url: "/api/v6/playlist/detail",
-        format: function(m1x, e1x) {
-            var res = j1x.bsN0x(m1x);
-            res.playlist = res.result;
-            delete res.result;
-            return xr5w(res, e1x)
-        }
-    },
-```
-只需要传 id 参数就可以获取到歌单内的所有歌曲。
-playlist_detail_interface = "https://interface.music.163.com/api/v6/playlist/detail"
-"""
+# 破案了 core_52f85c5f5153a7880e60155739395661.js?52f85c5f5153a7880e60155739395661.js 下的
+# 第 69 行匿名函数 (function()) 里头有个
+# ```
+# 	"res-playlist-get": {
+#         type: "GET",
+#         url: "/api/v6/playlist/detail",
+#         format: function(m1x, e1x) {
+#             var res = j1x.bsN0x(m1x);
+#             res.playlist = res.result;
+#             delete res.result;
+#             return xr5w(res, e1x)
+#         }
+#     },
+# ```
+# 只需要传 id 参数就可以获取到歌单内的所有歌曲。
+# playlist_detail_interface = "https://interface.music.163.com/api/v6/playlist/detail"
 
 header = {
 	"Accept"                   : "text/html,application/xhtml+xml,application/xml;"
@@ -130,6 +129,11 @@ appended_payload: bool = True
 
 
 def final_payload_sender(force_post: bool, choice: str):
+	"""
+	:param force_post: 一定要用 post 方法。
+	:param choice: 对接口链接的选择。
+	:return: 发请求后接口的响应返回值。
+	"""
 	if not force_post:
 		return requests.get(target, headers=header)
 	raw_data = {"csrf_token": PRIVATE_CONFIG['cloudmusic']['csrf_token']}

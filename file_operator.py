@@ -18,11 +18,11 @@ def write_to_file_in_a_way(path: str, attr: str, payload: str) -> None:
 
 
 @throw_err_if_exist
-def write_from_file(fpath: str, dst_path: str) -> None:
-	with open(fpath, 'r', encoding='utf-8') as fd:
+def write_from_file(src_path: str, dst_path: str) -> None:
+	with open(src_path, 'r', encoding='utf-8') as sd:
 		with open(dst_path, 'a', encoding='utf-8') as dd:
 			while True:
-				tmp = fd.read()
+				tmp = sd.read()
 				if tmp is None or len(tmp) <= 0:
 					break
 				dd.write(tmp)

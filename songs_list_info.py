@@ -67,13 +67,12 @@ write_to_file_in_a_way(
 	        f'# hits (only for reference): {tmp["playCount"]}\n\n'
 	        f'songs_list_title = `{tmp["name"]}`\n'
 	        f'description = `\n{tmp["description"]}\n`\n\n'
-	        f'# songs'
+	        f'# songs\n'
 )
 playlist = tmp['trackIds']
 del tmp
 lena, slicer = len(playlist), 100
-other = lena // slicer
-reminder = lena % slicer
+other, reminder = lena // slicer, lena % slicer
 
 
 def query_detailed_info_of_song_in_range(l: int, r: int):
@@ -98,7 +97,7 @@ def query_detailed_info_of_song_in_range(l: int, r: int):
 	:param r: 右开端点
 	:return: None
 	"""
-	# [33399045, 2150468782, 2622292778, 2622295278, 2622295928] 是可以用的
+	# 像是这种多个参数的查询 [33399045, 2150468782, 2622292778, 2622295278, 2622295928] 是可以用的
 	tmp_file_name = f'./{l}-{r}.tmp'
 	song_target = "https://interface.music.163.com/api/song/detail?ids="
 	cluster: list[int] = [playlist[i]['id'] for i in range(l, r)]
@@ -128,7 +127,7 @@ for t in ts:
 for t in ts:
 	t.join()
 
-# 做完了才能写
+# 做完了再写
 for seq in task_queue:
 	src_tmp_file = f'./{seq[0]}-{seq[1]}.tmp'
 	write_from_file(
