@@ -1,9 +1,9 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2024>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 """
-对 js 中的 PoC 验证。
+对网易前端 js 的 PoC。
 """
 import requests
 from crypto.bicrypto import (
@@ -15,7 +15,9 @@ from utils.json_paser import PRIVATE_CONFIG
 
 # TODO: 清理以下这里的结构。
 private_token = f"?csrf_token={PRIVATE_CONFIG['cloudmusic']['csrf_token']}"
-cdns_interface = "https://interface.music.163.com/weapi/cdns" + private_token
+host_root = PRIVATE_CONFIG['cloudmusic']['name']
+hostname = f"https://interface.{host_root}"
+cdns_interface = f"{hostname}/weapi/cdns" + private_token
 # 返回 CDN 连接
 # {
 #   "data": [
@@ -28,19 +30,19 @@ cdns_interface = "https://interface.music.163.com/weapi/cdns" + private_token
 # }
 
 # 返回版权说明
-copyright_interface = "https://interface.music.163.com/weapi/copyright/pay_fee_message/config" + private_token
+copyright_interface = f"{hostname}/weapi/copyright/pay_fee_message/config" + private_token
 
 # 返回评论列表
-private_comments_interface = "https://interface.music.163.com/weapi/pl/count" + private_token
+private_comments_interface = f"{hostname}/weapi/pl/count" + private_token
 
 # 404 无效页。
-target = "https://interface.music.163.com/m/api/encryption/param/get" + private_token
+target = f"{hostname}/m/api/encryption/param/get" + private_token
 
 # 只有 200，无其它结果
-refresh_login_token_interface = "https://interface.music.163.com/weapi/login/token/refresh" + private_token
+refresh_login_token_interface = f"{hostname}/weapi/login/token/refresh" + private_token
 
 # {"code":200,"data":{"title":null,"content":null,"region":null,"urlList":null,"needPop":false},"message":""}
-private_info_interface = "https://interface.music.163.com/weapi/privacy/info/get/v2" + private_token
+private_info_interface = f"{hostname}/weapi/privacy/info/get/v2" + private_token
 
 # {
 #   "topEventPermission":false,"pubLongMsgEvent":false,"LongMsgNum":1000,"pubEventWithPics":true,
@@ -48,7 +50,7 @@ private_info_interface = "https://interface.music.163.com/weapi/privacy/info/get
 #   "eventVideoUploadNosType":1,"lotteryEventPermission":false,
 #   "timingPublishEvent":false,"createChallengeTopic":false,"code":200
 # }
-user_event_interface = "https://interface.music.163.com/weapi/event/user/permission" + private_token
+user_event_interface = f"{hostname}/weapi/event/user/permission" + private_token
 
 # {
 #   "code":200,
@@ -60,12 +62,12 @@ user_event_interface = "https://interface.music.163.com/weapi/event/user/permiss
 #   "unauthorizedMv":"版权方要求，当前资源暂时无法使用"}
 # }
 #
-msg_on_mv_interface = "https://interface.music.163.com/weapi/privilege/message/mv" + private_token
+msg_on_mv_interface = f"{hostname}/weapi/privilege/message/mv" + private_token
 
-weblog_interface = "https://interface.music.163.com/weapi/feedback/weblog" + private_token
+weblog_interface = f"{hostname}/weapi/feedback/weblog" + private_token
 
 # 带有多个参数。
-get_followers_interface = f"https://interface.music.163.com/weapi/user/getfollows/{PRIVATE_CONFIG['cloudmusic']['user-id']}" + private_token
+get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG['cloudmusic']['user-id']}" + private_token
 
 # 暂时看不懂这个是干什么的
 # {
@@ -78,10 +80,10 @@ get_followers_interface = f"https://interface.music.163.com/weapi/user/getfollow
 # 	},
 # 	"message": ""
 # }
-clientconfig_interface = "https://interface.music.163.com/weapi/middle/clientcfg/config/list" + private_token
+clientconfig_interface = f"{hostname}/weapi/middle/clientcfg/config/list" + private_token
 
 # 传一堆参数
-comment_below_songslist_interface = "https://interface.music.163.com/weapi/comment/resource/comments/get" + private_token
+comment_below_songslist_interface = f"{hostname}/weapi/comment/resource/comments/get" + private_token
 
 # 破案了 core_52f85c5f5153a7880e60155739395661.js?52f85c5f5153a7880e60155739395661.js 下的
 # 第 69 行匿名函数 (function()) 里头有个
@@ -100,6 +102,8 @@ comment_below_songslist_interface = "https://interface.music.163.com/weapi/comme
 # 只需要传 id 参数就可以获取到歌单内的所有歌曲。
 # playlist_detail_interface = "https://interface.music.163.com/api/v6/playlist/detail"
 
+# 邮件登录过程 TODO
+
 header = {
 	"Accept"                   : "text/html,application/xhtml+xml,application/xml;"
 	                             "q=0.9,image/avif,image/webp,image/apng,*/*;"
@@ -108,7 +112,7 @@ header = {
 	"Cache-Control"            : "no-cache",
 	"Connection"               : "keep-alive",
 	"Pragma"                   : "no-cache",
-	"Referer"                  : f"https://music.163.com/",
+	"Referer"                  : f"https://{host_root}/",
 	"Sec-Fetch-Dest"           : "iframe",
 	"Sec-Fetch-Mode"           : "navigate",
 	"Sec-Fetch-Site"           : "same-origin",

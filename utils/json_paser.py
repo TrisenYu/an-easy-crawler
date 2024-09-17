@@ -1,6 +1,10 @@
+#! /usr/bin/env python3
+# -*- coding: utf8 -*-
+# (c) Author: <kisfg@hotmail.com in 2024>
+# SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 import json
 import os.path
-
+from typing import Optional
 from utils.throw_err import die_if_err, throw_err_if_exist
 
 
@@ -18,8 +22,8 @@ def load_config(inp: str) -> dict:
 
 
 @die_if_err
-def load_json_from_str_or_die(inp: str) -> dict:
-	return json.loads(inp)
+def json2dict_via_str_or_die(inp: str, key: Optional[str] = None) -> dict:
+	return json.loads(inp) if key is None else json.loads(inp)[key]
 
 
 @throw_err_if_exist

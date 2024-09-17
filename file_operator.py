@@ -1,11 +1,11 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2024>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 
 """
 之前这里的逻辑没有直接用网易的后端，而是通过解析冗长的前端来完成任务。
-编程效率相对比较快但是运行效率有点 low。所以已经全部注释掉了。
+编程效率相对比较快但是运行效率有点 low。所以已经全部清掉了。
 """
 import os
 from utils.throw_err import throw_err_if_exist

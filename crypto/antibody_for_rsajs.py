@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2024>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
@@ -26,8 +26,16 @@ with open(_curr_dir + '/./crypto_rsa.js', 'r', encoding='utf-8') as fd:
 # 此处需要配置 npm 路径。
 CTX = execjs.compile(_jstext, cwd=PRIVATE_CONFIG['cloudmusic']['npm-path'])
 
+def encSecKey_gen(ran_str: str):
+	"""
+	rsa_e 65537, 010001
+    :return: 返回值作为 h { encSecKey }
+	"""
+	return CTX.call('c', ran_str, rsa_e, rsa_modulo)
+
+
 if __name__ == '__main__':
-	res = CTX.call('c', 'e2yswfSf2Ac8CUpz', rsa_e, rsa_modulo)
+	res = encSecKey_gen('e2yswfSf2Ac8CUpz')
 	print(f'\n{res}')
 
 # 参考答案：24ef203783fa4da8ef6e5aaf2e200a0fe014febbe59c5f6e91dc90b1381c27b4a812e9b43882449c5745e2a68c1050dd1f8f297610687bc2897ea875938acd0f76894116907775f29474f23837354692c15038ebc8584cda38d0660447b84ecb039f0d8d584cb5f69b9a6ab2a430e27d89621fb6c45a56485581d142ed663d0d
