@@ -2,17 +2,14 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import base64, random
 
-from crypto.antibody_for_rsajs import CTX
+from crypto.antibody_for_rsajs import encSecKey_gen
 from utils.json_paser import PRIVATE_CONFIG
 
 # 简简单单打个 JavaScript 的断点。
 # TODO: 有没有可能以后网易的前端不会用这种写死的办法了呢？
-#       又或者后端接口全变了？
+#       或者说后端接口全变了？
 aes_cbc_iv = '0102030405060708'.encode('utf8')
 aes_cbc_key = '0CoJUm6Qyw8W8jud'.encode('utf8')
-rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7'
-rsa_e = '010001'
-
 
 def aes_cbc_encryptor(enc_key: bytes, payload: str) -> bytes:
 	"""
@@ -46,14 +43,6 @@ def gen_random_16_str() -> str:
 		e = random.randint(0, len(const_base_string) - 1)
 		res += const_base_string[e]
 	return res
-
-
-def encSecKey_gen(ran_str: str):
-	"""
-	rsa_e 65537, 010001
-    :return: 返回值作为 h { encSecKey }
-	"""
-	return CTX.call('c', ran_str, rsa_e, rsa_modulo)
 
 
 def encText_gen(random_16_bytes: bytes, payload: str):

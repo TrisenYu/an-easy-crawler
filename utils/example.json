@@ -4,7 +4,6 @@
 		"cookie": "",
 		"user-id": 1,
 		"list-id": 1,
-		"target": "/playlist",
 		"path-for-backup": "./songs-list.txt",
 		"npm-path": "PATH:\\To\\YOUR\\npm\\node_modules",
 		"csrf_token": ""
