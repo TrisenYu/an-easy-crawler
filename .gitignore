@@ -10,3 +10,5 @@ songs-list.txt
 /shelf/
 /workspace.xml
 __pycache__
+login.py
+logout.py

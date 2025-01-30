@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
-# (c) Author: <kisfg@hotmail.com in 2024>
+# (c) Author: <kisfg@hotmail.com in 2024,2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 import json
 import os.path

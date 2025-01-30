@@ -440,6 +440,8 @@ function a(a) {
     return c
 }
 function b(a, b) {
+    // 也只有这里用到了 crypto-js 的代码。
+    // 移植起来比较费劲，还是 npm i -g 吧。
     var c = CryptoJS.enc.Utf8.parse(b)
       , d = CryptoJS.enc.Utf8.parse("0102030405060708")
       , e = CryptoJS.enc.Utf8.parse(a)

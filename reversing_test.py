@@ -13,7 +13,6 @@ from crypto.bicrypto import (
 )
 from utils.json_paser import PRIVATE_CONFIG
 
-# TODO: 清理以下这里的结构。
 private_token = f"?csrf_token={PRIVATE_CONFIG['cloudmusic']['csrf_token']}"
 host_root = PRIVATE_CONFIG['cloudmusic']['name']
 hostname = f"https://interface.{host_root}"
@@ -66,7 +65,7 @@ msg_on_mv_interface = f"{hostname}/weapi/privilege/message/mv" + private_token
 
 weblog_interface = f"{hostname}/weapi/feedback/weblog" + private_token
 
-# 带有多个参数。
+# 带有多个参数。这里之前似乎前端就已经向后端发出了歌单查询请求。
 get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG['cloudmusic']['user-id']}" + private_token
 
 # 暂时看不懂这个是干什么的
@@ -85,7 +84,7 @@ clientconfig_interface = f"{hostname}/weapi/middle/clientcfg/config/list" + priv
 # 传一堆参数
 comment_below_songslist_interface = f"{hostname}/weapi/comment/resource/comments/get" + private_token
 
-# 破案了 core_52f85c5f5153a7880e60155739395661.js?52f85c5f5153a7880e60155739395661.js 下的
+# 破案了 core_52f85c5f5153a7880e60155739395661.js 下的
 # 第 69 行匿名函数 (function()) 里头有个
 # ```
 # 	"res-playlist-get": {
@@ -101,8 +100,6 @@ comment_below_songslist_interface = f"{hostname}/weapi/comment/resource/comments
 # ```
 # 只需要传 id 参数就可以获取到歌单内的所有歌曲。
 # playlist_detail_interface = "https://interface.music.163.com/api/v6/playlist/detail"
-
-# 邮件登录过程 TODO
 
 header = {
 	"Accept"                   : "text/html,application/xhtml+xml,application/xml;"
@@ -125,8 +122,8 @@ header = {
 	"cookie"                   : PRIVATE_CONFIG['cloudmusic']['cookie']
 }
 
-random_str = gen_random_16_str()
-binary_random_str = random_str.encode('utf8')
+random_str: str = gen_random_16_str()
+binary_random_str: bytes = random_str.encode('utf8')
 
 should_post: bool = True
 appended_payload: bool = True
