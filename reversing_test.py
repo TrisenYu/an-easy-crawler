@@ -1,20 +1,20 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
-# (c) Author: <kisfg@hotmail.com in 2024>
+# (c) Author: <kisfg@hotmail.com in 2024,2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 """
 对网易前端 js 的 PoC。
 """
 import requests
-from crypto.bicrypto import (
+from crypto.manual_deobfuscation import (
 	encText_gen,
 	encSecKey_gen,
-	gen_random_16_str
+	random_16_str_gen
 )
 from utils.json_paser import PRIVATE_CONFIG
 
 private_token = f"?csrf_token={PRIVATE_CONFIG['cloudmusic']['csrf_token']}"
-host_root = PRIVATE_CONFIG['cloudmusic']['name']
+host_root = 'music.163.com'
 hostname = f"https://interface.{host_root}"
 cdns_interface = f"{hostname}/weapi/cdns" + private_token
 # 返回 CDN 连接
@@ -122,7 +122,7 @@ header = {
 	"cookie"                   : PRIVATE_CONFIG['cloudmusic']['cookie']
 }
 
-random_str: str = gen_random_16_str()
+random_str: str = random_16_str_gen()
 binary_random_str: bytes = random_str.encode('utf8')
 
 should_post: bool = True

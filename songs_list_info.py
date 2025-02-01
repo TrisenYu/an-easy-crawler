@@ -7,6 +7,7 @@
 本程序只用于个人爬取网易云歌单的歌曲名等信息以用于留存备份。
 使用方式：
 	通过浏览器提供自身登录后得到的 cookie、歌单 id，然后运行爬取。
+会临时生成对应范围的临时文件，多线程执行完成和会按顺序写入 song-list.txt，而后删除临时文件。
 """
 import random
 from utils.json_paser import (
@@ -45,7 +46,7 @@ def query_detailed_info_of_song_in_range(l: int, r: int):
 	:param r: 右开端点
 	:return: None
 	"""
-	# 像是这种多个参数的查询 [33399045, 2150468782, 2622292778, 2622295278, 2622295928] 是可以用的
+	# 像这种多参数的查询 [33399045, 2150468782, 2622292778, 2622295278, 2622295928] 是可以的
 	tmp_file_name = f'./{l}-{r}.tmp'
 	cluster: list[int] = [playlist[i]['id'] for i in range(l, r)]
 	time.sleep(random.randint(1, 10))  # TODO: 伪造人来访问的拙劣手段。
@@ -57,7 +58,6 @@ def query_detailed_info_of_song_in_range(l: int, r: int):
 			fd.write(f'\n# failed to fetch songs which in the range of {l}-{r}.\n\n')
 			return
 		# 格式对照 ./human_readable.json 来操作。
-		# TODO: 如果后面换定义了，这里就得重新调。未免太过丑陋。
 		for a_song in songs_detail['songs']:
 			name, album = a_song['name'], a_song['album']['name']
 			duration = a_song['duration']
@@ -145,3 +145,5 @@ for seq in task_queue:
 		PRIVATE_CONFIG['cloudmusic']['path-for-backup']
 	)
 	remove_file(src_tmp_file)
+
+del task_queue, ts

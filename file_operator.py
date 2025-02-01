@@ -6,8 +6,12 @@
 """
 文件操作简化函数。
 """
-import os
-from utils.throw_err import throw_err_if_exist, die_if_err
+import os, json
+from utils.throw_err import (
+	throw_err_if_exist,
+	die_if_err
+)
+from utils.json_paser import load_config
 
 
 @throw_err_if_exist
@@ -42,3 +46,31 @@ def load_readable_txt_from_file(path: str) -> str:
 				break
 			res += tmp
 	return res
+
+
+@throw_err_if_exist
+def attempt_modify_json(
+	path: str,
+	target_name: list[str],
+	specific_member: list[str],
+	payload: list
+) -> None:
+	"""
+	在 `O(n)` 的复杂度下完成对文件的修改。
+	"""
+	if len(target_name) != len(specific_member) and len(target_name) != len(payload):
+		raise ValueError('invalid parameters')
+	if len(target_name) == 0:
+		raise ValueError('Empty parameter')
+
+	_for_match_1, _for_match_2 = [f'{t}' for t in target_name], [f'{s}' for s in specific_member]
+	pattern = load_config(path)
+	for idx, m1 in enumerate(_for_match_1):
+		pattern[m1][_for_match_2[idx]] = payload[idx]
+	del _for_match_1, _for_match_2
+	with open(path, 'w+', encoding='utf-8') as fd:
+		json.dump(pattern, fd, indent=4, ensure_ascii=False)
+
+
+if __name__ == "__main__":
+	attempt_modify_json('utils/example.json', ['user2', 'user2'], ['user-id', 'password'], [123, "321"])

@@ -2,10 +2,12 @@
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2024,2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
-import json
-import os.path
+import json, os.path
 from typing import Optional
-from utils.throw_err import die_if_err, throw_err_if_exist
+from utils.throw_err import (
+	die_if_err,
+	throw_err_if_exist
+)
 
 
 @die_if_err
@@ -23,6 +25,7 @@ def load_config(inp: str) -> dict:
 
 @die_if_err
 def json2dict_via_str_or_die(inp: str, key: Optional[str] = None) -> dict:
+	""" 解析传回的 json 为 python 可处理的内存对象 """
 	return json.loads(inp) if key is None else json.loads(inp)[key]
 
 
