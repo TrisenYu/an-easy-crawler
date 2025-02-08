@@ -1,6 +1,6 @@
 {
     "npm-path": "win-PATH:\\To\\YOUR\\npm\\node_modules; unix-path:,let's say, /usr/local/nodejs/node_modules/;",
-    "cloudmusic": {
+    "user1": {
         "cookie": "",
         "user-id": 1,
         "list-id": 1,
@@ -12,7 +12,16 @@
     "user2": {
         "cookie": "",
         "user-id": 123,
-        "email": 117,
+        "email": "117",
+        "password": "321",
+        "list-id": 117,
+        "path-for-backup": "./i-don't-know",
+        "csrf_token": ""
+    },
+    "any-other-name": {
+        "cookie": "",
+        "user-id": 123,
+        "email": "117",
         "password": "321",
         "list-id": 117,
         "path-for-backup": "./i-don't-know",

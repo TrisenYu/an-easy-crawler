@@ -1,13 +1,24 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
-# (c) Author: <kisfg@hotmail.com in 2024,2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, see <https://www.gnu.org/licenses/>.
 import logging
 
 
 class CustomFormatter(logging.Formatter):
 	"""
-	Logging colored formatter, adapted from:
+	Logging colored formatter, adapted from and thanks to:
 		- stackoverflow.com/a/56944256/3638629
 		- alexandra-zaharia.github.io/posts/make-your-own-custom-color-formatter-with-python-logging/
 	"""
@@ -36,9 +47,7 @@ class CustomFormatter(logging.Formatter):
 		return formatter.format(record)
 
 
-# Define format for logs
-_format = ' %(asctime)s [%(levelname)s]: %(message)s'
-
+_format = '\n%(asctime)s [%(filename)s/%(funcName)s/line%(lineno)d]-%(levelname)s: \n\t%(message)s'
 _stdout_handler = logging.StreamHandler()
 _stdout_handler.setLevel(logging.DEBUG)
 _stdout_handler.setFormatter(CustomFormatter(_format))

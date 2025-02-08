@@ -1,63 +1,74 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
-# (c) Author: <kisfg@hotmail.com in 2024,2025>
+# (c) Author: <kisfg@hotmail.com in 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
-
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
-import subprocess, base64, random
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, see <https://www.gnu.org/licenses/>.
+"""
+	diff_tests/estimator.py 下粗略比较了native和非native函数的执行用时，结果表明混淆后造成性能下降10~100倍。
+	需特别注意混淆js脚本出入字符串的大小写以及格式要求。
+"""
+import subprocess
 from functools import partial
 
-subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")  # 不加等着被 execjs 抛出的 gbdk 编码失效锤。
+import mmh3, math
 
-import os.path, execjs
-from utils.json_paser import PRIVATE_CONFIG
-from file_operator import load_readable_txt_from_file
+_Popen = subprocess.Popen
+subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")
 
+from Crypto.Cipher import (
+	AES,
+	PKCS1_v1_5
+)
+
+from Crypto.PublicKey import RSA
+from Crypto.Util.Padding import pad
+from Crypto.Util.number import bytes_to_long
+
+import hashlib, base64, random, binascii
+from gmssl import sm4
+
+subprocess.Popen = _Popen
+del _Popen
 # <简简单单> 打个 JavaScript 的断点。
-# TODO: 有没有可能以后网易的前端不会用这种写死的办法了呢？
-#       或者说后端接口全变了？
-rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17' \
-             'a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c9387011' \
-             '4af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef5' \
-             '2741d546b8e289dc6935b3ece0462db0a22b8e7'
+_rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17' \
+              'a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c9387011' \
+              '4af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef5' \
+              '2741d546b8e289dc6935b3ece0462db0a22b8e7'
+_rsa_pub2 = "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5gsH+AA4" \
+            "XWONB5TDcUd+xCz7ejOFHZKlcZDx+pF1i7Gsvi1vjyJoQhRtRSn950x498VUkx7rUxg1/ScBVfr" \
+            "RxQOZ8xFBye3pjAzfb22+RCuYApSVpJ3OO3KsEuKExftz9oFBv3ejxPlYc5yq7YiBO8XlTnQN0S" \
+            "a4R4qhPO3I2MQIDAQAB\n-----END PUBLIC KEY-----"
 
-aes_cbc_iv = '0102030405060708'.encode('utf8')
-cloud_music_aes_cbc_key = '0CoJUm6Qyw8W8jud'.encode('utf8')
-_CURR_DIR = os.path.dirname(__file__)
-try:
-	crypto_sm4 = execjs.compile(load_readable_txt_from_file(_CURR_DIR + '/./crypto_sm4.js'))
-	crypto_rsa = execjs.compile(load_readable_txt_from_file(_CURR_DIR + '/./crypto_rsa.js'),
-	                            cwd=PRIVATE_CONFIG['npm-path'])
-	crypto_rsa2 = execjs.compile(load_readable_txt_from_file(_CURR_DIR + '/./crypto_rsa2.js'))
-except Exception as e:
-	print(e)
-	exit(1)
-
-def encSecKey_gen(ran_str: str):
-	"""
-	rsa_e 65537, 0x010001
-	:return: 返回值作为 h { encSecKey }
-	"""
-	global crypto_rsa, rsa_modulo
-	# 此处需要配置 npm 路径。
-	return crypto_rsa.call('c', ran_str, '010001', rsa_modulo)
+_rsa_enc2 = PKCS1_v1_5.new(RSA.importKey(_rsa_pub2))
+_sm4_enc = sm4.CryptSM4(padding_mode=sm4.PKCS7)  # PKCS7 在实现上和 PKCS5 一致。
+# 下一行写法调了很久才调出来。属于是难绷了
+_sm4_enc.set_key(0xbc60b8b9e4ffeffa219e5ad77f11f9e2.to_bytes(16, 'big'), sm4.SM4_ENCRYPT)
+_aes_cbc_iv = b'0102030405060708'
+_cloud_music_aes_cbc_key = b'0CoJUm6Qyw8W8jud'
 
 
-def aes_cbc_encryptor(enc_key: bytes, payload: str) -> bytes:
-	"""
-	:param enc_key: 加密密钥
-	:param payload: 待加密字符串
-	"""
-	binary_payload = pad(payload.encode('utf8'), 16)
-	aes = AES.new(enc_key, AES.MODE_CBC, iv=aes_cbc_iv)
-	return aes.encrypt(binary_payload)
 
-def base64_str_gen(inp: bytes):
-	"""转 base64 """
-	return base64.b64encode(inp).decode('iso-8859-1')
+def encSecKey_gen(ran_str: str) -> str:
+	# 1. 直接 powmod
+	# 2. 翻转
+	global _rsa_modulo
+	cur = bytes_to_long(ran_str[::-1].encode('utf-8'))
+	encur = pow(cur, 0x010001, int(_rsa_modulo, 16))
+	return hex(encur)[2:]
 
-def gen_base64_str(inp: bytes):
+
+def base64_str_gen(inp: bytes) -> str:
 	"""转 base64 """
 	return base64.b64encode(inp).decode('iso-8859-1')
 
@@ -65,14 +76,15 @@ def gen_base64_str(inp: bytes):
 def random_16_str_gen() -> str:
 	"""
 	function a(a: int) {
-		var d, e, b = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", c = "";
-		for (d = 0; d < a; d ++)
-			e = Math.random() * b.length,
-			e = Math.floor(e),
-			c += b.charAt(e);
-		return c
+	....var d, e, b = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", c = "";
+	....for (d = 0; d < a; d ++)
+	........e = Math.random() * b.length,
+	........e = Math.floor(e),
+	........c += b.charAt(e);
+	....return c
 	}
-	:return: 伪随机生成的16个字节
+
+	- function return val: 伪随机生成的16个字节
 	"""
 	const_base_string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	ans = ''
@@ -82,77 +94,95 @@ def random_16_str_gen() -> str:
 	return ans
 
 
-def encText_gen(random_16_bytes: bytes, payload: str) -> str:
-	global cloud_music_aes_cbc_key
-	middle = base64_str_gen(aes_cbc_encryptor(cloud_music_aes_cbc_key, payload))
-	raw_enc = aes_cbc_encryptor(random_16_bytes, middle)
+def encText_gen(random_16_bytes: str, payload: str) -> str:
+	def aes_cbc_encryptor(enc_key: bytes, inpt: str) -> bytes:
+		"""
+		:param enc_key: 加密密钥
+		:param inpt: 待加密字符串
+		"""
+		binary_payload = pad(inpt.encode('utf8'), 16)
+		aes = AES.new(enc_key, AES.MODE_CBC, iv=_aes_cbc_iv)
+		return aes.encrypt(binary_payload)
+
+	global _cloud_music_aes_cbc_key
+	middle = base64_str_gen(aes_cbc_encryptor(_cloud_music_aes_cbc_key, payload))
+	raw_enc = aes_cbc_encryptor(random_16_bytes.encode('iso-8859-1'), middle)
 	return base64_str_gen(raw_enc)
 
 
-def cloud_music_encryptor(inp_string: str) -> tuple[dict, str]:
+def netease_encryptor(inp_string: str) -> tuple[dict, str]:
 	"""
 	:return: 加密后的 json payload 以及用于 rsa 的随机十六个字节。
 	"""
 	_for_Seckey = random_16_str_gen()
 	ans = {
-		"params": encText_gen(_for_Seckey.encode('iso-8859-1'), inp_string),
+		"params"   : encText_gen(_for_Seckey, inp_string),
 		"encSecKey": encSecKey_gen(_for_Seckey)
 	}
 	return ans, _for_Seckey
 
 
-def native_163_encryptor(inp_string: str):
-	""" 用法同 cloud_music_encryptor, 只不过走的直接是 js。 """
-	global crypto_rsa
-	return crypto_rsa.call('get_sign', inp_string)
+def sm4_encryptor(payload: str) -> str:
+	global _sm4_enc
+	return _sm4_enc.crypt_ecb(payload.encode('utf-8')).hex()
 
 
-def sm4_encryptor(payload: str):
-	"""
-	:return: 返回网易云前端 sm4 加密后的值
-	"""
-	global crypto_sm4
-	return crypto_sm4.call('cloudmusic_sm4_encrypt', payload)
 
-def rsa_encrypt_without_token(payload: str):
-	global crypto_rsa2
-	return crypto_rsa2.call('pwd_encrypt_wrapper', payload)
+def rsa_encrypt_without_token(payload: str) -> str:
+	global _rsa_enc2
+	pmt = _rsa_enc2.encrypt(payload.encode('utf-8'))
+	return base64_str_gen(pmt)
+
+
+def netease_md5(content: str) -> str:
+	return hashlib.md5(content.encode('utf-8')).hexdigest()
+
+
+def netease_crc32(content: str) -> str:
+	return hex(binascii.crc32(content.encode('utf-8')))[2:]
+
+
+def netease_mmh32_checksum(mmh32: str) -> str:
+	p, dig = 0, 0
+	for c in mmh32:
+		p += ord(c) - ord('0')
+	dig, l, lt, g, gt = math.floor(p / len(mmh32)), 0, 0, 0, 0
+	for c in mmh32:
+		cur = ord(c) - ord('0')
+		if cur < dig:
+			l += cur
+			lt += 1
+		else:
+			g += cur
+			gt += 1
+	lt = 1 if lt == 0 else lt
+	gt = 1 if gt == 0 else gt
+	cur = int((g / gt - l / lt) * 10)
+	if cur < 0 or cur >= 99:
+		return f'----'
+	return f'{p:02d}{cur:02d}'
+
+
+def netease_mmh32(content: str) -> str:
+	ans = f"{mmh3.hash(content, seed=31, signed=False)}"
+	return ans + netease_mmh32_checksum(ans)
+
+
+def netease_mmh128(payload: str) -> str:
+	_tmp = mmh3.hash128(payload.encode('iso-8859-1'), 0)
+	res = _tmp.to_bytes(16, byteorder='little', signed=False).hex()
+	return res
 
 
 if __name__ == '__main__':
 	# import sys
 	# print(sys.getsizeof(crypto_rsa), sys.getsizeof(crypto_rsa2), sys.getsizeof(crypto_sm4))
 	# 疑似指针，三者均为 56 字节
+	from utils.json_conf_reader import PRIVATE_CONFIG
+	csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["user1"]["csrf_token"]}"{"}"}'
+	# 应由 random_16_str_gen 生成
 
-	res = encSecKey_gen('e2yswfSf2Ac8CUpz')
-	print(f'\n{res}')
-	# 参考答案：24ef203783fa4da8ef6e5aaf2e200a0fe014febbe59c5f6e91dc90b1381c27b4a812e9b4
-	# 3882449c5745e2a68c1050dd1f8f297610687bc2897ea875938acd0f76894116907775f29474f238
-	# 37354692c15038ebc8584cda38d0660447b84ecb039f0d8d584cb5f69b9a6ab2a430e27d89621fb6c45a56485581d142ed663d0d
-
-	res = sm4_encryptor('{"un":"whatCanIsay123haha@163.com","pkid":"KGxdbOk","pd":"music",'
-	                    '"channel":0,"topURL":"https://music.163.com/",'
-	                    '"rtid":"ivai2ozLZcH3MH9GfTtLK2e8Lf5cHL2z"}')
-	print(res)
-	# 参考 '{"encParams":"6bf50cfdbac1dbd512f8f01a7851c8a9df78bafaa05a057770d33fdfb74109
-	# e8de41cd3f56c9f809b37b06fa8e05b2f88dacbdca0dccc5e22774eeb3b913071bd7e88947977e27a
-	# 85753ff75b15ed7042a285436209c6c5453e1faf244ce8f6a36c627daad5ffcc62536bc9cebf3a026
-	# 16f594768f38c4f35db46cf5645e5f319c5b232dfe7cce39a7b81d9da746fe2c2dc1f34cc4394a5605be29b684763195"}'
-
-	res = rsa_encrypt_without_token("123456abcdhahaha")
-	print(res)
-
-	from utils.json_paser import PRIVATE_CONFIG
-	csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["cloudmusic"]["csrf_token"]}"{"}"}'
-	# 应该由 gen_random_16_str 生成
-	ran_str_in_used = 'e2yswfSf2Ac8CUpz'
-	binary_ran_str_in_used = ran_str_in_used.encode('utf8')
 	# 生成 encText
-	encText = encText_gen(binary_ran_str_in_used, csrf_token_json_deserializer)
+	encText = encText_gen('e2yswfSf2Ac8CUpz', csrf_token_json_deserializer)
 	# 生成 encSecKey
-	encSecKey = encSecKey_gen(ran_str_in_used)
-	data = {
-		"params"   : encText,
-		"encSecKey": encSecKey
-	}
-	print(data)
+	print(netease_encryptor(csrf_token_json_deserializer)[0])

@@ -1,0 +1,17 @@
+# windows
+PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+# linux
+PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+$WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

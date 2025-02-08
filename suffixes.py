@@ -2,18 +2,34 @@
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2024,2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, see <https://www.gnu.org/licenses/>.
 """
-对网易前端 js 的 PoC。
+逆过程中遇到的suffix汇总
 """
 import requests
 from crypto.manual_deobfuscation import (
 	encText_gen,
-	encSecKey_gen,
 	random_16_str_gen
 )
-from utils.json_paser import PRIVATE_CONFIG
+from crypto.native_js import native_encSecKey_gen
+from utils.json_conf_reader import PRIVATE_CONFIG
+from utils.args_loader import PARSER
 
-private_token = f"?csrf_token={PRIVATE_CONFIG['cloudmusic']['csrf_token']}"
+args = PARSER.parse_args()
+
+token = PRIVATE_CONFIG[args.poc_user]['csrf_token']
+private_token = f"?csrf_token={token}"
 host_root = 'music.163.com'
 hostname = f"https://interface.{host_root}"
 cdns_interface = f"{hostname}/weapi/cdns" + private_token
@@ -66,7 +82,7 @@ msg_on_mv_interface = f"{hostname}/weapi/privilege/message/mv" + private_token
 weblog_interface = f"{hostname}/weapi/feedback/weblog" + private_token
 
 # 带有多个参数。这里之前似乎前端就已经向后端发出了歌单查询请求。
-get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG['cloudmusic']['user-id']}" + private_token
+get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG[args.poc_user]['user-id']}" + private_token
 
 # 暂时看不懂这个是干什么的
 # {
@@ -119,14 +135,8 @@ header = {
 	"sec-ch-ua"                : '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
 	"sec-ch-ua-mobile"         : "?0",
 	"sec-ch-ua-platform"       : "Windows",
-	"cookie"                   : PRIVATE_CONFIG['cloudmusic']['cookie']
+	"cookie"                   : PRIVATE_CONFIG[args.poc_user]['cookie']
 }
-
-random_str: str = random_16_str_gen()
-binary_random_str: bytes = random_str.encode('utf8')
-
-should_post: bool = True
-appended_payload: bool = True
 
 
 def final_payload_sender(force_post: bool, choice: str):
@@ -137,7 +147,7 @@ def final_payload_sender(force_post: bool, choice: str):
 	"""
 	if not force_post:
 		return requests.get(target, headers=header)
-	raw_data = {"csrf_token": PRIVATE_CONFIG['cloudmusic']['csrf_token']}
+	raw_data = {"csrf_token": token}
 	if choice == weblog_interface:
 		raw_data["logs"] = "[{\"action\":\"mobile_monitor\"," \
 		                   "\"json\":{" \
@@ -155,7 +165,7 @@ def final_payload_sender(force_post: bool, choice: str):
 	elif choice == clientconfig_interface:
 		raw_data['moduleName'] = 'preload'
 	elif choice == comment_below_songslist_interface:
-		tmp = f"A_PL_0_{PRIVATE_CONFIG['cloudmusic']['list-id']}"
+		tmp = f"A_PL_0_{PRIVATE_CONFIG[args.poc_user]['list-id']}"
 		raw_data["rid"] = tmp
 		raw_data["threadId"] = tmp
 		raw_data['pageNo'] = '1'
@@ -165,15 +175,18 @@ def final_payload_sender(force_post: bool, choice: str):
 		raw_data['orderType'] = '1'
 
 	# easy js 断点逆向。
+	random_str: str = random_16_str_gen()
+	print(f'random-str: {random_str}\n')
 	data = {
-		"params"   : encText_gen(binary_random_str, raw_data.__str__()),
-		"encSecKey": encSecKey_gen(random_str)
+		"params"   : encText_gen(random_str.encode('utf8'), raw_data.__str__()),
+		"encSecKey": native_encSecKey_gen(random_str)
 	}
 	header["Content-Type"] = "application/x-www-form-urlencoded"
 	return requests.post(choice, data=data, headers=header)
 
 
 # 某些链接需要 GET 而非 POST，编写时忘记写，读者可以自己重试。
-response = final_payload_sender(True, comment_below_songslist_interface)
-print(response.status_code)
-print(response.text)
+if __name__ == "__main__":
+	response = final_payload_sender(True, comment_below_songslist_interface)
+	print(response.status_code)
+	print(response.text)

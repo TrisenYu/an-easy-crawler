@@ -1,13 +1,18 @@
 config.json
+
+songs-list.txt
 analysis.txt
 wtf.txt
+
+/workspace.xml
+
 *.tmp
 .idea
 .vscode
-songs-list.txt
 .dist
 # 默认忽略的文件
 /shelf/
-/workspace.xml
 __pycache__
-login.py
+
+multifn/login.py
+multifn/cookie_gen.py
