@@ -2,7 +2,7 @@
 
 ### 配置方式
 
-到 `utils/` 下按照 `exmaple.json` 创建自己的 `config.json`。创建完成并配好环境后，如果：
+到 `utils/configs` 下按照 `exmaple.json` 创建自己的 `config.json`。创建完成并配好环境后，如果：
 
 - 若运行于命令行，则提供 `--user=` 参数以获取必要的信息或者直接按格式，使用默认的 `user1` 而执行以下命令；
 
@@ -24,7 +24,7 @@ $ python3 song_list_info.py --user=user1
 - 如果想直接运行某个程序而报模块 `utils` 找不到的错，比如要运行 `multifn/update_song_list_cnt.py`，但
 
 ```shell
-$ python update_song_list_cnt.py
+$ python3 update_song_list_cnt.py
 Traceback (most recent call last):
 line 35, in <module>
     from utils.json_paser import PRIVATE_CONFIG
@@ -32,10 +32,10 @@ ModuleNotFoundError: No module named 'utils'
 ```
   - **在工程目录下**（即songs_list_info.py所在的目录下）开命令行，按下述命令将 `update_song_list_cnt` 加载成模块后传参就能执行。其它同理不再赘述。
 ```shell
-$ python -m multifn.update_song_list_cnt --author=user2 --dummy=user2
+$ python3 -m multifn.update_song_list_cnt --author=user2 --dummy=user2
 ```
 
-如果做完这些还有错误，Unix类系统考虑更新。
+如果做完这些还有错误，Unix类系统考虑补充依赖或更新。
 
 实在没有办法解决的，就过来提 issues 和 pr 让大家看看。
 

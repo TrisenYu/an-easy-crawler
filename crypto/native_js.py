@@ -45,6 +45,7 @@ try:
 	_crypto2rsa = execjs.compile(load_readable_txt_from_file(os.path.join(obfus_dir, 'crypto2rsa.js')))
 	_crypto_md5 = execjs.compile(load_readable_txt_from_file(os.path.join(defus_dir, 'crypto_md5.js')))
 	_cryptommhx64_128 = execjs.compile(load_readable_txt_from_file(os.path.join(defus_dir, 'mmh3.js')))
+	_crypto_wm_nike = execjs.compile(load_readable_txt_from_file(os.path.join(obfus_dir, 'wm_nike_gen.js')))
 except Exception as e:
 	DEBUG_LOGGER.critical(e)
 	exit(1)
@@ -100,6 +101,11 @@ def native_md5(payload: str) -> str:
 def raw_mmh3(payload: str) -> str:
 	global _cryptommhx64_128
 	return _cryptommhx64_128.call('mmh3_x64_128', payload, 0)
+
+
+def native_wm_nike_gen(payload: str) -> str:
+	global _crypto_wm_nike
+	return _crypto_wm_nike.call('Na', payload)
 
 
 if __name__ == "main":

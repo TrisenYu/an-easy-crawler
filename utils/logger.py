@@ -16,7 +16,7 @@
 import logging
 
 
-class CustomFormatter(logging.Formatter):
+class _CustomFormatter(logging.Formatter):
 	"""
 	Logging colored formatter, adapted from and thanks to:
 		- stackoverflow.com/a/56944256/3638629
@@ -50,7 +50,7 @@ class CustomFormatter(logging.Formatter):
 _format = '\n%(asctime)s [%(filename)s/%(funcName)s/line%(lineno)d]-%(levelname)s: \n\t%(message)s'
 _stdout_handler = logging.StreamHandler()
 _stdout_handler.setLevel(logging.DEBUG)
-_stdout_handler.setFormatter(CustomFormatter(_format))
+_stdout_handler.setFormatter(_CustomFormatter(_format))
 
 DEBUG_LOGGER = logging.getLogger(__name__)
 DEBUG_LOGGER.setLevel(logging.DEBUG)

@@ -179,44 +179,44 @@ function mmh3_x64_128(key, seed) {
 
     // 没有 break，进到对应位置后直接做到底。
     switch (remainder) {
-    case 15:
-        k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 14)], 48));
-    case 14:
-        k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 13)], 40));
-    case 13:
-        k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 12)], 32));
-    case 12:
-        k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 11)], 24));
-    case 11:
-        k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 10)], 16));
-    case 10:
-        k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 9)], 8));
-    case 9:
-        k2 = _x64Xor(k2, [0, key.charCodeAt(i + 8)]);
-        k2 = _x64Multiply(k2, c2);
-        k2 = _x64Rotl(k2, 33);
-        k2 = _x64Multiply(k2, c1);
-        h2 = _x64Xor(h2, k2);
-    case 8:
-        k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 7)], 56));
-    case 7:
-        k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 6)], 48));
-    case 6:
-        k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 5)], 40));
-    case 5:
-        k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 4)], 32));
-    case 4:
-        k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 3)], 24));
-    case 3:
-        k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 2)], 16));
-    case 2:
-        k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 1)], 8));
-    case 1:
-        k1 = _x64Xor(k1, [0, key.charCodeAt(i)]);
-        k1 = _x64Multiply(k1, c1);
-        k1 = _x64Rotl(k1, 31);
-        k1 = _x64Multiply(k1, c2);
-        h1 = _x64Xor(h1, k1);
+        case 15:
+            k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 14)], 48));
+        case 14:
+            k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 13)], 40));
+        case 13:
+            k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 12)], 32));
+        case 12:
+            k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 11)], 24));
+        case 11:
+            k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 10)], 16));
+        case 10:
+            k2 = _x64Xor(k2, _x64LeftShift([0, key.charCodeAt(i + 9)], 8));
+        case 9:
+            k2 = _x64Xor(k2, [0, key.charCodeAt(i + 8)]);
+            k2 = _x64Multiply(k2, c2);
+            k2 = _x64Rotl(k2, 33);
+            k2 = _x64Multiply(k2, c1);
+            h2 = _x64Xor(h2, k2);
+        case 8:
+            k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 7)], 56));
+        case 7:
+            k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 6)], 48));
+        case 6:
+            k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 5)], 40));
+        case 5:
+            k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 4)], 32));
+        case 4:
+            k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 3)], 24));
+        case 3:
+            k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 2)], 16));
+        case 2:
+            k1 = _x64Xor(k1, _x64LeftShift([0, key.charCodeAt(i + 1)], 8));
+        case 1:
+            k1 = _x64Xor(k1, [0, key.charCodeAt(i)]);
+            k1 = _x64Multiply(k1, c1);
+            k1 = _x64Rotl(k1, 31);
+            k1 = _x64Multiply(k1, c2);
+            h1 = _x64Xor(h1, k1);
     }
 
     h1 = _x64Xor(h1, [0, key.length]);
@@ -233,3 +233,5 @@ function mmh3_x64_128(key, seed) {
 
     return ("00000000" + (h1[0] >>> 0).toString(16)).slice(-8) + ("00000000" + (h1[1] >>> 0).toString(16)).slice(-8) + ("00000000" + (h2[0] >>> 0).toString(16)).slice(-8) + ("00000000" + (h2[1] >>> 0).toString(16)).slice(-8);
 }
+
+console.log("逆".charCodeAt(0) & 0xFF)

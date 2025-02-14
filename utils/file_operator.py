@@ -21,19 +21,19 @@
 import os, json
 from datetime import datetime
 from utils.wrappers.err_wrap import (
-	throw_err_if_any,
+	seize_err_if_any,
 	die_if_err
 )
 from utils.json_conf_reader import load_config, ARGS
 
 
-@throw_err_if_any
+@seize_err_if_any
 def write_in_assigned_mode(path: str, attr: str, payload: str) -> None:
 	with open(path, attr, encoding='utf-8') as _fd:
 		_fd.write(payload)
 
 
-@throw_err_if_any
+@seize_err_if_any
 def append_from_read_only_file(src_path: str, dst_path: str) -> None:
 	with open(src_path, 'r', encoding='utf-8') as sd:
 		with open(dst_path, 'a', encoding='utf-8') as dd:
@@ -44,7 +44,7 @@ def append_from_read_only_file(src_path: str, dst_path: str) -> None:
 				dd.write(tmp)
 
 
-@throw_err_if_any
+@seize_err_if_any
 def remove_file(path: str) -> None:
 	os.remove(path)
 
@@ -61,10 +61,10 @@ def load_readable_txt_from_file(path: str) -> str:
 	return res
 
 
-@throw_err_if_any
+@seize_err_if_any
 def attempt_modify_json(filename: str = 'config.json', keyval: dict = None) -> None:
 	"""
-	在 `O(n)` 的复杂度下完成对path指向文件的修改。
+	在 `O(n)` 的复杂度下完成对 path 指向文件的修改。
 
 	keyval 格式形如：
 	{

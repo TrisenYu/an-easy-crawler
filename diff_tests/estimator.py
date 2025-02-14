@@ -44,9 +44,11 @@ from crypto.native_js import (
 	native_sm4_encryptor,
 	native_md5,
 	native_rsa_encrypt_without_token,
-	raw_mmh3
+	raw_mmh3,
+	native_wm_nike_gen,
 )
-from crypto.unk_hash import crazy_xor
+from crypto.unk_hash import unk_hash
+
 args = PARSER.parse_args()
 
 
@@ -67,7 +69,6 @@ def evaluation1():
 @get_interval
 def comp_eval1():
 	return native_encSecKey_gen('e2yswfSf2Ac8CUpz')
-
 
 
 @check_eq_after_time_gauge(
@@ -117,15 +118,20 @@ def evaluation2_5():
 def comp_eval2_5():
 	return native_encText_gen('8l08fKqcmiaAHMok', '{"csrf_token":""}')
 
-@check_eq_after_time_gauge('noijREiPbpPLd+8eHCo9CJ6v08pl5JYNlwVhLvGtQkPRM0nT9O0wJearcacwMJ1F'
-						   '/Y0PWVa5RrGbrOxeTYMfi8WsoXofOJsxmrNdAGGS0g5zlV9enKPzzuEEWdKLuZ2w')
+
+@check_eq_after_time_gauge(
+	'noijREiPbpPLd+8eHCo9CJ6v08pl5JYNlwVhLvGtQkPRM0nT9O0wJearcacwMJ1F'
+	'/Y0PWVa5RrGbrOxeTYMfi8WsoXofOJsxmrNdAGGS0g5zlV9enKPzzuEEWdKLuZ2w'
+)
 @get_interval
 def evaluation2_9():
 	return encText_gen('hahahahahahahaha', '{"ydDeviceType":"WebOnline","ydDeviceToken":"whatC4nISay?"}')
 
 
-@check_eq_after_time_gauge('noijREiPbpPLd+8eHCo9CJ6v08pl5JYNlwVhLvGtQkPRM0nT9O0wJearcacwMJ1F'
-						   '/Y0PWVa5RrGbrOxeTYMfi8WsoXofOJsxmrNdAGGS0g5zlV9enKPzzuEEWdKLuZ2w')
+@check_eq_after_time_gauge(
+	'noijREiPbpPLd+8eHCo9CJ6v08pl5JYNlwVhLvGtQkPRM0nT9O0wJearcacwMJ1F'
+	'/Y0PWVa5RrGbrOxeTYMfi8WsoXofOJsxmrNdAGGS0g5zlV9enKPzzuEEWdKLuZ2w'
+)
 @get_interval
 def comp_eval2_9():
 	return native_encText_gen('hahahahahahahaha', '{"ydDeviceType":"WebOnline","ydDeviceToken":"whatC4nISay?"}')
@@ -148,9 +154,11 @@ def com_eval3():
 )
 @get_interval
 def evaluation4():
-	return sm4_encryptor('{"un":"whatCanIsay123haha@163.com","pkid":"KGxdbOk","pd":"music",'
-						 '"channel":0,"topURL":"https://music.163.com/",'
-						 '"rtid":"ivai2ozLZcH3MH9GfTtLK2e8Lf5cHL2z"}')
+	return sm4_encryptor(
+		'{"un":"whatCanIsay123haha@163.com","pkid":"KGxdbOk","pd":"music",'
+		'"channel":0,"topURL":"https://music.163.com/",'
+		'"rtid":"ivai2ozLZcH3MH9GfTtLK2e8Lf5cHL2z"}'
+	)
 
 
 @check_eq_after_time_gauge(
@@ -160,9 +168,11 @@ def evaluation4():
 )
 @get_interval
 def comp_eval4():
-	return native_sm4_encryptor('{"un":"whatCanIsay123haha@163.com","pkid":"KGxdbOk","pd":"music",'
-								'"channel":0,"topURL":"https://music.163.com/",'
-								'"rtid":"ivai2ozLZcH3MH9GfTtLK2e8Lf5cHL2z"}')
+	return native_sm4_encryptor(
+		'{"un":"whatCanIsay123haha@163.com","pkid":"KGxdbOk","pd":"music",'
+		'"channel":0,"topURL":"https://music.163.com/",'
+		'"rtid":"ivai2ozLZcH3MH9GfTtLK2e8Lf5cHL2z"}'
+	)
 
 
 @get_interval
@@ -179,37 +189,41 @@ def comp_eval5():
 @get_interval
 def evaluation6():
 	return netease_crc32("{'v':'v1.1','fp':'5735083394745,20364379824448',"
-						 "'u':'zgE1738765579303Jl3','h':'music.163.com'}")
+	                     "'u':'zgE1738765579303Jl3','h':'music.163.com'}")
 
 
 @check_eq_after_time_gauge('20364379824448')
 @get_interval
 def evaluation7():
-	return netease_mmh32('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-						 'Chrome/132.0.0.0 Safari/537.36###zh-CN###24###864x1536###-480######PDF Viewer::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chrome PDF Viewer::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chromium PDF Viewer::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Microsoft Edge PDF Viewer::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf$WebKit built-in '
-						 'PDF::Portable Document Format::'
-						 'application/pdf~pdf,text/pdf~pdf'
-						 ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
-						 ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
+	return netease_mmh32(
+		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+		'Chrome/132.0.0.0 Safari/537.36###zh-CN###24###864x1536###-480######PDF Viewer::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chrome PDF Viewer::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chromium PDF Viewer::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Microsoft Edge PDF Viewer::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf$WebKit built-in '
+		'PDF::Portable Document Format::'
+		'application/pdf~pdf,text/pdf~pdf'
+		';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
+		';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
+	)
 
 
 # 12123839674255 文本太大了，不打算测
 @check_eq_after_time_gauge('26870096765163')
 @get_interval
 def evaluation8():
-	return netease_mmh32('Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
-						 '###zh-CN###24###1080x1920###-480###1###'
-						 'PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chrome PDF Viewer::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chromium PDF Viewer::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Microsoft Edge PDF Viewer::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf$WebKit built-in PDF::'
-						 'Portable Document Format::application/pdf~pdf,text/pdf~pdf'
-						 ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
-						 ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
+	return netease_mmh32(
+		'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
+		'###zh-CN###24###1080x1920###-480###1###'
+		'PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chrome PDF Viewer::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Chromium PDF Viewer::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf$Microsoft Edge PDF Viewer::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf$WebKit built-in PDF::'
+		'Portable Document Format::application/pdf~pdf,text/pdf~pdf'
+		';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
+		';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'
+	)
 
 
 @check_eq("QWSc1NeSGiHkuZOGViVFAtom5W37Axbdqzi7DQ+ojTxH5jA5V+VPnedcJlcIWBV3l/z+"
@@ -219,50 +233,100 @@ def evaluation9():
 	inp = "{'v':'v1.1','fp':'5735083394745,20364379824448'," \
 	      "'u':'mV71738999513316FRV','h':'music.163.com'}"
 	crc32 = netease_crc32(inp)
-	return crazy_xor(f"{inp}{crc32}", [-19, -86, -29, 37])
+	return unk_hash(f"{inp}{crc32}", [-19, -86, -29, 37])
 
 
 @check_eq_after_time_gauge("f4d6d7596bcd931fc5b2480e7788b4f3")
 @get_interval
 def evaluation9_5():
-	return netease_md5("1739039009597.8303https://music.163.com/1536864Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-	                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
-	                   "NMTID=00OfA_VKxVftZ-MU0hfmHTPRgIyHQUAAAGU5s09aA; "
-	                   "JSESSIONID-WYYY=e8EwXjZnGHUIz9e35HjBAgfOkgTVFopsa9NGCnl1Cc7"
-	                   "%5CkZSmJWbuK%5C6v5h0lQ76GpAw6O7ECZBqWWjGd0KEDuF0nTzgrWFmhGaa8UoRhNTHF1tyGHTVNN"
-	                   "%5Cm460bFGnf04g5q1YOr5EIrfskf%2BefCMhBVv8g4eK"
-	                   "%2FR7MSQPmF%2FmpX2uWEx%3A1739040809575; _iuqxldmzr_=321536:747")
+	return netease_md5(
+		"1739039009597.8303https://music.163.com/1536864Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+		"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+		"NMTID=00OfA_VKxVftZ-MU0hfmHTPRgIyHQUAAAGU5s09aA; "
+		"JSESSIONID-WYYY=e8EwXjZnGHUIz9e35HjBAgfOkgTVFopsa9NGCnl1Cc7"
+		"%5CkZSmJWbuK%5C6v5h0lQ76GpAw6O7ECZBqWWjGd0KEDuF0nTzgrWFmhGaa8UoRhNTHF1tyGHTVNN"
+		"%5Cm460bFGnf04g5q1YOr5EIrfskf%2BefCMhBVv8g4eK"
+		"%2FR7MSQPmF%2FmpX2uWEx%3A1739040809575; _iuqxldmzr_=321536:747"
+	)
+
 
 @check_eq_after_time_gauge("f4d6d7596bcd931fc5b2480e7788b4f3")
 @get_interval
 def comp_eval9_5():
-	return native_md5("1739039009597.8303https://music.163.com/1536864Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-	                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
-	                   "NMTID=00OfA_VKxVftZ-MU0hfmHTPRgIyHQUAAAGU5s09aA; "
-	                   "JSESSIONID-WYYY=e8EwXjZnGHUIz9e35HjBAgfOkgTVFopsa9NGCnl1Cc7"
-	                   "%5CkZSmJWbuK%5C6v5h0lQ76GpAw6O7ECZBqWWjGd0KEDuF0nTzgrWFmhGaa8UoRhNTHF1tyGHTVNN"
-	                   "%5Cm460bFGnf04g5q1YOr5EIrfskf%2BefCMhBVv8g4eK"
-	                   "%2FR7MSQPmF%2FmpX2uWEx%3A1739040809575; _iuqxldmzr_=321536:747")
+	return native_md5(
+		"1739039009597.8303https://music.163.com/1536864Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+		"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+		"NMTID=00OfA_VKxVftZ-MU0hfmHTPRgIyHQUAAAGU5s09aA; "
+		"JSESSIONID-WYYY=e8EwXjZnGHUIz9e35HjBAgfOkgTVFopsa9NGCnl1Cc7"
+		"%5CkZSmJWbuK%5C6v5h0lQ76GpAw6O7ECZBqWWjGd0KEDuF0nTzgrWFmhGaa8UoRhNTHF1tyGHTVNN"
+		"%5Cm460bFGnf04g5q1YOr5EIrfskf%2BefCMhBVv8g4eK"
+		"%2FR7MSQPmF%2FmpX2uWEx%3A1739040809575; _iuqxldmzr_=321536:747"
+	)
+
+
+@check_eq_after_time_gauge("6f255bfcd732eaf2d5fd55b52df7a12b")
+@get_interval
+def evaluation9_7():
+	# function cc() 内最后的过程
+	return netease_md5("104410450417d2275475c06b99150e11dAWsBhCqtOaNLLJ25hBzWbqWXwiK99Wd")
+
+@check_eq("6f255bfcd732eaf2d5fd55b52df7a12b")
+def comp_eval9_7():
+	return native_md5("104410450417d2275475c06b99150e11dAWsBhCqtOaNLLJ25hBzWbqWXwiK99Wd")
 
 @check_eq_after_time_gauge("b69f0e3afa15fb947efef61ec84603ce")
 @get_interval
 def evaluation10():
-	return mmh3_x64_128("PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-	                      "Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-	                      "Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-	                      "Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-	                      "WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf")
+	return mmh3_x64_128(
+		"PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"
+	)
+
 
 @check_eq_after_time_gauge("b69f0e3afa15fb947efef61ec84603ce")
 @get_interval
 def comp_eval10():
-	return raw_mmh3("PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-                    "Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-                    "Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-                    "Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-                    "WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf")
+	return raw_mmh3(
+		"PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"
+	)
 
-# PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf
+# try:
+# 	from crypto.mmh3_x64_128 import dll
+# 	@check_eq_after_time_gauge("b69f0e3afa15fb947efef61ec84603ce")
+# 	@get_interval
+# 	def o_comp_eval10():
+# 		mmh3_obj = dll.mmh3_x64_128(b"PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf", 394, 0)
+# 		return f'{mmh3_obj.h1:08x}{mmh3_obj.h2:08x}'
+# 	DEBUG_LOGGER.info(f'{o_comp_eval10()}')
+# except Exception as e:
+# 	DEBUG_LOGGER.warning(e)
+# 	pass
+"""
+以上代码执行结果: 
+b69f0e3afa15fb947efef61ec84603ce
+
+2025-02-12 02:24:38,082 [estimator.py/<module>/line296]-INFO:
+        ('b69f0e3afa15fb947efef61ec84603ce', 1.1600001016631722e-05)
+"""
+
+@check_eq("9ca17ae2e6ffcda170e2e6ee92f05cae8db8aff646a5ef8eb2c85f968b8fb0c742a3afbe8ce652"
+          "afb59f95aa2af0fea7c3b92aa5f09dadf454aebdb7a8ee7ea8bba2a2d27b8a8c9e91e47da89e9d"
+          "9bb64298b7ac8dd560f7efa3b0cb5994bab9a6e25398939aa3d47daa88f988e4618287a5d8eb73"
+          "82ad9788f75bae97b7d9ea60edf599b3b867a29ca9afc4399292bda3f87d8596a4a8f23ca8b7ba"
+          "d5b44888b6feccf533a5a7feb5e267f8a9a4b4d25c85ba9ad3cc37e2a3")
+def comp_eval11():
+	return native_wm_nike_gen('{"r":1,'
+	                          '"d":"qmPnSxNwNg1BQEUVUAODJaqrkgZmkQt+",'
+	                          '"i":"g0SLqXncyGovdenASqJTRpawdBSz7JTidlVT51mOHSPfwEcYTMVBQwjX7gakBYk7hyBsYgtQnIy8kT'
+	                          '/+WR5mbDgNA3RNsBuwGJlGs0div41LDj2+v9gy2Tcm4wlSSPGfV2I="}')
+
 if __name__ == "__main__":
 	# 不计划做差分分析，只比较混淆造成的额外开销。
 	# 鉴定为，直接跑快很多，就以上两者来看，10到1000个数量级。
@@ -295,3 +359,5 @@ if __name__ == "__main__":
 	DEBUG_LOGGER.info(f'{evaluation9()}')
 	DEBUG_LOGGER.info(f'{evaluation9_5()[1]}s, {comp_eval9_5()[1]}s\n\t'
 	                  f'{evaluation10()[1]}s, {comp_eval10()[1]}s')
+	DEBUG_LOGGER.info(f'{evaluation9_7()}\n\t{comp_eval9_7()}')
+	DEBUG_LOGGER.info(f'{comp_eval11()}')

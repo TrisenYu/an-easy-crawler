@@ -25,6 +25,7 @@ from crypto.manual_deobfuscation import (
 from crypto.native_js import native_encSecKey_gen
 from utils.json_conf_reader import PRIVATE_CONFIG
 from utils.args_loader import PARSER
+from utils.header import HEADER
 
 args = PARSER.parse_args()
 
@@ -32,7 +33,8 @@ token = PRIVATE_CONFIG[args.poc_user]['csrf_token']
 private_token = f"?csrf_token={token}"
 host_root = 'music.163.com'
 hostname = f"https://interface.{host_root}"
-cdns_interface = f"{hostname}/weapi/cdns" + private_token
+
+
 # 返回 CDN 连接
 # {
 #   "data": [
@@ -43,21 +45,29 @@ cdns_interface = f"{hostname}/weapi/cdns" + private_token
 #    ],
 #    "code": 200
 # }
+cdns_interface = f"{hostname}/weapi/cdns" + private_token
+
 
 # 返回版权说明
 copyright_interface = f"{hostname}/weapi/copyright/pay_fee_message/config" + private_token
 
+
 # 返回评论列表
 private_comments_interface = f"{hostname}/weapi/pl/count" + private_token
+
 
 # 404 无效页。
 target = f"{hostname}/m/api/encryption/param/get" + private_token
 
+
 # 只有 200，无其它结果
+# TODO: 后面这里应该会用到？
 refresh_login_token_interface = f"{hostname}/weapi/login/token/refresh" + private_token
+
 
 # {"code":200,"data":{"title":null,"content":null,"region":null,"urlList":null,"needPop":false},"message":""}
 private_info_interface = f"{hostname}/weapi/privacy/info/get/v2" + private_token
+
 
 # {
 #   "topEventPermission":false,"pubLongMsgEvent":false,"LongMsgNum":1000,"pubEventWithPics":true,
@@ -66,6 +76,7 @@ private_info_interface = f"{hostname}/weapi/privacy/info/get/v2" + private_token
 #   "timingPublishEvent":false,"createChallengeTopic":false,"code":200
 # }
 user_event_interface = f"{hostname}/weapi/event/user/permission" + private_token
+
 
 # {
 #   "code":200,
@@ -80,6 +91,7 @@ user_event_interface = f"{hostname}/weapi/event/user/permission" + private_token
 msg_on_mv_interface = f"{hostname}/weapi/privilege/message/mv" + private_token
 
 weblog_interface = f"{hostname}/weapi/feedback/weblog" + private_token
+
 
 # 带有多个参数。这里之前似乎前端就已经向后端发出了歌单查询请求。
 get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG[args.poc_user]['user-id']}" + private_token
@@ -97,10 +109,13 @@ get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG[arg
 # }
 clientconfig_interface = f"{hostname}/weapi/middle/clientcfg/config/list" + private_token
 
+
 # 传一堆参数
 comment_below_songslist_interface = f"{hostname}/weapi/comment/resource/comments/get" + private_token
 
+
 # 破案了 core_52f85c5f5153a7880e60155739395661.js 下的
+# 2025/02/08: core_70d0eefb570184a2b62021346460be95.js，反正理解为 core.js
 # 第 69 行匿名函数 (function()) 里头有个
 # ```
 # 	"res-playlist-get": {
@@ -116,28 +131,8 @@ comment_below_songslist_interface = f"{hostname}/weapi/comment/resource/comments
 # ```
 # 只需要传 id 参数就可以获取到歌单内的所有歌曲。
 # playlist_detail_interface = "https://interface.music.163.com/api/v6/playlist/detail"
-
-header = {
-	"Accept"                   : "text/html,application/xhtml+xml,application/xml;"
-	                             "q=0.9,image/avif,image/webp,image/apng,*/*;"
-	                             "q=0.8,application/signed-exchange;v=b3;q=0.7",
-	"Accept-Language"          : "zh-CN,zh-TW;q=0.9,zh;q=0.8,th;q=0.7",
-	"Cache-Control"            : "no-cache",
-	"Connection"               : "keep-alive",
-	"Pragma"                   : "no-cache",
-	"Referer"                  : f"https://{host_root}/",
-	"Sec-Fetch-Dest"           : "iframe",
-	"Sec-Fetch-Mode"           : "navigate",
-	"Sec-Fetch-Site"           : "same-origin",
-	"Upgrade-Insecure-Requests": "1",
-	"User-Agent"               : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-	                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-	"sec-ch-ua"                : '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-	"sec-ch-ua-mobile"         : "?0",
-	"sec-ch-ua-platform"       : "Windows",
-	"cookie"                   : PRIVATE_CONFIG[args.poc_user]['cookie']
-}
-
+HEADER["Referer"] = f"https://{host_root}/"
+HEADER["Cookie"] = PRIVATE_CONFIG[args.poc_user]['cookie']
 
 def final_payload_sender(force_post: bool, choice: str):
 	"""
@@ -146,7 +141,7 @@ def final_payload_sender(force_post: bool, choice: str):
 	:return: 发请求后接口的响应返回值。
 	"""
 	if not force_post:
-		return requests.get(target, headers=header)
+		return requests.get(target, headers=HEADER)
 	raw_data = {"csrf_token": token}
 	if choice == weblog_interface:
 		raw_data["logs"] = "[{\"action\":\"mobile_monitor\"," \
@@ -178,11 +173,11 @@ def final_payload_sender(force_post: bool, choice: str):
 	random_str: str = random_16_str_gen()
 	print(f'random-str: {random_str}\n')
 	data = {
-		"params"   : encText_gen(random_str.encode('utf8'), raw_data.__str__()),
+		"params"   : encText_gen(random_str, raw_data.__str__()),
 		"encSecKey": native_encSecKey_gen(random_str)
 	}
-	header["Content-Type"] = "application/x-www-form-urlencoded"
-	return requests.post(choice, data=data, headers=header)
+	HEADER["Content-Type"] = "application/x-www-form-urlencoded"
+	return requests.post(choice, data=data, headers=HEADER)
 
 
 # 某些链接需要 GET 而非 POST，编写时忘记写，读者可以自己重试。

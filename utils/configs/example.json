@@ -2,29 +2,29 @@
     "npm-path": "win-PATH:\\To\\YOUR\\npm\\node_modules; unix-path:,let's say, /usr/local/nodejs/node_modules/;",
     "user1": {
         "cookie": "",
-        "user-id": 1,
-        "list-id": 1,
+        "user-id": "1",
+        "list-id": "1",
         "email": "your-email",
         "password": "your-password-should-not-be-disclosed-in-any-possible-channel",
-        "path-for-backup": "./songs-list.txt",
+        "backup-dir": "/save/to/absolute/and/concreate/path/",
         "csrf_token": ""
     },
     "user2": {
         "cookie": "",
-        "user-id": 123,
+        "user-id": "123",
         "email": "117",
         "password": "321",
-        "list-id": 117,
-        "path-for-backup": "./i-don't-know",
+        "list-id": "117",
+        "backup-dir": "/path/i-don't-know",
         "csrf_token": ""
     },
     "any-other-name": {
         "cookie": "",
-        "user-id": 123,
+        "user-id": "it does not matter, actually",
         "email": "117",
         "password": "321",
-        "list-id": 117,
-        "path-for-backup": "./i-don't-know",
+        "list-id": "117",
+        "backup-dir": "/",
         "csrf_token": ""
     }
 }

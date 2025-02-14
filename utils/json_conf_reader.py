@@ -18,7 +18,7 @@ import json, os
 from typing import Optional
 from utils.wrappers.err_wrap import (
 	die_if_err,
-	throw_err_if_any
+	seize_err_if_any
 )
 from utils.args_loader import PARSER
 
@@ -42,7 +42,7 @@ def json2dict_via_str_or_die(inp: str, key: Optional[str] = None) -> dict:
 	return json.loads(inp) if key is None else json.loads(inp)[key]
 
 
-@throw_err_if_any
+@seize_err_if_any
 def load_json_from_str(inp: str) -> dict:
 	return json.loads(inp)
 

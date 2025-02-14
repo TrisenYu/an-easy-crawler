@@ -86,5 +86,3 @@ def user_logout(conf_file: str = 'config.json') -> None:
 if __name__ == "__main__":
 	user_logout()
 	# TODO: 退了，但是如退。看样子好像要重新逆了。
-	# 这后端写得真是难评。
-	# 确实什么也没有，只有 set-cookie 有变化

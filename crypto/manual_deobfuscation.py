@@ -21,25 +21,32 @@
 import subprocess
 from functools import partial
 
-import mmh3, math
+import mmh3, math, os
 
-_Popen = subprocess.Popen
-subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")
-
-from Crypto.Cipher import (
-	AES,
-	PKCS1_v1_5
-)
-
-from Crypto.PublicKey import RSA
-from Crypto.Util.Padding import pad
-from Crypto.Util.number import bytes_to_long
+if os.name == 'nt':
+	_Popen = subprocess.Popen
+	subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")
+	from Crypto.Cipher import (
+		AES,
+		PKCS1_v1_5
+	)
+	from Crypto.PublicKey import RSA
+	from Crypto.Util.Padding import pad
+	from Crypto.Util.number import bytes_to_long
+	subprocess.Popen = _Popen
+	del _Popen
+else:
+	from Crypto.Cipher import (
+		AES,
+		PKCS1_v1_5
+	)
+	from Crypto.PublicKey import RSA
+	from Crypto.Util.Padding import pad
+	from Crypto.Util.number import bytes_to_long
 
 import hashlib, base64, random, binascii
 from gmssl import sm4
 
-subprocess.Popen = _Popen
-del _Popen
 # <简简单单> 打个 JavaScript 的断点。
 _rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17' \
               'a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c9387011' \
@@ -135,11 +142,11 @@ def rsa_encrypt_without_token(payload: str) -> str:
 
 
 def netease_md5(content: str) -> str:
-	return hashlib.md5(content.encode('utf-8')).hexdigest()
+	return hashlib.md5(content.encode('iso-8859-1')).hexdigest()
 
 
 def netease_crc32(content: str) -> str:
-	return hex(binascii.crc32(content.encode('utf-8')))[2:]
+	return hex(binascii.crc32(content.encode('iso-8859-1')))[2:]
 
 
 def netease_mmh32_checksum(mmh32: str) -> str:

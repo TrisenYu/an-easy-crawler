@@ -1,5 +1,0 @@
-# 看起来是： true||true||true||undefine||undefine||undefine||Win64||base64||CSSsysColor
-#
-# !!window['sessionStorage']###!!window['localStorage']###!!window['indexedDB']
-# ###{undefine|typeof document.body.addBehavior}###typeof window["openDatabase"]
-# ###Navigator.cpuClass###Navigator.platform###{base64编码的神秘canvas||"cavas exception"||}###

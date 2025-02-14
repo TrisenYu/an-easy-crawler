@@ -144,5 +144,3 @@ function ntes_hex_md5(a) {
         document.cookie = a + "=" + c + "; expires=" + b.toGMTString() + "; path=/; domain=" + bqb6V
     }
 */
-
-// console.log(ntes_hex_md5("1738489622710.397https://music.163.com/1536864Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36NMTID={0}; JSESSIONID-WYYY={x}; _iuqxldmzr_=32x:y"))

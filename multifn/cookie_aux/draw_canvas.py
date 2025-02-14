@@ -17,7 +17,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from base64 import b64encode
-from utils.wrappers.err_wrap import throw_err_if_any
+from utils.wrappers.err_wrap import seize_err_if_any
 
 """
 canvas 生成过程：
@@ -35,7 +35,7 @@ canvas 生成过程：
 """
 
 
-@throw_err_if_any
+@seize_err_if_any
 def gen_fp_png_base64str(
 	rect_pos: tuple[int, int, int, int] = (125, 1, 187, 20),
 	rect_col: tuple[int, int, int] = (0xFF, 0x66, 0x00),
@@ -43,7 +43,8 @@ def gen_fp_png_base64str(
 	txt_col2: tuple[int, int, int] = (0x66, 0xCC, 0)
 ) -> str:
 	"""
-	TODO: 看后面随机数取代原生实现的检测。
+	TODO: 看后面随机数取代原生实现的检测。此处实现仍不准确。
+
 	:param rect_pos: (x0, y0, x1, y1) 四个点确定矩形在图中的位置。
 	:param rect_col: 矩形颜色。
 	:param txt_col1: 文本首次上色的颜色。

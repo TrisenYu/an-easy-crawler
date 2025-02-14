@@ -16,9 +16,7 @@
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 # TODO: 检验 session_gen 算的 cookie 是否不能取代这种大量计算得出的值
 import re, random, time
-
-from random_user_agent.params import SoftwareName, OperatingSystem
-from random_user_agent.user_agent import UserAgent
+from fake_useragent import UserAgent
 
 from multifn.cookie_aux.draw_canvas import gen_fp_png_base64str
 from crypto.manual_deobfuscation import (
@@ -26,24 +24,6 @@ from crypto.manual_deobfuscation import (
 	netease_crc32
 )
 
-_sdk_s = [
-	SoftwareName.CHROME.value,
-	SoftwareName.YANDEX.value,
-	SoftwareName.EDGE.value,
-	SoftwareName.FIREFOX.value,
-	SoftwareName.SAFARI.value
-]
-_os_s = [
-	OperatingSystem.WINDOWS.value,
-	OperatingSystem.WINDOWS_PHONE.value,
-	OperatingSystem.LINUX.value,
-	OperatingSystem.ANDROID.value,
-	OperatingSystem.DARWIN.value,
-	OperatingSystem.IOS.value,
-	OperatingSystem.MACOS.value,
-	OperatingSystem.UNIX.value,
-	OperatingSystem.OPENBSD.value
-]
 inject_str = "aZbY0cXdW1eVf2Ug3Th4SiR5jQk6PlO7mNn8MoL9pKqJrIsHtGuFvEwDxCyBzA"
 r2_const_suffix = "PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf" \
                   "$Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf" \
@@ -61,8 +41,8 @@ def cloud_music_gen_session_id():
 	def rand_rgb() -> tuple[int, int, int]:
 		return anony_rand(), anony_rand(), anony_rand()
 
-	user_agent_rotator = UserAgent(operating_systems=_os_s, software_names=_sdk_s)
-	ua = user_agent_rotator.get_random_user_agent()
+	user_agent_rotator = UserAgent()
+	ua = user_agent_rotator.random
 	try:
 		# 事实上 Navigator.platform 理应被弃用了。不过为什么要纠结这个呢？ua里头有啊——
 		# 如果想搞特殊可以看 https://stackoverflow.com/a/19883965
@@ -93,3 +73,6 @@ def cloud_music_gen_session_id():
 	      f"'h':'music.163.com'{'}'}"
 	del raw_str1, raw_str2
 	return f'{inp}{netease_crc32(inp)}'
+
+if __name__ == "__main__":
+	print(cloud_music_gen_session_id())

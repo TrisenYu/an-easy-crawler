@@ -22,7 +22,7 @@ def check_eq_after_time_gauge(payload):
 		def wrapper(*args, **kwargs):
 			_ans, _spining = fn(*args, **kwargs)
 			if _ans != payload:
-				DEBUG_LOGGER.warn('not eq!')
+				DEBUG_LOGGER.warning('not eq!')
 			return _ans, _spining
 		return wrapper
 	return dec
@@ -33,7 +33,7 @@ def check_eq(payload):
 		def wrapper(*args, **kwargs):
 			_ans = fn(*args, **kwargs)
 			if _ans != payload:
-				DEBUG_LOGGER.warn('not eq!')
+				DEBUG_LOGGER.warning('not eq!')
 			return _ans
 		return wrapper
 	return dec

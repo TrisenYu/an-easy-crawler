@@ -18,11 +18,11 @@ from utils.logger import DEBUG_LOGGER
 from functools import wraps
 
 
-def throw_err_if_any(fn):
-	@wraps(fn)
+def seize_err_if_any(fn_with_ret_val):
+	@wraps(fn_with_ret_val)
 	def wrapper(*args, **kwargs):
 		try:
-			return fn(*args, **kwargs)
+			return fn_with_ret_val(*args, **kwargs)
 		except Exception as e:
 			DEBUG_LOGGER.error(f'{e}')
 			return None
@@ -30,14 +30,14 @@ def throw_err_if_any(fn):
 	return wrapper
 
 
-def throw_quietly(fn):
-	@wraps(fn)
+def seize_quietly(fn_with_ret_val):
+	@wraps(fn_with_ret_val)
 	def wrapper(*args, **kwargs):
 		try:
-			return fn(*args, **kwargs)
+			return fn_with_ret_val(*args, **kwargs)
 		finally:
+			# if success, won't execute this.
 			return None
-
 	return wrapper
 
 

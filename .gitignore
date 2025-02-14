@@ -1,18 +1,23 @@
+# 隐私文件定义
 config.json
-
-songs-list.txt
 analysis.txt
 wtf.txt
+static_assets/bot_hits.log
 
+# 代码编辑工具乱七八糟的东西
 /workspace.xml
-
 *.tmp
+*.dll
+*.so
 .idea
 .vscode
 .dist
-# 默认忽略的文件
 /shelf/
 __pycache__
 
+# 暂时不给看的内容
 multifn/login.py
-multifn/cookie_gen.py
+
+# 隐私文件夹
+static_assets/output/*
+tmp/
