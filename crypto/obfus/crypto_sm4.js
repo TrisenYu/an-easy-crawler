@@ -1,21 +1,4 @@
 // core.js
-//!function t(n) {
-//    /** CODE TEST.
-//        console.log("object" == typeof exports && "object" == typeof module) // true
-//        console.log(typeof define) // undefine
-//        console.log("object" == typeof exports) // true
-//    */
-//    /*
-//    "object" == typeof exports && "object" == typeof module ?
-//        module.exports = n() :
-//        "function" == typeof define && define.amd ?
-//            define("URSSM4", [], n) :
-//            "object" == typeof exports ?
-//                exports.URSSM4 = n() : self.URSSM4 = n()
-//    */
-//    最后只剩下下面这行。于是可以直接定义为 n()。
-//    module.exports = n()
-//}();
 function n() {
     function e(i) {
         var r = n[i];
@@ -1467,7 +1450,6 @@ function n() {
         e(9579);
     var t, n
 }
-// var test_payload = '{"un":"whatCanIsay123haha@163.com","pkid":"KGxdbOk","pd":"music","channel":0,"topURL":"https://music.163.com/","rtid":"ivai2ozLZcH3MH9GfTtLK2e8Lf5cHL2z"}';
 var sm4key = "BC60B8B9E4FFEFFA219E5AD77F11F9E2", bicryptor = n();
 // 显式调用以返回构造好的类，从而可以调用类内的函数。
 

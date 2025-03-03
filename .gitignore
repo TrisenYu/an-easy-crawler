@@ -1,23 +1,25 @@
 # 隐私文件定义
+*.tmp
+*.dll
+*.so
+*.exe
 config.json
 analysis.txt
 wtf.txt
 static_assets/bot_hits.log
+multifn/login.py
+tmp/
+tmp*
+
 
 # 代码编辑工具乱七八糟的东西
 /workspace.xml
-*.tmp
-*.dll
-*.so
 .idea
 .vscode
 .dist
 /shelf/
 __pycache__
 
-# 暂时不给看的内容
-multifn/login.py
-
-# 隐私文件夹
+# 排除output内的内容而不排除output.
 static_assets/output/*
-tmp/
+!static_assets/output/

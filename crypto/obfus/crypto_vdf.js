@@ -1,4 +1,5 @@
 // core.js
+// 只作为样本以供参考。
 function sequFun(data, type) {
     var puzzle = data.args.puzzle;
     var str = data.args.target;
@@ -113,6 +114,7 @@ function reduceFun(data, type) {
     })
 }
 
+/// mmh3_hash
 function powSign(key, seed) {
     var remainder, bytes, h1, h1b, c1, c1b, c2, c2b, k1, i;
     remainder = key.length & 3;
@@ -154,6 +156,8 @@ function powSign(key, seed) {
     return h1 >>> 0
 }
 
+// 异步可验证时延加密算法(VDF)，用在区块链上比较多，怀疑是某个 npm 包。
+/// verifiable time-Delay Encoding Function.
 function vdfAsync(data) {
     var puzzle = data.args.puzzle;
     var mod = data.args.mod;
@@ -218,8 +222,8 @@ function vdfCb(startTime, count, bigx, puzzle, data, cb) {
         var value = signObj[key];
         encodedParams.push(encodeURIComponent(key) + '=' + encodeURIComponent(value))
     }
-    encodedParams = encodedParams.join('&');
-    var sign = powSign(encodedParams, count);
+    encodedParams = encodedParams.join('&');    // runTimes=1234&spendTime=1234&t=1235&x=aaaabbbbccccdddd
+    var sign = powSign(encodedParams, count);   // mmh3(runTimes, curr_time - )
     return cb({
         maxTime: data.maxTime,
         puzzle: puzzle,
@@ -247,15 +251,13 @@ function vdfSync(data, cb) {
     var tnum = parseInt(t, 10);
     var jobs = Math.ceil(tnum / jobcount);
     var joblist = [];
-    for (var b = 0; b < jobs; b++) {
-        if (b === jobs - 1) {
-            joblist.push(tnum - b * jobcount)
-        } else {
-            joblist.push(jobcount)
-        }
+    for (var b = 0; b < jobs - 1; b++) {
+        joblist.push(2000)
     }
+    joblist.push(tnum - b * 2000)
     var ji = -1;
     var stl = setInterval(function () {
+        // 难绷混淆
         if (++ji < joblist.length) {
             var jobt = joblist[ji];
             for (var i = 0; i < jobt || new Date().getTime() - startTime < data.minTime; i++) {

@@ -1,4 +1,4 @@
-# !/usr/env/python3
+# !/usr/bin/env/python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
@@ -16,13 +16,13 @@
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 """
 每次调用成功会使歌单增加 4 次播放量。
-一天 24 小时，实测发现**同一用户**只有每 5~6 分钟调用一次脚本才能让歌单播放量增加。且 csrf_token 貌似可用一周。
-如需要持续可用，还得实现登录获取 token 的逻辑。
+一天 24 小时，实测发现**同一用户**只有每 5~6 分钟调用一次脚本才能让歌单播放量增加。且经逆向获知，cookie可用期限为申请后的一年以内。
 
-因持续使用，暂时不考虑token过期。单个程序一天最多能增加 [240~288] * 4 次播放。
-再找十个人的账号，一天就能刷 9600~11500。但风控也是个问题。偶尔这么做还行，天天这么做如果深究，理论上不行。
+单个傀儡一天最多能增加目标歌单的 [240~288] * 4 次播放。
+找十个一天就能刷 9600~11500。但风控大概率会是个问题。
+此外，偶尔这么做还行，天天这么做如果深究起来，理论上不行。
 
-实际中发现做了几天可能 ip 被封了？导致post抛出异常，反馈找不到interface.music.163.com。
+先前因云服务提供商更新了笔者的服务器，导致python依赖缺失，所以才导致不可用。因此在部署时也需要留意系统是否因为更新而导致执行失败。
 """
 import time, random
 from utils.json_conf_reader import PRIVATE_CONFIG
@@ -37,8 +37,6 @@ args = PARSER.parse_args()
 host = 'music.163.com'
 token = PRIVATE_CONFIG[args.dummy]["csrf_token"]
 csrf_token = f'?csrf_token={token}'
-suspect = f'/api/playlist/update/playcount' + csrf_token
-# 经过前端处理后，以上的 suspect 变为以下的 suffix。
 suffix = f'/weapi/playlist/update/playcount' + csrf_token
 _https = 'https://'
 prefix = f'{_https}interface.{host}'
@@ -51,18 +49,16 @@ HEADER["Cookie"] = PRIVATE_CONFIG[args.dummy]['cookie']
 def bot_hit(identity: str, tk: str) -> None:
 	# 歌单 id 和 csrf-token 传入加密。以 post 方式查询。
 	enc_data, _ran_str = netease_encryptor(f'{"{"}"id":"{identity}","csrf_token":"{tk}"{"}"}')
-	# 随机性，但不需要真随机熵源。
 	time.sleep(random.randint(1, 17))
 	try:
 		resp = req_poster(prefix + suffix, data=enc_data, headers=HEADER)
 		if resp.status_code != 200:
 			print(f'{resp.status_code}: {resp.content}, {resp.text}')
-		else:
-			print(f"{resp.text}")
+			return
+		print(f"{resp.text}")
 	except Exception as e:
 		print(f'{e}')
-		# TODO: 出现异常了。应该开始执行脚本，清除定时程序。
-		#  但是 OS 差异以及执行差异，这个暂时不实现。后续再看。
+		# TODO: 出现异常了。应该清除定时程序。或者根据某个量而不发包。
 
 if __name__ == "__main__":
 	bot_hit(PRIVATE_CONFIG[args.author]["list-id"], token)

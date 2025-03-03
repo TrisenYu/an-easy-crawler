@@ -18,18 +18,25 @@
 """
 文件操作简化函数。
 """
-import os, json
-from datetime import datetime
+import os
 from utils.wrappers.err_wrap import (
 	seize_err_if_any,
 	die_if_err
 )
-from utils.json_conf_reader import load_config, ARGS
+
+
+def dir2file(dirname: str, filename: str) -> str:
+	"""
+	:param dirname: 给定目录。
+	:param filename: 给定文件名。
+	:return: 各操作系统下到文件的绝对路径
+	"""
+	return os.path.join(dirname, filename)
 
 
 @seize_err_if_any
-def write_in_assigned_mode(path: str, attr: str, payload: str) -> None:
-	with open(path, attr, encoding='utf-8') as _fd:
+def write_in_given_mode(path: str, mode: str, payload: str) -> None:
+	with open(path, mode, encoding='utf-8') as _fd:
 		_fd.write(payload)
 
 
@@ -45,70 +52,17 @@ def append_from_read_only_file(src_path: str, dst_path: str) -> None:
 
 
 @seize_err_if_any
-def remove_file(path: str) -> None:
-	os.remove(path)
+def remove_file(abspath: str) -> None:
+	os.remove(abspath)
 
 
 @die_if_err
-def load_readable_txt_from_file(path: str) -> str:
+def load_readable_txt_from_file(abspath: str) -> str:
 	res = ''
-	with open(path, 'r', encoding='utf-8') as fd:
+	with open(abspath, 'r', encoding='utf-8') as fd:
 		while True:
 			tmp = fd.readline()
 			if tmp is None or len(tmp) <= 0:
 				break
 			res += tmp
 	return res
-
-
-@seize_err_if_any
-def attempt_modify_json(filename: str = 'config.json', keyval: dict = None) -> None:
-	"""
-	在 `O(n)` 的复杂度下完成对 path 指向文件的修改。
-
-	keyval 格式形如：
-	{
-	...."user1": {
-	........"attr1" : "",
-	........"attr2" : 123,
-	....}
-	}
-
-	必须与 config.json 对应。否则删除中间文件并抛出ValueError。
-
-	- path 配置名。其父目录写死为 args_loader.py 中 PARSER 解析得来的参数。
-	- keyval 待修改的键值对。
-	"""
-	if len(keyval) == 0:
-		raise ValueError('empty parameters')
-	pattern = load_config(os.path.join(ARGS.config_dir, filename))
-	# 留个备份，以防毁灭性修改。以后要删，自己评估完了删。
-	date = datetime.now().strftime('-%Y-%m-%d-%H-%M-%S-')
-	pmt = os.path.join(ARGS.config_dir, 'before' + date + filename + '.tmp')
-	with open(pmt, 'w+', encoding='utf-8') as fd:
-		json.dump(pattern, fd, indent=4, ensure_ascii=False)
-	for attr in keyval:
-		if attr not in pattern:
-			os.remove(pmt)
-			raise ValueError('invalid member-record')
-		for val in keyval[attr]:
-			if val not in pattern[attr]:
-				os.remove(pmt)
-				raise ValueError('invalid key-field')
-			pattern[attr][val] = keyval[attr][val]
-
-	with open(os.path.join(ARGS.config_dir, filename), 'w+', encoding='utf-8') as fd:
-		json.dump(pattern, fd, indent=4, ensure_ascii=False)
-
-
-if __name__ == "__main__":
-	print(ARGS.config_dir)
-	attempt_modify_json(
-		'example.json',
-		{
-			"user2": {
-				'user-id': 123,
-				'password': "321"
-			}
-		}
-	)

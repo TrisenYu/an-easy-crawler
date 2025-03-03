@@ -1,8 +1,8 @@
-本项目以供参考学习，用于主动从网易云后端fetch到歌单的必要信息。
+本项目仅供参考学习，用于主动从网易云后端fetch到歌单的必要信息。
 
 ### 配置方式
 
-到 `utils/configs` 下按照 `exmaple.json` 创建自己的 `config.json`。创建完成并配好环境后，如果：
+到 `utils/configs` 下按照 `exmaple.json` 创建自己的 `config.json`。创建完成并配好环境后：
 
 - 若运行于命令行，则提供 `--user=` 参数以获取必要的信息或者直接按格式，使用默认的 `user1` 而执行以下命令；
 
@@ -21,7 +21,7 @@ $ python3 song_list_info.py --user=user1
 - 如果没有用 `npm` 安装过 _crypto-js_ 这个库，需要 `npm install -g crypto-js`。
 - 可能随时间更新，本项目会失效。不过这可以抽时间出来重新逆。
 - 如果运行时报了缺少包，如找不到 `Crypto` 的错，则 `/path/to/venv/pip install pycryptodome` 逐个下载。不过还是建议直接建一个虚拟环境或者用 pycharm，能省很多事。
-- 如果想直接运行某个程序而报模块 `utils` 找不到的错，比如要运行 `multifn/update_song_list_cnt.py`，但
+- 如果想直接运行某个程序而报模块找不到的错，比如要运行 `multifn/update_song_list_cnt.py`，但出现
 
 ```shell
 $ python3 update_song_list_cnt.py
@@ -42,3 +42,12 @@ $ python3 -m multifn.update_song_list_cnt --author=user2 --dummy=user2
 ### TODO
 
 看时间、心情和兴趣做其它方向的逆。比如手机上能看某首歌的红心数量，但web端和桌面应用看不见。
+
+### 致谢
+排名不区分前后。
+
+- [AST 还原 JavaScript 混淆代码](https://www.52pojie.cn/thread-1744206-1-1.html)
+- [crypto-js](https://github.com/crypto-js/crypto-js)
+- [jsdom](https://www.npmjs.com/package/jsdom)
+- [python](https://www.python.org/)
+- [llvm](https://github.com/llvm/llvm-project/)

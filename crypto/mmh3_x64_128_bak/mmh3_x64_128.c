@@ -102,8 +102,7 @@ _x128 mmh3_x64_128(_u08 *key, _u64 lenk, _u32 seed) {
     }
     h1 ^= lenk, h2 ^= lenk;
     h1 += h2, h2 += h1;
-    h1 = _f_mix(h1);
-    h2 = _f_mix(h2);
+    h1 = _f_mix(h1), h2 = _f_mix(h2);
     h1 += h2, h2 += h1;
     _x128 res = {h1, h2};
     return res;

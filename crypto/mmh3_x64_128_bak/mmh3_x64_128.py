@@ -96,6 +96,7 @@ def mmh3_x64_128(key: str = '', seed: int = 0) -> str:
 	h2 = _add(h2, h1)
 	return f'{h1:08x}{h2:08x}'
 
+
 # try:
 # 	from ctypes import cdll, Structure, c_ulonglong
 # 	import os
@@ -116,19 +117,11 @@ def mmh3_x64_128(key: str = '', seed: int = 0) -> str:
 # 	print(e)
 # 	pass
 
-if __name__ == "__main__":
-	print(f'{_rot_l(0x3f35a32c_92edec78, 35):08x}')
-	print(f'{_ari_l(0x3f35a32c_92edec78, 35):08x}')
-	print(f'{_mul(0xc4ceb9fe1a85ec53, 0xff51afd7ed558ccd)}')
-	print(
-		f'\n{_ari_l(0x3f35a32c_92edec78, 64):08x}\n'
-	    f'{_ari_l(0x3f35a32c_92edec78, -1):08x}'
-	)
 
+if __name__ == "__main__":
 	print(mmh3_x64_128("PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 	                   "Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 	                   "Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 	                   "Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 	                   "WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"))
 	print(mmh3_x64_128("卧槽马绝杀"))
-	print(mmh3_x64_128('4self\x2Etop> echo -e "0ne asserted to be arbitrarily defined as ni1\n" >> /dev/null'))

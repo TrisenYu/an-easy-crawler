@@ -39,13 +39,8 @@ def _get_val(v: str) -> str:
 		return a
 	}
 	"""
-	res = ''
 	val = int.from_bytes(v.encode('utf-16-LE'), 'little')
-	if val > 255:
-		res += f'&#{val};'
-	else:
-		res += f'{val}'
-	return res
+	return f'&#{val};' if val > 255 else f'{val}'
 
 def _convertor(v: str) -> str:
 	res = ''
@@ -54,41 +49,43 @@ def _convertor(v: str) -> str:
 	return res
 
 
-def fetch_vistor_hash(
-	cookie_siz_salt: str = ''
-) -> str:
+def crack_vistor_hash(cookie_siz_salt: str = '') -> str:
 	"""
-	function str2binl(d) {
-		var c = new Array;
-		var a = (1 << 8) - 1;
-		for (var b = 0; b < d.length * 8; b += 8) {
-			c[b >> 5] |= (d.charCodeAt(b / 8) & a) << b % 32
-		}
-		return c
-	}
-	function binl2hex(c) {
-		var b = "0123456789abcdef";
-		var d = "";
-		for (var a = 0; a < c.length * 4; a++) {
-			d += b.charAt(c[a >> 2] >> a % 4 * 8 + 4 & 15) + b.charAt(c[a >> 2] >> a % 4 * 8 & 15)
-		}
-		return d
-	}
-	function fetch_visitor_hash() {
-		var c = new Date;
-		# referer: https://music.163.com/
-		# location: "https://music.163.com/discove"
-		var a = str_to_ent(
-			c.getTime() + Math.random() + document.location + document.referrer +
-			screen.width + screen.height + navigator.userAgent + document.cookie +
-			document.body.clientWidth + ":" + document.body.clientHeight
-		);
-		return ntes_hex_md5(a)
-	}
 	str_to_ent("卧槽马绝杀") = "&#21351;&#27133;&#39532;&#32477;&#26432;"
+
+	>>> 'function str2binl(d) {'                                \
+		'var c = new Array;'                                    \
+		'var a = (1 << 8) - 1;'                                 \
+		'for (var b = 0; b < d.length * 8; b += 8) {'           \
+			'c[b >> 5] |= (d.charCodeAt(b / 8) & a) << b % 32'  \
+		'}'                                                     \
+		'return c'                                              \
+	'}'                                                         \
+	'function binl2hex(c) {'                                    \
+		'var b = "0123456789abcdef";'                           \
+		'var d = "";'                                           \
+		'for (var a = 0; a < c.length * 4; a++) {'              \
+			'd += b.charAt(c[a >> 2] >> a % 4 * 8 + 4 & 15) + ' \
+			'b.charAt(c[a >> 2] >> a % 4 * 8 & 15)'             \
+		'}'                                                     \
+		'return d'                                              \
+	'}'                                                         \
+	'function fetch_visitor_hash() {'                           \
+		'var c = new Date;'                                     \
+		'# referer: https://music.163.com/'                     \
+		'# location: "https://music.163.com/discove"'           \
+		'var a = str_to_ent('                                   \
+			'c.getTime() + Math.random() + document.location +' \
+			'document.referrer + screen.width + screen.height +'\
+			'navigator.userAgent + document.cookie +'           \
+			'document.body.clientWidth + ":" + '                \
+			'document.body.clientHeight'                        \
+		');'                                                    \
+		'return ntes_hex_md5(a)'                                \
+	'}'
 	"""
 	return netease_md5(_convertor(f"{'卧槽马绝杀'}{int(time.time() * 1000) + random.random()}{cookie_siz_salt}"))
 
 
 if __name__ == "__main__":
-	fetch_vistor_hash()
+	print(crack_vistor_hash())

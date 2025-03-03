@@ -17,11 +17,13 @@
 """
 登出操作。
 """
-from utils.json_conf_reader import PRIVATE_CONFIG
+from utils.json_conf_reader import (
+	PRIVATE_CONFIG,
+	attempt_modify_json
+)
 from crypto.manual_deobfuscation import netease_encryptor
 from utils.args_loader import PARSER
 from utils.logger import DEBUG_LOGGER
-from utils.file_operator import attempt_modify_json
 from requests import post as rep
 
 args = PARSER.parse_args()

@@ -17,10 +17,11 @@
 import subprocess
 from functools import partial
 
-import os
+from os import name as os_name
+from os.path import dirname as op_dirname
 
-# 很离谱，这里需要根据操作系统来处理。
-if os.name != 'nt':
+# 不同操作系统上Popen的编码不一。
+if os_name != 'nt':
 	_Popen = subprocess.Popen
 	subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")  # 不加等着被 execjs 抛出的 gbk 编码失效锤。
 	import execjs
@@ -30,22 +31,26 @@ else:
 	subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")
 	import execjs
 
-from utils.file_operator import load_readable_txt_from_file
-from utils.json_conf_reader import PRIVATE_CONFIG
 from utils.logger import DEBUG_LOGGER
+from utils.file_operator import (
+	load_readable_txt_from_file,
+	dir2file
+)
+from utils.json_conf_reader import PRIVATE_CONFIG
 
-_curr_dir = os.path.dirname(__file__)
-obfus_dir = os.path.join(_curr_dir, 'obfus')
-defus_dir = os.path.join(_curr_dir, 'deobfus')
+_curr_dir = op_dirname(__file__)
+_obfus_dir = dir2file(_curr_dir, 'obfus')
+_defus_dir = dir2file(_curr_dir, 'deobfus')
+_fo = lambda s: load_readable_txt_from_file(dir2file(_obfus_dir, s))
+_fd = lambda s: load_readable_txt_from_file(dir2file(_defus_dir, s))
 
 try:
-	_crypto_sm4 = execjs.compile(load_readable_txt_from_file(os.path.join(obfus_dir, 'crypto_sm4.js')))
-	_crypto_rsa = execjs.compile(load_readable_txt_from_file(os.path.join(obfus_dir, 'crypto_rsa.js')),
-	                             cwd=PRIVATE_CONFIG['npm-path'])
-	_crypto2rsa = execjs.compile(load_readable_txt_from_file(os.path.join(obfus_dir, 'crypto2rsa.js')))
-	_crypto_md5 = execjs.compile(load_readable_txt_from_file(os.path.join(defus_dir, 'crypto_md5.js')))
-	_cryptommhx64_128 = execjs.compile(load_readable_txt_from_file(os.path.join(defus_dir, 'mmh3.js')))
-	_crypto_wm_nike = execjs.compile(load_readable_txt_from_file(os.path.join(obfus_dir, 'wm_nike_gen.js')))
+	_crypto_sm4 = execjs.compile(_fo('crypto_sm4.js'))
+	_crypto_rsa = execjs.compile(_fo('crypto_rsa.js'), cwd=PRIVATE_CONFIG['npm-path'])
+	_crypto2rsa = execjs.compile(_fo('crypto2rsa.js'))
+	_crypto_md5 = execjs.compile(_fd('crypto_md5.js'))
+	_cryptommhx64_128 = execjs.compile(_fd('crypto_mmh3.js'))
+	_crypto_wm_nike = execjs.compile(_fo('wmlike_gen.js'))
 except Exception as e:
 	DEBUG_LOGGER.critical(e)
 	exit(1)

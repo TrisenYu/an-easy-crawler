@@ -1,3 +1,4 @@
+// 源码。
 function _x64Add(m, n) {
     //
     // Given two 64bit ints (as an array of two 32bit ints) returns the two
@@ -233,5 +234,3 @@ function mmh3_x64_128(key, seed) {
 
     return ("00000000" + (h1[0] >>> 0).toString(16)).slice(-8) + ("00000000" + (h1[1] >>> 0).toString(16)).slice(-8) + ("00000000" + (h2[0] >>> 0).toString(16)).slice(-8) + ("00000000" + (h2[1] >>> 0).toString(16)).slice(-8);
 }
-
-console.log("逆".charCodeAt(0) & 0xFF)

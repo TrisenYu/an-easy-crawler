@@ -1,4 +1,3 @@
-// 需要在终端 npm install -g crypto-js 
 // core.js
 const CryptoJS = require("crypto-js");
 

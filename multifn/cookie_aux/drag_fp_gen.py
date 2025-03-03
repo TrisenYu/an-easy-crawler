@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
-# TODO: 检验 session_gen 算的 cookie 是否不能取代这种大量计算得出的值
 import re, random, time
 from fake_useragent import UserAgent
 

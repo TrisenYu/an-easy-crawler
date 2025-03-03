@@ -17,10 +17,9 @@
 
 from fake_useragent import UserAgent
 from user_agents import parse
+
 _ua = UserAgent().random
 _ua_obj = parse(_ua)
-_operating_sys, _what_browser, _is_mob = _ua_obj.get_os(), _ua_obj.get_browser(), _ua_obj.is_mobile
-
 # 不同进程的内存空间互相隔离，不会影响。除了其它程序的读写文件操作。
 HEADER = {
 	"Accept"                   : "text/html,application/xhtml+xml,application/xml;"
@@ -29,17 +28,14 @@ HEADER = {
 	"Accept-Language"          : "zh-CN,zh-TW,en-US;q=0.9,zh;q=0.8,th;q=0.7",
 	"Cache-Control"            : "no-cache",
 	"Connection"               : "keep-alive",
-	# "Cookie"                   : "",
 	"Host"                     : "music.163.com",
 	"Pragma"                   : "no-cache",
-	# "Referer"                  : "",
 	"Sec-Fetch-Dest"           : "iframe",
 	"Sec-Fetch-Mode"           : "navigate",
 	"Sec-Fetch-Site"           : "same-origin",
 	"Upgrade-Insecure-Requests": "1",
 	"User-Agent"               : f"{_ua}",
 }
-
 
 if __name__ == "__main__":
 	print(HEADER["User-Agent"])

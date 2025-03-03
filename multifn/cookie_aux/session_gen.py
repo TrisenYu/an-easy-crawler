@@ -21,7 +21,7 @@ from crypto.manual_deobfuscation import (
 	netease_crc32,
 	netease_mmh32_checksum
 )
-from crypto.unk_hash import unk_hash
+from crypto.unk_symm_cipher import unk_block
 
 
 _inject_str = "aZbY0cXdW1eVf2Ug3Th4SiR5jQk6PlO7mNn8MoL9pKqJrIsHtGuFvEwDxCyBzA"
@@ -32,10 +32,10 @@ def just_crack_cookie() -> str:
 	inpt = f"{'{'}'v':'v1.1','" \
 	       f"fp':'{a}{netease_mmh32_checksum(f'{a}')},{b}{netease_mmh32_checksum(f'{b}')}'," \
 	       f"'u':'{_f(_inject_str)}{int(time.time() * 1000)}{_f(_inject_str)}','h':'music.163.com'{'}'}"
-	return unk_hash(f'{inpt}{netease_crc32(inpt)}')
+	return unk_block(f'{inpt}{netease_crc32(inpt)}')
 
 
 if __name__ == "__main__":
 	payload = just_crack_cookie()
 	print(f'dec(JSESSIONID-WYYY)={payload}; _iuqxldmzr_=32')
-	print(unk_hash(payload))
+	print(unk_block(payload))

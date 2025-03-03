@@ -20,7 +20,7 @@
 import requests
 from crypto.manual_deobfuscation import (
 	encText_gen,
-	random_16_str_gen
+	dilphabet_16_str_gen
 )
 from crypto.native_js import native_encSecKey_gen
 from utils.json_conf_reader import PRIVATE_CONFIG
@@ -45,19 +45,19 @@ hostname = f"https://interface.{host_root}"
 #    ],
 #    "code": 200
 # }
-cdns_interface = f"{hostname}/weapi/cdns" + private_token
+cdns_api = f"{hostname}/weapi/cdns" + private_token
 
 
-# 返回版权说明
-copyright_interface = f"{hostname}/weapi/copyright/pay_fee_message/config" + private_token
+# 版权声明
+copyright_api = f"{hostname}/weapi/copyright/pay_fee_message/config" + private_token
 
 
-# 返回评论列表
-private_comments_interface = f"{hostname}/weapi/pl/count" + private_token
+# 返回私信
+direct_msg_api = f"{hostname}/weapi/pl/count" + private_token
 
 
 # 404 无效页。
-target = f"{hostname}/m/api/encryption/param/get" + private_token
+_unaccessable_page = f"{hostname}/m/api/encryption/param/get" + private_token
 
 
 # 只有 200，无其它结果
@@ -66,7 +66,7 @@ refresh_login_token_interface = f"{hostname}/weapi/login/token/refresh" + privat
 
 
 # {"code":200,"data":{"title":null,"content":null,"region":null,"urlList":null,"needPop":false},"message":""}
-private_info_interface = f"{hostname}/weapi/privacy/info/get/v2" + private_token
+persona_api = f"{hostname}/weapi/privacy/info/get/v2" + private_token
 
 
 # {
@@ -75,7 +75,7 @@ private_info_interface = f"{hostname}/weapi/privacy/info/get/v2" + private_token
 #   "eventVideoUploadNosType":1,"lotteryEventPermission":false,
 #   "timingPublishEvent":false,"createChallengeTopic":false,"code":200
 # }
-user_event_interface = f"{hostname}/weapi/event/user/permission" + private_token
+user_event_api = f"{hostname}/weapi/event/user/permission" + private_token
 
 
 # {
@@ -90,13 +90,12 @@ user_event_interface = f"{hostname}/weapi/event/user/permission" + private_token
 #
 msg_on_mv_interface = f"{hostname}/weapi/privilege/message/mv" + private_token
 
-weblog_interface = f"{hostname}/weapi/feedback/weblog" + private_token
+weblog_api = f"{hostname}/weapi/feedback/weblog" + private_token
 
 
 # 带有多个参数。这里之前似乎前端就已经向后端发出了歌单查询请求。
-get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG[args.poc_user]['user-id']}" + private_token
+get_followers_api = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG[args.poc_user]['user-id']}" + private_token
 
-# 暂时看不懂这个是干什么的
 # {
 # 	"code"   : 200,
 # 	"data"   : {
@@ -107,43 +106,24 @@ get_followers_interface = f"{hostname}/weapi/user/getfollows/{PRIVATE_CONFIG[arg
 # 	},
 # 	"message": ""
 # }
-clientconfig_interface = f"{hostname}/weapi/middle/clientcfg/config/list" + private_token
-
+clientconfig_api = f"{hostname}/weapi/middle/clientcfg/config/list" + private_token
 
 # 传一堆参数
-comment_below_songslist_interface = f"{hostname}/weapi/comment/resource/comments/get" + private_token
-
-
-# 破案了 core_52f85c5f5153a7880e60155739395661.js 下的
-# 2025/02/08: core_70d0eefb570184a2b62021346460be95.js，反正理解为 core.js
-# 第 69 行匿名函数 (function()) 里头有个
-# ```
-# 	"res-playlist-get": {
-#         type: "GET",
-#         url: "/api/v6/playlist/detail",
-#         format: function(m1x, e1x) {
-#             var res = j1x.bsN0x(m1x);
-#             res.playlist = res.result;
-#             delete res.result;
-#             return xr5w(res, e1x)
-#         }
-#     },
-# ```
-# 只需要传 id 参数就可以获取到歌单内的所有歌曲。
+comment_of_songslist_api = f"{hostname}/weapi/comment/resource/comments/get" + private_token
 # playlist_detail_interface = "https://interface.music.163.com/api/v6/playlist/detail"
 HEADER["Referer"] = f"https://{host_root}/"
 HEADER["Cookie"] = PRIVATE_CONFIG[args.poc_user]['cookie']
 
-def final_payload_sender(force_post: bool, choice: str):
+def __payload_sender(force_post: bool, choice: str):
 	"""
 	:param force_post: 一定要用 post 方法。
 	:param choice: 对接口链接的选择。
 	:return: 发请求后接口的响应返回值。
 	"""
 	if not force_post:
-		return requests.get(target, headers=HEADER)
+		return requests.get(_unaccessable_page, headers=HEADER)
 	raw_data = {"csrf_token": token}
-	if choice == weblog_interface:
+	if choice == weblog_api:
 		raw_data["logs"] = "[{\"action\":\"mobile_monitor\"," \
 		                   "\"json\":{" \
 		                   "\"meta._ver\":2," \
@@ -153,13 +133,13 @@ def final_payload_sender(force_post: bool, choice: str):
 		                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36\"," \
 		                   "\"chromeVersion\":128," \
 		                   "\"mainsite\":\"1\"}}]"
-	elif choice == get_followers_interface:
+	elif choice == get_followers_api:
 		raw_data['offset'] = ' 0'
 		raw_data['limit'] = '1000'
 		raw_data['order'] = 'true'
-	elif choice == clientconfig_interface:
+	elif choice == clientconfig_api:
 		raw_data['moduleName'] = 'preload'
-	elif choice == comment_below_songslist_interface:
+	elif choice == comment_of_songslist_api:
 		tmp = f"A_PL_0_{PRIVATE_CONFIG[args.poc_user]['list-id']}"
 		raw_data["rid"] = tmp
 		raw_data["threadId"] = tmp
@@ -170,7 +150,7 @@ def final_payload_sender(force_post: bool, choice: str):
 		raw_data['orderType'] = '1'
 
 	# easy js 断点逆向。
-	random_str: str = random_16_str_gen()
+	random_str: str = dilphabet_16_str_gen()
 	print(f'random-str: {random_str}\n')
 	data = {
 		"params"   : encText_gen(random_str, raw_data.__str__()),
@@ -182,6 +162,6 @@ def final_payload_sender(force_post: bool, choice: str):
 
 # 某些链接需要 GET 而非 POST，编写时忘记写，读者可以自己重试。
 if __name__ == "__main__":
-	response = final_payload_sender(True, comment_below_songslist_interface)
+	response = __payload_sender(True, comment_of_songslist_api)
 	print(response.status_code)
 	print(response.text)

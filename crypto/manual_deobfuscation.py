@@ -15,8 +15,10 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 """
-	diff_tests/estimator.py 下粗略比较了native和非native函数的执行用时，结果表明混淆后造成性能下降10~100倍。
-	需特别注意混淆js脚本出入字符串的大小写以及格式要求。
+	diff_tests/estimator.py 下粗略比较了native和非native函数的执行用时，结果表明混淆后造成性能下降 10~100 倍。
+	无非是一种为了反爬而导致的必然，但响应不怎么慢的感觉，掩盖了这点性能的下降。
+
+	**编写与调用函数时**，需特别注意混淆js脚本出入字符串的大小写以及格式要求。
 """
 import subprocess
 from functools import partial
@@ -30,6 +32,10 @@ if os.name == 'nt':
 		AES,
 		PKCS1_v1_5
 	)
+	from Crypto.Hash import (
+		SHA256,
+		SHA224
+	)
 	from Crypto.PublicKey import RSA
 	from Crypto.Util.Padding import pad
 	from Crypto.Util.number import bytes_to_long
@@ -40,12 +46,17 @@ else:
 		AES,
 		PKCS1_v1_5
 	)
+	from Crypto.Hash import (
+		SHA256,
+		SHA224
+	)
 	from Crypto.PublicKey import RSA
 	from Crypto.Util.Padding import pad
 	from Crypto.Util.number import bytes_to_long
 
 import hashlib, base64, random, binascii
 from gmssl import sm4
+
 
 # <简简单单> 打个 JavaScript 的断点。
 _rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17' \
@@ -65,6 +76,10 @@ _aes_cbc_iv = b'0102030405060708'
 _cloud_music_aes_cbc_key = b'0CoJUm6Qyw8W8jud'
 
 
+def ran_str_gen(lenp: int) -> str:
+	""" 生成适用于密码学的指定长度字符串 """
+	return os.urandom(lenp).decode('iso-8859-1')
+
 
 def encSecKey_gen(ran_str: str) -> str:
 	# 1. 直接 powmod
@@ -80,7 +95,7 @@ def base64_str_gen(inp: bytes) -> str:
 	return base64.b64encode(inp).decode('iso-8859-1')
 
 
-def random_16_str_gen() -> str:
+def dilphabet_16_str_gen() -> str:
 	"""
 	function a(a: int) {
 	....var d, e, b = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", c = "";
@@ -96,9 +111,13 @@ def random_16_str_gen() -> str:
 	const_base_string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	ans = ''
 	for _ in range(16):
-		ee = random.randint(0, len(const_base_string) - 1)
+		ee = random.randint(0, 61)
 		ans += const_base_string[ee]
 	return ans
+
+
+def dilphabet_32_str_gen() -> str:
+	return dilphabet_16_str_gen() + dilphabet_16_str_gen()
 
 
 def encText_gen(random_16_bytes: str, payload: str) -> str:
@@ -121,7 +140,7 @@ def netease_encryptor(inp_string: str) -> tuple[dict, str]:
 	"""
 	:return: 加密后的 json payload 以及用于 rsa 的随机十六个字节。
 	"""
-	_for_Seckey = random_16_str_gen()
+	_for_Seckey = dilphabet_16_str_gen()
 	ans = {
 		"params"   : encText_gen(_for_Seckey, inp_string),
 		"encSecKey": encSecKey_gen(_for_Seckey)
@@ -170,15 +189,47 @@ def netease_mmh32_checksum(mmh32: str) -> str:
 	return f'{p:02d}{cur:02d}'
 
 
-def netease_mmh32(content: str) -> str:
-	ans = f"{mmh3.hash(content, seed=31, signed=False)}"
+def netease_mmh32(content: str, sed: int=31) -> str:
+	ans = f"{mmh3.hash(content, seed=sed, signed=False)}"
 	return ans + netease_mmh32_checksum(ans)
 
 
 def netease_mmh128(payload: str) -> str:
-	_tmp = mmh3.hash128(payload.encode('iso-8859-1'), 0)
-	res = _tmp.to_bytes(16, byteorder='little', signed=False).hex()
-	return res
+	_tmp = mmh3.mmh3_x64_128_utupledigest(payload.encode('iso-8859-1'), 0)
+	# res = _tmp.to_bytes(16, byteorder='little', signed=False).hex()
+	return f'{_tmp[0]:08x}{_tmp[1]:08x}'
+
+
+def sha256(inp: bytes) -> str:
+	tmp = SHA256.new()
+	tmp.update(inp)
+	return tmp.hexdigest()
+
+
+def sha224(inp: bytes) -> str:
+	tmp = SHA224.new()
+	tmp.update(inp)
+	return tmp.hexdigest()
+
+
+_sha256 = SHA256.new()
+def sha256_update(chunk: bytes) -> str:
+	_sha256.update(chunk)
+	return _sha256.hexdigest()
+
+
+_sha224 = SHA224.new()
+def sha224_update(chunk: bytes) -> str:
+	_sha224.update(chunk)
+	return _sha224.hexdigest()
+
+
+def sha256_hmac() -> str:
+	pass
+
+
+def sha224_hmac() -> str:
+	pass
 
 
 if __name__ == '__main__':
@@ -187,9 +238,15 @@ if __name__ == '__main__':
 	# 疑似指针，三者均为 56 字节
 	from utils.json_conf_reader import PRIVATE_CONFIG
 	csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["user1"]["csrf_token"]}"{"}"}'
-	# 应由 random_16_str_gen 生成
+	# 应由 dilphabet_16_str_gen 生成
 
 	# 生成 encText
 	encText = encText_gen('e2yswfSf2Ac8CUpz', csrf_token_json_deserializer)
 	# 生成 encSecKey
 	print(netease_encryptor(csrf_token_json_deserializer)[0])
+
+	print(netease_mmh128("PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+		"WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"))

@@ -125,22 +125,3 @@ function binl2hex(c) {
 function ntes_hex_md5(a) {
     return binl2hex(ntes_core_md5(str2binl(a), a.length * 8))
 }
-
-/*
-    function fetch_visitor_hash() {
-        var c = new Date;
-        var a = str_to_ent(
-            c.getTime() + Math.random() + document.location +
-            document.referrer + screen.width + screen.height +
-            navigator.userAgent + document.cookie +
-            // 1536                      :    747
-            document.body.clientWidth + ":" + document.body.clientHeight
-        );
-        return ntes_hex_md5(a)
-    }
-    function ntes_set_cookie_long(a, c) {
-        var b = new Date;
-        b.setTime(b.getTime() + 1e3 * 60 * 60 * 24 * 365 * 100);
-        document.cookie = a + "=" + c + "; expires=" + b.toGMTString() + "; path=/; domain=" + bqb6V
-    }
-*/

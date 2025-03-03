@@ -9,7 +9,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Library General Public License for more details.
 #
 # You should have received a copy of the GNU Library General Public
@@ -59,22 +59,20 @@ _s_box_xc = [
 	0x45, 0xbe, 0x10, 0x7b, 0xd1, 0xaa, 0xa2, 0xb4, 0xf4, 0x73, 0x35, 0xa8, 0x7c, 0xb7, 0x81, 0x1f
 ]
 
-# TODO: k2, c2 这两个换得很频繁，在后端架构没有太大变动的情况下，需要通过自动化的方法来获取。否则需要一直人工干预更新。
 _k1 = "IUoKOfRm31Ck\e/EdVbz6XNHt5W+24P9i7Gc80xuFshSyYnDgZvljaABwrTQpJqM"  # 缺 L
-_k2_1 = "icB3gaKm8J4fkrF9.2ZI651Wqw+xCDLMRbQYotu0/dXzjT7hnSspGyvleOVEUHNA"  # 缺 P
-_k2_2 = "NiYht0P.fcLyE8RH2dZXj1GCMFpWqvlAQT/4sw7amebBk6nUxKIJr5zuOV+SogD9"  # 缺 3
+
+# TODO: k2, c2 这两个换得很频繁，在后端架构没有太大变动的情况下，需要通过自动化的方法来获取。否则需要一直人工干预更新。
+k2_1 = "icB3gaKm8J4fkrF9.2ZI651Wqw+xCDLMRbQYotu0/dXzjT7hnSspGyvleOVEUHNA" # 缺 P
+k2_2 = "NiYht0P.fcLyE8RH2dZXj1GCMFpWqvlAQT/4sw7amebBk6nUxKIJr5zuOV+SogD9" # 缺 3
+k2_3 = "qXNSC3WT67dGu4IsraKFn50Q/fotxypA2Oi.gmU+MbJjLkvZYRw81eh9BVPHEzcD" # 缺 l
+k2_d = "MB.CfHUzEeJpsuGkgNwhqiSaI4Fd9L6jYKZAxn1/Vml0c5rbXRP+8tD3QTO2vWyo" # 缺 7
 c2_1 = "87d2d49c491940d1ad3b8fcf7c295567"
 c2_2 = "77c41e1486ec4773a35957f68abc7e33"
+c2_3 = "ef8c9f09464240e5974d364643e19e27"
+c2_d = "fd6a43ae25f74398b61c03c83be37449"
+
 
 _aux_arr_ka = [
-	# v0, v1, v2, v3 = -39, 56, -51, 7
-	# for j in range(64):
-	#   ...
-	#   parr[i + j] = fet(parr[i + j] ^ v1 ^ v2 ^ v3 ^ p[j])
-	#   v0, v1, v2, v3 = cadd(v0), csub(v1), cadd(v2), cadd(v3)
-	#   ...
-	#   print(v1 ^ v2 ^ v3)
-	# exit(0)
 	0xf2, 0xf1, 0xf0, 0xef, 0xee, 0xed, 0xec, 0xeb, 0xea, 0xe9, 0xe8, 0xe7, 0xe6, 0xe5, 0xe4, 0xe3,
 	0xe2, 0xe1, 0xe0, 0xdf, 0xde, 0xdd, 0xdc, 0xdb, 0xda, 0xd9, 0xd8, 0xd7, 0xd6, 0xd5, 0xd4, 0xd3,
 	0xd2, 0xd1, 0xd0, 0xcf, 0xce, 0xcd, 0xcc, 0xcb, 0xca, 0xc9, 0xc8, 0xc7, 0xc6, 0xc5, 0xc4, 0xc3,
@@ -104,6 +102,7 @@ def _necessary_pad(inp: str) -> list[int]:
 	return res
 
 
+# decode 有点费脑
 def custom_encode(inp_list: list[int], key: str, pad: str):
 	def _3_2_4(i: int, j: int):
 		if j == 1:
@@ -127,7 +126,7 @@ def custom_encode(inp_list: list[int], key: str, pad: str):
 	return res + _3_2_4(jdx, remain)
 
 
-def unk_hash(inp: str, assign: list[int] = None) -> str:
+def unk_block(inp: str, assign: list[int] = None) -> str:
 	"""
 	core.js JSESSIONID-WYYY
 	:param inp: inp 带有 crc32 后缀的字典。
@@ -161,14 +160,12 @@ def unk_hash(inp: str, assign: list[int] = None) -> str:
 	return custom_encode(y, _k1, 'L')
 
 
-def unk_hash2(inp: str, assign: list[int] = None, ck: str = c2_2, enck: str = _k2_2, padk: str = '3') -> str:
+def unk_block2(inp: str, assign: list[int] = None, ck: str = c2_3, enck: str = k2_3, padk: str = 'l') -> str:
 	""" watchman.js ? """
 	if assign is None or len(assign) < 4:
 		y = [random.randint(0, 255) for _ in range(4)]
 	else:
 		y = [assign[_] for _ in range(4)]
-	# var e = g[85]
-	#
 	fet = lambda x: (x & 0xFF)
 	parr = _necessary_pad(inp + hex(binascii.crc32(inp.encode('iso-8859-1')))[2:])
 
@@ -193,7 +190,7 @@ def unk_hash2(inp: str, assign: list[int] = None, ck: str = c2_2, enck: str = _k
 
 
 def netease_wmjsonp_guid() -> str:
-	return uuid.uuid4().bytes.hex()[2:] # [2:9]
+	return uuid.uuid4().bytes.hex()[2:]
 
 
 if __name__ == "__main__":
@@ -228,7 +225,9 @@ if __name__ == "__main__":
 	          b'\x74\x68\x00\xe8\x00\x08\x4e\x65\x74\x73\x63\x61\x70\x65\x00\xf3\x00\x01\x08\x01\xc3' \
 	          b'\x00\x01\x01\x01\x91\x00\x01\x01\x01\x93\x00\x01\x00\x01\x94\x00\x01\x00\x01\xc2\x00' \
 	          b'\x01\x07\x01\x92\x00\x00'.decode('iso-8859-1')
-	print(unk_hash2(payload, [-11, -12, 83, 87], c2_1, _k2_1, 'P'))
+	print(len(payload))
+	_tmp = unk_block2(payload, [-11, -12, 83, 87], c2_1, k2_1, 'P')
+	print(_tmp, len(_tmp))
 	print(netease_wmjsonp_guid())
 	"""
 	预期：HM2I5nqo12VFAGpsyIdqdmRY8lFEOoYmui/HGlRs19asuEG0BK4v3dVMHjg7jHvoCTp7UZXOFN9rox24+zmFpYm/

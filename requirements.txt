@@ -1,6 +1,6 @@
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
-# platform has been tested: win-64 linux-x86_86
+# platforms have been tested: win10_64 kali-linux-6.6.9 manjaro-6.12.1
 
 PyExecJS~=1.5.1
 pycryptodome~=3.20.0

@@ -31,10 +31,14 @@ PARSER.add_argument(
 	type=str, default=os.path.join(os.path.dirname(__file__), 'configs'),
 	help="配置文件config.json所在的绝对目录。"
 )
-### 默认都给 user1
+
+### 凡涉及到用户的，默认给 user1。
 # ================  multifn/update_song_list_cnt.py =========
 PARSER.add_argument('-a', '--author', type=str, default='user1', help='歌单作者，更新cnt专用。')
 PARSER.add_argument('-d', '--dummy', type=str, default='user1', help='指定傀儡，更新cnt用。')
+
+# ================ multifn/login.py =========================
+PARSER.add_argument('--applicant', type=str, default='user1', help="要求登录的账号")
 
 # ================  multifn/logout.py =======================
 PARSER.add_argument('-eu', '--exit-user', type=str, default='user1', help='对应到配置文件config.json的登出账户。')
@@ -42,6 +46,7 @@ PARSER.add_argument('-eu', '--exit-user', type=str, default='user1', help='对�
 # ================  song_list_info.py =======================
 PARSER.add_argument('-sa', '--songlist-author', type=str, default='user1', help="歌单作者名，以从 json 中读取相关约定信息。")
 PARSER.add_argument('-ld', '--login-dummy', type=str, default='user1', help="登录过的 dummy，用于抽取 cookie 和 token。")
+PARSER.add_argument('-tps', '--threadpool-size', type=int, default=8, help="给定线程池大小")
 
 # ================  suffixes.py =============================
 PARSER.add_argument('-pu', '--poc-user', type=str, default='user1', help="用于验证某种设计的用户。")
@@ -49,7 +54,7 @@ PARSER.add_argument('-pu', '--poc-user', type=str, default='user1', help="用于
 # ================  diff_tests/estimator.py =================
 PARSER.add_argument('-tu', '--test-user', type=str, default='user1', help='用于 diff_tests/ 中测试的用户。')
 
-# ================ multifn/indistinct_search.py(Feature) =============
+# ================ multifn/indistinct_search.py(Feature in the future) =============
 PARSER.add_argument('-sfn', '--songlist-fuzzy-name', type=str, default='', help="歌单的模糊名，用于模糊搜索获取其id")
 
 # 解析命令行参数

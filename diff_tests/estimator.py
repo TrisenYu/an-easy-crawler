@@ -34,9 +34,9 @@ from crypto.manual_deobfuscation import (
 	rsa_encrypt_without_token,
 	netease_crc32,  # 不提供混淆脚本解释执行，只检查是否构成对应。
 	netease_mmh32,
+	netease_mmh128,
 	netease_md5
 )
-from crypto.mmh3_x64_128 import mmh3_x64_128
 from crypto.native_js import (
 	native_encSecKey_gen,
 	native_encText_gen,
@@ -47,7 +47,7 @@ from crypto.native_js import (
 	raw_mmh3,
 	native_wm_nike_gen,
 )
-from crypto.unk_hash import unk_hash
+from crypto.unk_symm_cipher import unk_block
 
 args = PARSER.parse_args()
 
@@ -233,7 +233,7 @@ def evaluation9():
 	inp = "{'v':'v1.1','fp':'5735083394745,20364379824448'," \
 	      "'u':'mV71738999513316FRV','h':'music.163.com'}"
 	crc32 = netease_crc32(inp)
-	return unk_hash(f"{inp}{crc32}", [-19, -86, -29, 37])
+	return unk_block(f"{inp}{crc32}", [-19, -86, -29, 37])
 
 
 @check_eq_after_time_gauge("f4d6d7596bcd931fc5b2480e7788b4f3")
@@ -277,7 +277,7 @@ def comp_eval9_7():
 @check_eq_after_time_gauge("b69f0e3afa15fb947efef61ec84603ce")
 @get_interval
 def evaluation10():
-	return mmh3_x64_128(
+	return netease_mmh128(
 		"PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 		"Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 		"Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
@@ -297,24 +297,105 @@ def comp_eval10():
 		"WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"
 	)
 
-# try:
-# 	from crypto.mmh3_x64_128 import dll
-# 	@check_eq_after_time_gauge("b69f0e3afa15fb947efef61ec84603ce")
-# 	@get_interval
-# 	def o_comp_eval10():
-# 		mmh3_obj = dll.mmh3_x64_128(b"PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf", 394, 0)
-# 		return f'{mmh3_obj.h1:08x}{mmh3_obj.h2:08x}'
-# 	DEBUG_LOGGER.info(f'{o_comp_eval10()}')
-# except Exception as e:
-# 	DEBUG_LOGGER.warning(e)
-# 	pass
-"""
-以上代码执行结果: 
-b69f0e3afa15fb947efef61ec84603ce
 
-2025-02-12 02:24:38,082 [estimator.py/<module>/line296]-INFO:
-        ('b69f0e3afa15fb947efef61ec84603ce', 1.1600001016631722e-05)
-"""
+@check_eq_after_time_gauge("eb3c874188f9cdbdb282af734adc465e")
+@get_interval
+def evaluation10_5():
+	return netease_mmh128("acos:1.4473588658278522,acosh:709.889355822726,acoshPf:355.291251501643,"
+	                      "asin:0.12343746096704435,asinh:0.881373587019543,asinhPf:0.8813735870195429,"
+	                      "atanh:0.5493061443340548,atanhPf:0.5493061443340548,atan:0.4636476090008061,"
+	                      "sin:0.8178819121159085,sinh:1.1752011936438014,sinhPf:2.534342107873324,"
+	                      "cos:-0.8390715290095377,cosh:1.5430806348152437,coshPf:1.5430806348152437,"
+	                      "tan:-1.4214488238747245,tanh:0.7615941559557649,tanhPf:0.7615941559557649,"
+	                      "exp:2.718281828459045,expm1:1.718281828459045,expm1Pf:1.718281828459045,"
+	                      "log1p:2.3978952727983707,log1pPf:2.3978952727983707,powPI:1.9275814160560204e-50")
+
+@check_eq_after_time_gauge("a1374108a0bcc1626eeb20c4052da5f1")
+@get_interval
+def evaluation10_7():
+	return netease_mmh128("extensions:ANGLE_instanced_arrays;EXT_blend_minmax;EXT_clip_control;"
+	                      "EXT_color_buffer_half_float;EXT_depth_clamp;EXT_disjoint_timer_query;"
+	                      "EXT_float_blend;EXT_frag_depth;EXT_polygon_offset_clamp;EXT_shader_texture_lod;"
+	                      "EXT_texture_compression_bptc;EXT_texture_compression_rgtc;"
+	                      "EXT_texture_filter_anisotropic;EXT_texture_mirror_clamp_to_edge;EXT_sRGB;"
+	                      "KHR_parallel_shader_compile;OES_element_index_uint;OES_fbo_render_mipmap;"
+	                      "OES_standard_derivatives;OES_texture_float;OES_texture_float_linear;"
+	                      "OES_texture_half_float;OES_texture_half_float_linear;OES_vertex_array_object;"
+	                      "WEBGL_blend_func_extended;WEBGL_color_buffer_float;WEBGL_compressed_texture_s3tc;"
+	                      "WEBGL_compressed_texture_s3tc_srgb;WEBGL_debug_renderer_info;WEBGL_debug_shaders;"
+	                      "WEBGL_depth_texture;WEBGL_draw_buffers;WEBGL_lose_context;WEBGL_multi_draw;"
+	                      "WEBGL_polygon_mode,webgl aliased line width range:[1, 1],"
+	                      "webgl aliased point size range:[1, 1024],webgl alpha bits:8,"
+	                      "webgl antialiasing:yes,webgl blue bits:8,webgl depth bits:24,"
+	                      "webgl green bits:8,webgl max anisotropy:16,"
+	                      "webgl max combined texture image units:32,webgl max cube map texture size:16384,"
+	                      "webgl max fragment uniform vectors:1024,webgl max render buffer size:16384,"
+	                      "webgl max texture image units:16,webgl max texture size:16384,"
+	                      "webgl max varying vectors:30,webgl max vertex attribs:16,"
+	                      "webgl max vertex texture image units:16,webgl max vertex uniform vectors:4096,"
+	                      "webgl max viewport dims:[32767, 32767],webgl red bits:8,"
+	                      "webgl renderer:WebKit WebGL,webgl shading language version:WebGL GLSL ES 1.0 "
+	                      "(OpenGL ES GLSL ES 1.0 Chromium),webgl stencil bits:0,webgl vendor:WebKit,"
+	                      "webgl version:WebGL 1.0 (OpenGL ES 2.0 Chromium),"
+	                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACWCAYAAABkW7XSAAAAAXNSR0IArs4c6QAABGhJREFUeF7t1IEJADAMAkG7/9AtdIuHywRyBs+2O0eAAIGAwDFYgZZEJEDgCxgsj0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIg8ADA2JYBN9/scgAAAABJRU5ErkJggg==")
+
+@check_eq_after_time_gauge("8bdad2543f873b1d51afdc996c8ce5a1")
+@get_interval
+def evaluation10_9():
+	return netease_mmh128("Agency FB,Algerian,Baskerville Old Face,Bauhaus 93,Bell MT,Berlin Sans FB,"
+	                      "Bernard MT Condensed,Blackadder ITC,Bodoni MT,Bodoni MT Black,"
+	                      "Bodoni MT Condensed,Bookshelf Symbol 7,Bradley Hand ITC,Broadway,Brush Script MT,"
+	                      "Californian FB,Calisto MT,Candara,Castellar,Centaur,Chiller,Colonna MT,Constantia,"
+	                      "Cooper Black,Copperplate Gothic,Copperplate Gothic Light,Corbel,Curlz MT,Ebrima,"
+	                      "Edwardian Script ITC,Elephant,Engravers MT,FangSong,Felix Titling,Footlight MT Light,"
+	                      "Forte,Freestyle Script,French Script MT,Gabriola,Gigi,Gill Sans MT,"
+	                      "Gill Sans MT Condensed,Goudy Old Style,Goudy Stout,Haettenschweiler,"
+	                      "Harrington,High Tower Text,Imprint MT Shadow,Informal Roman,Jokerman,Juice ITC,"
+	                      "KaiTi,Kristen ITC,Kunstler Script,Magneto,Maiandra GD,Malgun Gothic,Marlett,"
+	                      "Matura MT Script Capitals,Meiryo,Meiryo UI,Microsoft Himalaya,Microsoft JhengHei,"
+	                      "Microsoft New Tai Lue,Microsoft PhagsPa,Microsoft Tai Le,Microsoft YaHei,"
+	                      "Microsoft Yi Baiti,MingLiU_HKSCS-ExtB,MingLiU-ExtB,Mistral,Modern No. 20,"
+	                      "Mongolian Baiti,MS Mincho,MS PMincho,MS Reference Specialty,MS UI Gothic,MT Extra,"
+	                      "MV Boli,Niagara Engraved,Niagara Solid,NSimSun,Old English Text MT,"
+	                      "Onyx,Palace Script MT,Papyrus,Parchment,Perpetua,Perpetua Titling MT,Playbill,"
+	                      "PMingLiU-ExtB,Poor Richard,Pristina,Ravie,Rockwell,Rockwell Condensed,"
+	                      "Showcard Gothic,SimHei,SimSun,SimSun-ExtB,Snap ITC,Stencil,Sylfaen,Tempus Sans ITC,"
+	                      "Tw Cen MT,Tw Cen MT Condensed,Viner Hand ITC,Vivaldi,Vladimir Script,Wide Latin,"
+	                      "仿宋,华文中宋,华文仿宋,华文宋体,华文彩云,华文新魏,华文楷体,华文琥珀,华文细黑,华文行楷,华文隶书,"
+	                      "宋体,幼圆,微软雅黑,新宋体,方正姚体,方正舒体,楷体,隶书,黑体")
+
+@check_eq_after_time_gauge("00fbfdf1d384fc93e658c32156de2275")
+@get_interval
+def evaluation10_99():
+	return netease_mmh128("Google Bahasa Indonesia, Google Bahasa Indonesia, id-ID, 0, 0,"
+	                      "Google Deutsch, Google Deutsch, de-DE, 0, 0,Google Nederlands, Google Nederlands,"
+	                      " nl-NL, 0, 0,Google UK English Female, Google UK English Female, en-GB, 0, 0,"
+	                      "Google UK English Male, Google UK English Male, en-GB, 0, 0,"
+	                      "Google US English, Google US English, en-US, 0, 0,Google español de Estados Unidos,"
+	                      " Google español de Estados Unidos, es-US, 0, 0,Google español, Google español,"
+	                      " es-ES, 0, 0,Google français, Google français, fr-FR, 0, 0,Google italiano,"
+	                      " Google italiano, it-IT, 0, 0,Google polski, Google polski, pl-PL, 0, 0,"
+	                      "Google português do Brasil, Google português do Brasil, pt-BR, 0, 0,"
+	                      "Google русский, Google русский, ru-RU, 0, 0,Google हिन्दी, Google हिन्दी, hi-IN,"
+	                      " 0, 0,Google 國語（臺灣）, Google 國語（臺灣）, zh-TW, 0, 0,"
+	                      "Google 日本語, Google 日本語, ja-JP, 0, 0,Google 한국의, Google 한국의, ko-KR, 0,"
+	                      " 0,Google 普通话（中国大陆）, Google 普通话（中国大陆）, zh-CN, 0, 0,"
+	                      "Google 粤語（香港）, Google 粤語（香港）, zh-HK, 0, 0,"
+	                      "Microsoft Huihui - Chinese (Simplified\, PRC),"
+	                      " Microsoft Huihui - Chinese (Simplified\, PRC), zh-CN, 1, 1,"
+	                      "Microsoft Kangkang - Chinese (Simplified\, PRC),"
+	                      " Microsoft Kangkang - Chinese (Simplified\, PRC),"
+	                      " zh-CN, 1, 0,Microsoft Yaoyao - Chinese (Simplified\, PRC),"
+	                      " Microsoft Yaoyao - Chinese (Simplified\, PRC), zh-CN, 1, 0")
+
+
+@check_eq_after_time_gauge("7ae481c3234821b6649b434bed036ff0")
+@get_interval
+def evaluation10_999():
+	return netease_mmh128("1111111111111111111111111111111111111111112111111111111111111111111111121111111111111111111112111111111111111111111111111111111111111111111111111111111211111111111111111111111111111111111111111111111111211111111111111111111111111211111111111111111")
+
+
+
 
 @check_eq("9ca17ae2e6ffcda170e2e6ee92f05cae8db8aff646a5ef8eb2c85f968b8fb0c742a3afbe8ce652"
           "afb59f95aa2af0fea7c3b92aa5f09dadf454aebdb7a8ee7ea8bba2a2d27b8a8c9e91e47da89e9d"
@@ -360,4 +441,4 @@ if __name__ == "__main__":
 	DEBUG_LOGGER.info(f'{evaluation9_5()[1]}s, {comp_eval9_5()[1]}s\n\t'
 	                  f'{evaluation10()[1]}s, {comp_eval10()[1]}s')
 	DEBUG_LOGGER.info(f'{evaluation9_7()}\n\t{comp_eval9_7()}')
-	DEBUG_LOGGER.info(f'{comp_eval11()}')
+	DEBUG_LOGGER.info(f'{evaluation10_5()}\n\t{comp_eval11()}')
