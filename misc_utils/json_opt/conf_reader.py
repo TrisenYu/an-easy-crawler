@@ -15,20 +15,25 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 import json, os
-from datetime import datetime
-from typing import Optional
-from utils.wrappers.err_wrap import (
+from typing import (
+	Optional,
+	Union,
+	TypedDict
+)
+from typing_extensions import NotRequired
+
+from misc_utils.wrappers.err_wrap import (
 	die_if_err,
 	seize_err_if_any
 )
-from utils.file_operator import dir2file
-from utils.args_loader import PARSER
-
+from misc_utils.file_operator import dir2file
+from misc_utils.args_loader import PARSER
+from misc_utils.time_aux import curr_time_formatter
 _args = PARSER.parse_args()
 
 
-@die_if_err
-def load_config(inp: str) -> dict:
+@die_if_err()
+def load_config(inp: str) -> dict[str, Union[str, dict[str, str]]]:
 	payload_str: str = ''
 	with open(inp, 'r') as fd:
 		while True:
@@ -40,21 +45,27 @@ def load_config(inp: str) -> dict:
 	return payload
 
 
-@die_if_err
-def json2dict_via_str_or_die(inp: str, key: Optional[str] = None) -> dict:
+@die_if_err()
+def deserialize_json_or_die(inp: str, key: Optional[str] = None) -> dict:
 	"""
 	ascii意义下，尝试将 json 字符串反序列化为 python 可处理的 dict
+	:param inp: inp 为序列化为字符串的 json。
+	:param key: inp 内存在的键值。
+	:return: 返回反序列化对象。
 	"""
 	return json.loads(inp) if key is None else json.loads(inp)[key]
 
 
-@seize_err_if_any
+@seize_err_if_any()
 def load_json_from_str(inp: str) -> dict:
 	return json.loads(inp)
 
 
-@seize_err_if_any
-def attempt_modify_json(filename: str = 'config.json', keyval: dict = None) -> None:
+@seize_err_if_any()
+def attempt_modify_json(
+	filename: str = 'config.json',
+	keyval: dict = None
+) -> None:
 	"""
 	在 `O(n)` 的复杂度下完成对 path 指向文件的修改。
 
@@ -72,15 +83,18 @@ def attempt_modify_json(filename: str = 'config.json', keyval: dict = None) -> N
 	- keyval 待修改的键值对。
 	"""
 	global _args
-	if len(keyval) == 0:
+	if keyval is None or len(keyval) == 0:
 		raise ValueError('empty parameters')
 	pattern = load_config(dir2file(_args.config_dir, filename))
 	# 留个备份，以防毁灭性修改。以后要删，自己评估完了删。
 	# TODO: 选数据库来读写。直接写到某个文件夹就像是拉了一样
-	date = datetime.now().strftime('-%Y-%m-%d-%H-%M-%S-')
+	#       分布式还是？一个人自用？
+	date = curr_time_formatter("-%Y-%m-%d-%H-%M-%S-")
 	pmt = dir2file(_args.config_dir, 'before' + date + filename + '.tmp')
+
 	with open(pmt, 'w+', encoding='utf-8') as fd:
 		json.dump(pattern, fd, indent=4, ensure_ascii=False)
+
 	for attr in keyval:
 		if attr not in pattern:
 			os.remove(pmt)
@@ -95,7 +109,31 @@ def attempt_modify_json(filename: str = 'config.json', keyval: dict = None) -> N
 		json.dump(pattern, fd, indent=4, ensure_ascii=False)
 
 
-PRIVATE_CONFIG = load_config(dir2file(_args.config_dir, "config.json"))
+# See https://docs.python.org/zh-cn/3.10/library/typing.html#typing.TypedDict
+_PerUserConf = TypedDict(
+	'_PerUserConf',
+	{
+		"cookie": str,      # cookie
+		"user-id": str,     # 用户 id 非必选
+		"list-id": str,     # 歌单 id
+		"email": str,       # 登录邮箱号
+		"password": str,    # 明文
+		"backup-dir": str,  # 备份目录
+		"csrf_token": str   # 跨域 token
+	}
+)
+ConfJson = TypedDict(
+	'ConfJson',
+	{
+		"npm-path": str,    # npm 路径
+		# TODO: 疑似可用用户池来？user1如果想要最大程度的
+		#  自定义就可能需要延拓一下定义了。
+		"user1": NotRequired[_PerUserConf]
+	},
+	total=False
+)
+
+PRIVATE_CONFIG: dict[str, Union[str, dict[str, str]]] = load_config(dir2file(_args.config_dir, "config.json"))
 
 if __name__ == "__main__":
 	print(PRIVATE_CONFIG)

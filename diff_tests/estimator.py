@@ -18,15 +18,15 @@
 """
 测试用例兼执行速度评估。
 """
-from utils.args_loader import PARSER
-from utils.wrappers.perf_wrap import get_interval
-from utils.wrappers.logic_wrap import (
+from misc_utils.args_loader import PARSER
+from misc_utils.wrappers.perf_wrap import get_interval
+from misc_utils.wrappers.logic_wrap import (
 	check_eq_after_time_gauge,
 	check_eq
 )
-from utils.logger import DEBUG_LOGGER
-from utils.json_conf_reader import PRIVATE_CONFIG
-from crypto.manual_deobfuscation import (
+from misc_utils.logger import DEBUG_LOGGER
+from misc_utils.json_opt.conf_reader import PRIVATE_CONFIG
+from crypto_aux.manual_deobfus import (
 	encSecKey_gen,
 	encText_gen,
 	netease_encryptor,
@@ -37,7 +37,7 @@ from crypto.manual_deobfuscation import (
 	netease_mmh128,
 	netease_md5
 )
-from crypto.native_js import (
+from crypto_aux.native_js import (
 	native_encSecKey_gen,
 	native_encText_gen,
 	native_netease_encryptor,
@@ -47,7 +47,7 @@ from crypto.native_js import (
 	raw_mmh3,
 	native_wm_nike_gen,
 )
-from crypto.unk_symm_cipher import unk_block
+from crypto_aux.unk_symm_cipher import unk_block
 
 args = PARSER.parse_args()
 
@@ -160,6 +160,21 @@ def evaluation4():
 		'"rtid":"ivai2ozLZcH3MH9GfTtLK2e8Lf5cHL2z"}'
 	)
 
+#
+#
+@check_eq_after_time_gauge(
+	"19736feba8c544a5fe33b8a884a53212af3632efa03f58d7be37e524acd92164d42a0028dca71fd138"
+    "74b69d8be2d936e13038670343ecaa86270463dab98b8b15613de33180163a69a798b6d0f688bee602"
+    "9a760fd21efad33c4f665d6ab3ad0acaa92b24d2b812aa6ca9bae1aeeb1fe1d4900ab689ca0caec661"
+    "a28dcf39176552d54f21e0659126205454a94b1abe"
+)
+@get_interval
+def evaluation4_4():
+	return sm4_encryptor(
+		'{"pd":"music","pkid":"KGxdbOk","pkht":"music.163.com",'
+		'"channel":0,"topURL":"https://music.163.com/",'
+		'"rtid":"ekOrYjCyuif7N2pDF6pOSUgwhvtIpIht"}'
+	)
 
 @check_eq_after_time_gauge(
 	'6bf50cfdbac1dbd512f8f01a7851c8a9df78bafaa05a057770d33fdfb74109e8de41cd3f56c9f809b37b06fa8e05b2f88dacbdca0d'
@@ -270,9 +285,11 @@ def evaluation9_7():
 	# function cc() 内最后的过程
 	return netease_md5("104410450417d2275475c06b99150e11dAWsBhCqtOaNLLJ25hBzWbqWXwiK99Wd")
 
+
 @check_eq("6f255bfcd732eaf2d5fd55b52df7a12b")
 def comp_eval9_7():
 	return native_md5("104410450417d2275475c06b99150e11dAWsBhCqtOaNLLJ25hBzWbqWXwiK99Wd")
+
 
 @check_eq_after_time_gauge("b69f0e3afa15fb947efef61ec84603ce")
 @get_interval
@@ -301,14 +318,17 @@ def comp_eval10():
 @check_eq_after_time_gauge("eb3c874188f9cdbdb282af734adc465e")
 @get_interval
 def evaluation10_5():
-	return netease_mmh128("acos:1.4473588658278522,acosh:709.889355822726,acoshPf:355.291251501643,"
-	                      "asin:0.12343746096704435,asinh:0.881373587019543,asinhPf:0.8813735870195429,"
-	                      "atanh:0.5493061443340548,atanhPf:0.5493061443340548,atan:0.4636476090008061,"
-	                      "sin:0.8178819121159085,sinh:1.1752011936438014,sinhPf:2.534342107873324,"
-	                      "cos:-0.8390715290095377,cosh:1.5430806348152437,coshPf:1.5430806348152437,"
-	                      "tan:-1.4214488238747245,tanh:0.7615941559557649,tanhPf:0.7615941559557649,"
-	                      "exp:2.718281828459045,expm1:1.718281828459045,expm1Pf:1.718281828459045,"
-	                      "log1p:2.3978952727983707,log1pPf:2.3978952727983707,powPI:1.9275814160560204e-50")
+	return netease_mmh128(
+		"acos:1.4473588658278522,acosh:709.889355822726,acoshPf:355.291251501643,"
+		"asin:0.12343746096704435,asinh:0.881373587019543,asinhPf:0.8813735870195429,"
+		"atanh:0.5493061443340548,atanhPf:0.5493061443340548,atan:0.4636476090008061,"
+		"sin:0.8178819121159085,sinh:1.1752011936438014,sinhPf:2.534342107873324,"
+		"cos:-0.8390715290095377,cosh:1.5430806348152437,coshPf:1.5430806348152437,"
+		"tan:-1.4214488238747245,tanh:0.7615941559557649,tanhPf:0.7615941559557649,"
+		"exp:2.718281828459045,expm1:1.718281828459045,expm1Pf:1.718281828459045,"
+		"log1p:2.3978952727983707,log1pPf:2.3978952727983707,powPI:1.9275814160560204e-50"
+	)
+
 
 @check_eq_after_time_gauge("a1374108a0bcc1626eeb20c4052da5f1")
 @get_interval
@@ -339,62 +359,72 @@ def evaluation10_7():
 	                      "webgl version:WebGL 1.0 (OpenGL ES 2.0 Chromium),"
 	                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACWCAYAAABkW7XSAAAAAXNSR0IArs4c6QAABGhJREFUeF7t1IEJADAMAkG7/9AtdIuHywRyBs+2O0eAAIGAwDFYgZZEJEDgCxgsj0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIgYLD8AAECGQGDlalKUAIEDJYfIEAgI2CwMlUJSoCAwfIDBAhkBAxWpipBCRAwWH6AAIGMgMHKVCUoAQIGyw8QIJARMFiZqgQlQMBg+QECBDICBitTlaAECBgsP0CAQEbAYGWqEpQAAYPlBwgQyAgYrExVghIg8ADA2JYBN9/scgAAAABJRU5ErkJggg==")
 
+
 @check_eq_after_time_gauge("8bdad2543f873b1d51afdc996c8ce5a1")
 @get_interval
 def evaluation10_9():
-	return netease_mmh128("Agency FB,Algerian,Baskerville Old Face,Bauhaus 93,Bell MT,Berlin Sans FB,"
-	                      "Bernard MT Condensed,Blackadder ITC,Bodoni MT,Bodoni MT Black,"
-	                      "Bodoni MT Condensed,Bookshelf Symbol 7,Bradley Hand ITC,Broadway,Brush Script MT,"
-	                      "Californian FB,Calisto MT,Candara,Castellar,Centaur,Chiller,Colonna MT,Constantia,"
-	                      "Cooper Black,Copperplate Gothic,Copperplate Gothic Light,Corbel,Curlz MT,Ebrima,"
-	                      "Edwardian Script ITC,Elephant,Engravers MT,FangSong,Felix Titling,Footlight MT Light,"
-	                      "Forte,Freestyle Script,French Script MT,Gabriola,Gigi,Gill Sans MT,"
-	                      "Gill Sans MT Condensed,Goudy Old Style,Goudy Stout,Haettenschweiler,"
-	                      "Harrington,High Tower Text,Imprint MT Shadow,Informal Roman,Jokerman,Juice ITC,"
-	                      "KaiTi,Kristen ITC,Kunstler Script,Magneto,Maiandra GD,Malgun Gothic,Marlett,"
-	                      "Matura MT Script Capitals,Meiryo,Meiryo UI,Microsoft Himalaya,Microsoft JhengHei,"
-	                      "Microsoft New Tai Lue,Microsoft PhagsPa,Microsoft Tai Le,Microsoft YaHei,"
-	                      "Microsoft Yi Baiti,MingLiU_HKSCS-ExtB,MingLiU-ExtB,Mistral,Modern No. 20,"
-	                      "Mongolian Baiti,MS Mincho,MS PMincho,MS Reference Specialty,MS UI Gothic,MT Extra,"
-	                      "MV Boli,Niagara Engraved,Niagara Solid,NSimSun,Old English Text MT,"
-	                      "Onyx,Palace Script MT,Papyrus,Parchment,Perpetua,Perpetua Titling MT,Playbill,"
-	                      "PMingLiU-ExtB,Poor Richard,Pristina,Ravie,Rockwell,Rockwell Condensed,"
-	                      "Showcard Gothic,SimHei,SimSun,SimSun-ExtB,Snap ITC,Stencil,Sylfaen,Tempus Sans ITC,"
-	                      "Tw Cen MT,Tw Cen MT Condensed,Viner Hand ITC,Vivaldi,Vladimir Script,Wide Latin,"
-	                      "仿宋,华文中宋,华文仿宋,华文宋体,华文彩云,华文新魏,华文楷体,华文琥珀,华文细黑,华文行楷,华文隶书,"
-	                      "宋体,幼圆,微软雅黑,新宋体,方正姚体,方正舒体,楷体,隶书,黑体")
+	return netease_mmh128(
+		"Agency FB,Algerian,Baskerville Old Face,Bauhaus 93,Bell MT,Berlin Sans FB,"
+		"Bernard MT Condensed,Blackadder ITC,Bodoni MT,Bodoni MT Black,"
+		"Bodoni MT Condensed,Bookshelf Symbol 7,Bradley Hand ITC,Broadway,Brush Script MT,"
+		"Californian FB,Calisto MT,Candara,Castellar,Centaur,Chiller,Colonna MT,Constantia,"
+		"Cooper Black,Copperplate Gothic,Copperplate Gothic Light,Corbel,Curlz MT,Ebrima,"
+		"Edwardian Script ITC,Elephant,Engravers MT,FangSong,Felix Titling,Footlight MT Light,"
+		"Forte,Freestyle Script,French Script MT,Gabriola,Gigi,Gill Sans MT,"
+		"Gill Sans MT Condensed,Goudy Old Style,Goudy Stout,Haettenschweiler,"
+		"Harrington,High Tower Text,Imprint MT Shadow,Informal Roman,Jokerman,Juice ITC,"
+		"KaiTi,Kristen ITC,Kunstler Script,Magneto,Maiandra GD,Malgun Gothic,Marlett,"
+		"Matura MT Script Capitals,Meiryo,Meiryo UI,Microsoft Himalaya,Microsoft JhengHei,"
+		"Microsoft New Tai Lue,Microsoft PhagsPa,Microsoft Tai Le,Microsoft YaHei,"
+		"Microsoft Yi Baiti,MingLiU_HKSCS-ExtB,MingLiU-ExtB,Mistral,Modern No. 20,"
+		"Mongolian Baiti,MS Mincho,MS PMincho,MS Reference Specialty,MS UI Gothic,MT Extra,"
+		"MV Boli,Niagara Engraved,Niagara Solid,NSimSun,Old English Text MT,"
+		"Onyx,Palace Script MT,Papyrus,Parchment,Perpetua,Perpetua Titling MT,Playbill,"
+		"PMingLiU-ExtB,Poor Richard,Pristina,Ravie,Rockwell,Rockwell Condensed,"
+		"Showcard Gothic,SimHei,SimSun,SimSun-ExtB,Snap ITC,Stencil,Sylfaen,Tempus Sans ITC,"
+		"Tw Cen MT,Tw Cen MT Condensed,Viner Hand ITC,Vivaldi,Vladimir Script,Wide Latin,"
+		"仿宋,华文中宋,华文仿宋,华文宋体,华文彩云,华文新魏,华文楷体,华文琥珀,华文细黑,华文行楷,华文隶书,"
+		"宋体,幼圆,微软雅黑,新宋体,方正姚体,方正舒体,楷体,隶书,黑体"
+	)
+
 
 @check_eq_after_time_gauge("00fbfdf1d384fc93e658c32156de2275")
 @get_interval
 def evaluation10_99():
-	return netease_mmh128("Google Bahasa Indonesia, Google Bahasa Indonesia, id-ID, 0, 0,"
-	                      "Google Deutsch, Google Deutsch, de-DE, 0, 0,Google Nederlands, Google Nederlands,"
-	                      " nl-NL, 0, 0,Google UK English Female, Google UK English Female, en-GB, 0, 0,"
-	                      "Google UK English Male, Google UK English Male, en-GB, 0, 0,"
-	                      "Google US English, Google US English, en-US, 0, 0,Google español de Estados Unidos,"
-	                      " Google español de Estados Unidos, es-US, 0, 0,Google español, Google español,"
-	                      " es-ES, 0, 0,Google français, Google français, fr-FR, 0, 0,Google italiano,"
-	                      " Google italiano, it-IT, 0, 0,Google polski, Google polski, pl-PL, 0, 0,"
-	                      "Google português do Brasil, Google português do Brasil, pt-BR, 0, 0,"
-	                      "Google русский, Google русский, ru-RU, 0, 0,Google हिन्दी, Google हिन्दी, hi-IN,"
-	                      " 0, 0,Google 國語（臺灣）, Google 國語（臺灣）, zh-TW, 0, 0,"
-	                      "Google 日本語, Google 日本語, ja-JP, 0, 0,Google 한국의, Google 한국의, ko-KR, 0,"
-	                      " 0,Google 普通话（中国大陆）, Google 普通话（中国大陆）, zh-CN, 0, 0,"
-	                      "Google 粤語（香港）, Google 粤語（香港）, zh-HK, 0, 0,"
-	                      "Microsoft Huihui - Chinese (Simplified\, PRC),"
-	                      " Microsoft Huihui - Chinese (Simplified\, PRC), zh-CN, 1, 1,"
-	                      "Microsoft Kangkang - Chinese (Simplified\, PRC),"
-	                      " Microsoft Kangkang - Chinese (Simplified\, PRC),"
-	                      " zh-CN, 1, 0,Microsoft Yaoyao - Chinese (Simplified\, PRC),"
-	                      " Microsoft Yaoyao - Chinese (Simplified\, PRC), zh-CN, 1, 0")
+	return netease_mmh128(
+		"Google Bahasa Indonesia, Google Bahasa Indonesia, id-ID, 0, 0,"
+		"Google Deutsch, Google Deutsch, de-DE, 0, 0,Google Nederlands, Google Nederlands,"
+		" nl-NL, 0, 0,Google UK English Female, Google UK English Female, en-GB, 0, 0,"
+		"Google UK English Male, Google UK English Male, en-GB, 0, 0,"
+		"Google US English, Google US English, en-US, 0, 0,Google español de Estados Unidos,"
+		" Google español de Estados Unidos, es-US, 0, 0,Google español, Google español,"
+		" es-ES, 0, 0,Google français, Google français, fr-FR, 0, 0,Google italiano,"
+		" Google italiano, it-IT, 0, 0,Google polski, Google polski, pl-PL, 0, 0,"
+		"Google português do Brasil, Google português do Brasil, pt-BR, 0, 0,"
+		"Google русский, Google русский, ru-RU, 0, 0,Google हिन्दी, Google हिन्दी, hi-IN,"
+		" 0, 0,Google 國語（臺灣）, Google 國語（臺灣）, zh-TW, 0, 0,"
+		"Google 日本語, Google 日本語, ja-JP, 0, 0,Google 한국의, Google 한국의, ko-KR, 0,"
+		" 0,Google 普通话（中国大陆）, Google 普通话（中国大陆）, zh-CN, 0, 0,"
+		"Google 粤語（香港）, Google 粤語（香港）, zh-HK, 0, 0,"
+		"Microsoft Huihui - Chinese (Simplified\, PRC),"
+		" Microsoft Huihui - Chinese (Simplified\, PRC), zh-CN, 1, 1,"
+		"Microsoft Kangkang - Chinese (Simplified\, PRC),"
+		" Microsoft Kangkang - Chinese (Simplified\, PRC),"
+		" zh-CN, 1, 0,Microsoft Yaoyao - Chinese (Simplified\, PRC),"
+		" Microsoft Yaoyao - Chinese (Simplified\, PRC), zh-CN, 1, 0"
+	)
 
 
 @check_eq_after_time_gauge("7ae481c3234821b6649b434bed036ff0")
 @get_interval
 def evaluation10_999():
-	return netease_mmh128("1111111111111111111111111111111111111111112111111111111111111111111111121111111111111111111112111111111111111111111111111111111111111111111111111111111211111111111111111111111111111111111111111111111111211111111111111111111111111211111111111111111")
-
-
+	return netease_mmh128(
+		"1111111111111111111111111111111111111111112"
+		"111111111111111111111111111121111111111111111111112"
+		"1111111111111111111111111111111111111111111111111111111112"
+		"111111111111111111111111111111111111111111111111112"
+		"11111111111111111111111111211111111111111111"
+	)
 
 
 @check_eq("9ca17ae2e6ffcda170e2e6ee92f05cae8db8aff646a5ef8eb2c85f968b8fb0c742a3afbe8ce652"
@@ -407,6 +437,7 @@ def comp_eval11():
 	                          '"d":"qmPnSxNwNg1BQEUVUAODJaqrkgZmkQt+",'
 	                          '"i":"g0SLqXncyGovdenASqJTRpawdBSz7JTidlVT51mOHSPfwEcYTMVBQwjX7gakBYk7hyBsYgtQnIy8kT'
 	                          '/+WR5mbDgNA3RNsBuwGJlGs0div41LDj2+v9gy2Tcm4wlSSPGfV2I="}')
+
 
 if __name__ == "__main__":
 	# 不计划做差分分析，只比较混淆造成的额外开销。
@@ -426,6 +457,7 @@ if __name__ == "__main__":
 	)
 	del tmp, pmt
 	DEBUG_LOGGER.info(f'{evaluation4()[1]}s, {comp_eval4()[1]}s')
+	DEBUG_LOGGER.info(f'{evaluation4_4()[1]}')
 	# '123' 经 PKCS1.5 标准 pad 后一般成
 	# 0002||79aae568bcdb02fbe48070d3ba9ea6e1e0ecd830e52acaa91afbf1b7cc8147268b3702b7c4996
 	# c57f88c2a9bceca69a538a756e41621c0ee0c12b2325be2845d77da9215dec90195ab31c320302a7bf050b65b5900||313233

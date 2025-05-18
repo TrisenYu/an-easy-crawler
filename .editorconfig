@@ -1,0 +1,5 @@
+root = true
+# configuration for all files
+[*]
+indent_style = tab
+indent_size = 4

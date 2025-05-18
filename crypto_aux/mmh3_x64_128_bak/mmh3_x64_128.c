@@ -12,6 +12,7 @@
 /// License along with this library; if not, see
 /// <https://www.gnu.org/licenses/>.
 
+/// 建议直接写汇编。
 typedef unsigned long long _u64;
 typedef unsigned int _u32;
 typedef unsigned char _u08;

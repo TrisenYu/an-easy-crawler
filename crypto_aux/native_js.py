@@ -3,6 +3,8 @@
 # (c) Author: <kisfg@hotmail.com in 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 #
+# 直接调混淆脚本加解密接口所用。
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
 # License as published by the Free Software Foundation.
@@ -25,24 +27,24 @@ if os_name != 'nt':
 	_Popen = subprocess.Popen
 	subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")  # 不加等着被 execjs 抛出的 gbk 编码失效锤。
 	import execjs
-	subprocess.Popen = _Popen  # 不加等着被操作系统兼容性锤。
+	subprocess.Popen = _Popen  # 不改回来等着被操作系统兼容性锤。
 	del _Popen
 else:
 	subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")
 	import execjs
 
-from utils.logger import DEBUG_LOGGER
-from utils.file_operator import (
-	load_readable_txt_from_file,
+from misc_utils.logger import DEBUG_LOGGER
+from misc_utils.file_operator import (
+	load_txt_via_file_or_die,
 	dir2file
 )
-from utils.json_conf_reader import PRIVATE_CONFIG
+from misc_utils.json_opt.conf_reader import PRIVATE_CONFIG
 
 _curr_dir = op_dirname(__file__)
 _obfus_dir = dir2file(_curr_dir, 'obfus')
 _defus_dir = dir2file(_curr_dir, 'deobfus')
-_fo = lambda s: load_readable_txt_from_file(dir2file(_obfus_dir, s))
-_fd = lambda s: load_readable_txt_from_file(dir2file(_defus_dir, s))
+_fo = lambda s: load_txt_via_file_or_die(dir2file(_obfus_dir, s))
+_fd = lambda s: load_txt_via_file_or_die(dir2file(_defus_dir, s))
 
 try:
 	_crypto_sm4 = execjs.compile(_fo('crypto_sm4.js'))

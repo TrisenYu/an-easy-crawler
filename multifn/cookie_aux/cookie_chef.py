@@ -3,6 +3,7 @@
 # (c) Author <kisfg@hotmail.com 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 #
+# 施工现场。
 # 益言定真，鉴定为转人工 paste 更好。除非前后端都不更新，不然这里不确定性太大，相当不稳定。
 #   感觉过于困难。只能说连同 unk_block2 提供出来作为参考。
 #   后续会尝试先从此处获取 cookie，如果失败，再去文件中读预置的。如果还失败，则不会往后做任何实现并抛出错误。
@@ -19,8 +20,10 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 
-import requests, time, random
+import time, random
 from string import ascii_lowercase
+
+from curl_cffi import requests
 
 from multifn.cookie_aux.session_gen import just_crack_cookie
 from multifn.cookie_aux.unid_gen import crack_vistor_hash
@@ -29,14 +32,14 @@ from multifn.cookie_aux.fp_gen import (
 	crack_fp_payload_gen,
 
 )
-from utils.header import HEADER
-from utils.time_aux import unix_ms, unix_ms_of_next_year
-from crypto.unk_symm_cipher import (
+from misc_utils.header import HEADER
+from misc_utils.time_aux import unix_ms, unix_ms_of_next_year
+from crypto_aux.unk_symm_cipher import (
 	netease_wmjsonp_guid,
 	unk_block2, c2_d, k2_d # 如果暂时不能利用好 unk_block2.unk_block，那就走前端获取混淆脚本执行的路。
 	# 再不行就用户自己扒下来。不可能为了一个网站写个浏览器出来。
 )
-from crypto.native_js import native_wm_nike_gen
+from crypto_aux.native_js import native_wm_nike_gen
 
 def gen_wnmcid() -> str:
 	return "".join(random.choice(ascii_lowercase) for _ in range(6)) + f'.{unix_ms()}.01.0'
@@ -49,19 +52,19 @@ if resp.status_code != 200:
 	print(f'{resp.status_code}: {resp.cookies} {resp.content}')
 	exit(1)
 
+# TODO: 用合理的数据结构取控制下面的结构
 ck = resp.cookies
 ck.set(
 	'JSESSIONID-WYYY', f'{just_crack_cookie()}',
-	domain=f'.{host}', path='/', expires=f'{unix_ms_of_next_year()}'
+	domain=f'.{host}', path='/'
 )
-ck.set('_iuqxldmzr_', '32', domain=f'.{host}', path='/', expires=f'{unix_ms_of_next_year()}')
+ck.set('_iuqxldmzr_', '32', domain=f'.{host}', path='/')
 _hash_val, _nnid_timeval = crack_vistor_hash(ck.__str__()), f'{unix_ms_of_next_year()}'
-ck.set('_ntes_nuid', f'{_hash_val}', domain=f'{host}', path='/', expires=f'{_nnid_timeval}')
-ck.set('_ntes_nnid', f'{_hash_val},{unix_ms()}',
-       domain=f'{host}', path='/', expires=f'{_nnid_timeval}')
-ck.set('WEVNSM', '1.0.0', domain=f'.{host}', path='/', expires=f'{unix_ms_of_next_year()}')
-ck.set('WNMCID', gen_wnmcid(), domain=f'.{host}', path='/', expires=f'{unix_ms_of_next_year()}')
-ck.set('__remember_me', 'true', domain=f'{host}', path='/', expires=f'{unix_ms_of_next_year()}')
+ck.set('_ntes_nuid', f'{_hash_val}', domain=f'{host}', path='/')
+ck.set('_ntes_nnid', f'{_hash_val},{unix_ms()}', domain=f'{host}', path='/')
+ck.set('WEVNSM', '1.0.0', domain=f'.{host}', path='/')
+ck.set('WNMCID', gen_wnmcid(), domain=f'.{host}', path='/')
+ck.set('__remember_me', 'true', domain=f'{host}', path='/')
 resp = requests.get(f'https://{host}', headers=HEADER, cookies=ck)
 
 if resp.status_code != 200:
@@ -108,10 +111,10 @@ try:
 	wm_tid, wm_did = wm[3].strip('"'), wm[4].strip('"')
 	wm_ni = wm[5].strip('"')
 	_curr = unix_ms_of_next_year()
-	ck.set('WM_NI', wm_ni, domain=f'{host}', path='/', expires=f'{_curr}')
-	ck.set('WM_TID', wm_tid, domain=f'{host}', path='/', expires=f'{_curr}')
+	ck.set('WM_NI', wm_ni, domain=f'{host}', path='/')
+	ck.set('WM_TID', wm_tid, domain=f'{host}', path='/')
 	ck.set('WM_NIKE', native_wm_nike_gen(f'{"{"}"r":1,"d":"{wm_did}","i":"{wm_ni}"{"}"}'),
-	       domain=f'{host}', path='/', expires=f'{_curr}')
+	       domain=f'{host}', path='/')
 except Exception as e:
 	print(e)
 	exit(1)
@@ -182,8 +185,7 @@ _240,240_240_240,0_0_0,0_0_0,0_0_0,255_255_255,255_255_255,255_255_255,255_255_2
 a4c622e1
 \x00\x05\x00 
  8344a875d3fb4ad4820a67ad24a60738
- \x03\x88\x00\x10\xf8\xb5&\x8cH\xf7\xc8r\xc3M\x1dQq\xee\x1fX\x02\x01\x00\x0f\xe7\xbd\x91\xe6\x98\x93\xe4\xba\x91\xe9\x9f\xb3\xe4\xb9\x90\x00\x03\x00\x00\
-x03"\x00\x08
+ \x03\x88\x00\x10\xf8\xb5&\x8cH\xf7\xc8r\xc3M\x1dQq\xee\x1fX\x02\x01\x00\x0f\xe7\xbd\x91\xe6\x98\x93\xe4\xba\x91\xe9\x9f\xb3\xe4\xb9\x90\x00\x03\x00\x00\x03"\x00\x08
 e5cd4de6
 \x00\xc9\x00\x05
 zh-CN

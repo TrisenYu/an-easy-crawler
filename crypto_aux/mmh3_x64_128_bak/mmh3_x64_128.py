@@ -97,27 +97,6 @@ def mmh3_x64_128(key: str = '', seed: int = 0) -> str:
 	return f'{h1:08x}{h2:08x}'
 
 
-# try:
-# 	from ctypes import cdll, Structure, c_ulonglong
-# 	import os
-# 	if os.name == 'nt':
-# 		# mmh3_x64_128_win.dll
-# 		p = os.path.join(os.path.dirname(__file__), 'mmh3_x64_128_win.dll')
-# 	else:
-# 		p = os.path.join(os.path.dirname(__file__), 'mmh3_x64_128.so')
-# 	dll = cdll.LoadLibrary(p)
-# 	class x128(Structure):
-# 		_fields_ = [("h1", c_ulonglong),
-# 					("h2", c_ulonglong)]
-# 	dll.mmh3_x64_128.restype = x128
-# 	# 直接在这里用字节串，避免错误。
-# 	h = dll.mmh3_x64_128(b"PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf", 394, 0)
-# 	print(f'{h.h1:08x}{h.h2:08x}')
-# except Exception as e:
-# 	print(e)
-# 	pass
-
-
 if __name__ == "__main__":
 	print(mmh3_x64_128("PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 	                   "Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"

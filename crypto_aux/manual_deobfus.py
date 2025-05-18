@@ -22,8 +22,8 @@
 """
 import subprocess
 from functools import partial
-
-import mmh3, math, os
+import math, os
+import hashlib, base64, random, binascii
 
 if os.name == 'nt':
 	_Popen = subprocess.Popen
@@ -54,9 +54,9 @@ else:
 	from Crypto.Util.Padding import pad
 	from Crypto.Util.number import bytes_to_long
 
-import hashlib, base64, random, binascii
-from gmssl import sm4
 
+import mmh3
+from gmssl import sm4
 
 # <简简单单> 打个 JavaScript 的断点。
 _rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17' \
@@ -106,7 +106,7 @@ def dilphabet_16_str_gen() -> str:
 	....return c
 	}
 
-	- function return val: 伪随机生成的16个字节
+	- function return val: 伪随机生成的16个字符[0-9A-Za-z]
 	"""
 	const_base_string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	ans = ''
@@ -117,6 +117,7 @@ def dilphabet_16_str_gen() -> str:
 
 
 def dilphabet_32_str_gen() -> str:
+	""" 伪随机生成32个字符[0-9A-Za-z] """
 	return dilphabet_16_str_gen() + dilphabet_16_str_gen()
 
 
@@ -196,7 +197,6 @@ def netease_mmh32(content: str, sed: int=31) -> str:
 
 def netease_mmh128(payload: str) -> str:
 	_tmp = mmh3.mmh3_x64_128_utupledigest(payload.encode('iso-8859-1'), 0)
-	# res = _tmp.to_bytes(16, byteorder='little', signed=False).hex()
 	return f'{_tmp[0]:08x}{_tmp[1]:08x}'
 
 
@@ -236,7 +236,7 @@ if __name__ == '__main__':
 	# import sys
 	# print(sys.getsizeof(crypto_rsa), sys.getsizeof(crypto_rsa2), sys.getsizeof(crypto_sm4))
 	# 疑似指针，三者均为 56 字节
-	from utils.json_conf_reader import PRIVATE_CONFIG
+	from misc_utils.json_opt.conf_reader import PRIVATE_CONFIG
 	csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["user1"]["csrf_token"]}"{"}"}'
 	# 应由 dilphabet_16_str_gen 生成
 

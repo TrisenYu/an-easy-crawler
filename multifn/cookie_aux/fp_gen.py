@@ -1,4 +1,4 @@
-from crypto.unk_symm_cipher import unk_block2
+from crypto_aux.unk_symm_cipher import unk_block2
 import random
 
 def crack_fp_payload_gen(assigned: int = 636) -> str:

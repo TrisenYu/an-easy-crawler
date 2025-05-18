@@ -14,40 +14,31 @@
 #
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
-from utils.logger import DEBUG_LOGGER
-from functools import wraps
+from misc_utils.logger import DEBUG_LOGGER
 
 
-def seize_err_if_any(fn_with_ret_val):
-	@wraps(fn_with_ret_val)
-	def wrapper(*args, **kwargs):
-		try:
-			return fn_with_ret_val(*args, **kwargs)
-		except Exception as e:
-			DEBUG_LOGGER.error(f'{e}')
+def seize_err_if_any(logger_enable: bool = True):
+	def dec(fn_with_ret_val):
+		def wrapper(*args, **kwargs):
+			try:
+				return fn_with_ret_val(*args, **kwargs)
+			except Exception as e:
+				if logger_enable:
+					DEBUG_LOGGER.error(f'{e}')
 			return None
+		return wrapper
+	return dec
 
-	return wrapper
 
-
-def seize_quietly(fn_with_ret_val):
-	@wraps(fn_with_ret_val)
-	def wrapper(*args, **kwargs):
-		try:
-			return fn_with_ret_val(*args, **kwargs)
-		finally:
-			# if success, won't execute this.
+def die_if_err(logger_enable: bool = True):
+	def dec(fn):
+		def error_dumper(*args, **kwargs):
+			try:
+				return fn(*args, **kwargs)
+			except Exception as e:
+				if logger_enable:
+					DEBUG_LOGGER.critical(f'{e}')
+				exit(1)
 			return None
-	return wrapper
-
-
-def die_if_err(fn):
-	@wraps(fn)
-	def error_dumper(*args, **kwargs):
-		try:
-			return fn(*args, **kwargs)
-		except Exception as e:
-			DEBUG_LOGGER.critical(f'{e}')
-			exit(1)
-
-	return error_dumper
+		return error_dumper
+	return dec

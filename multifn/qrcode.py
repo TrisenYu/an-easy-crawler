@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
-# (c) Author: <kisfg@hotmail.com in 2024,2025>
+# (c) Author: <kisfg@hotmail.com in 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 #
 # This program is free software; you can redistribute it and/or

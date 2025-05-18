@@ -2,13 +2,14 @@
 # (c) author: <kisfg@hotmail.com 2025>
 
 CC=gcc
-flags=-shared -m64
+flags=-shared -m64 -O3
+target=mmh3_x64_128_win
 ifeq ($(OS),Windows_NT)
-	target=mmh3_x64_128_win.dll
+	target+=.dll
     clang_test=-$(shell clang --version)
 else
-	target=mmh3_x64_128.so
-    clang_test=$(shell clang --version 2>&1)
+	target+=.so
+    clang_test=$(shell clang --version &> /dev/null)
 endif
 
 ifdef clang_test

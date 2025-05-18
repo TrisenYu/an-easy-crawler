@@ -1,7 +1,7 @@
 {
     "npm-path": "win-PATH:\\To\\YOUR\\npm\\node_modules; unix-path:,let's say, /usr/local/nodejs/node_modules/;",
     "user1": {
-        "cookie": "",
+        "cookie": "all field must be defined as `str` otherwise python will failed.",
         "user-id": "1",
         "list-id": "1",
         "email": "your-email",

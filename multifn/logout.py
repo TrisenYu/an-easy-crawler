@@ -15,59 +15,45 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 """
-登出操作。
+	登出操作。
 """
-from utils.json_conf_reader import (
+from misc_utils.json_opt.conf_reader import (
 	PRIVATE_CONFIG,
 	attempt_modify_json
 )
-from crypto.manual_deobfuscation import netease_encryptor
-from utils.args_loader import PARSER
-from utils.logger import DEBUG_LOGGER
-from requests import post as rep
+from crypto_aux.manual_deobfus import netease_encryptor
+from misc_utils.logger import DEBUG_LOGGER
+from misc_utils.header import HEADER, BROWSER
+from curl_cffi import requests
 
-args = PARSER.parse_args()
 
-token = PRIVATE_CONFIG[args.exit_user]['csrf_token']
-csrf_token = f'?csrf_token={token}'
-suffix = '/weapi/logout' + csrf_token
 host = 'music.163.com'
 prefix = f'https://{host}'
-header = {
-	# ':authority:'       : host,
-	# ':method:'          : 'POST',
-	# ':path:'            : suffix,
-	# ':scheme:'          : 'https',
-	'accept'            : '*/*',
-	'accept-language'   : 'zh-CN,zh-TW;q=0.9,zh;q=0.8,th;q=0.7',
-	'cache-control'     : 'no-cache',
-	'content-length'    : '410',
-	'content-type'      : 'application/x-www-form-urlencoded',
-	'cookie'            : PRIVATE_CONFIG[args.exit_user]['cookie'],
-	'nm-gcore-status'   : '1',
-	'origin'            : prefix,
-	"pragma"            : 'no-cache',
-	'priority'          : "u=1, i",
-	"referer"           : f"{prefix}/",
-	"sec-ch-ua"         : '"Not A(Brand";v="8", "Chromium";v="132", "Google Chrome";v="132"',
-	"sec-ch-ua-mobile"  : '?0',
-	"sec-ch-ua-platform": '"Windows"',
-	"sec-fetch-dest"    : "empty",
-	"sec-fetch-mode"    : "cors",
-	"sec-fetch-site"    : "same-origin",
-	"user-agent"        : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-	                      "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
-}
+suffix = f'/weapi/logout?csrf_token='
+
+HEADER['Referer'] = f'{prefix}/'
+HEADER['Origin'] = prefix
+HEADER['Content-Type'] = 'application/x-www-form-urlencoded'
 
 
-def user_logout(conf_file: str = 'config.json') -> None:
+def user_logout(
+	dummy: str,
+	token: str,
+	conf_file: str = 'config.json'
+) -> None:
 	"""
 	发请求到后端使之删除 cookie 和 token。同时也修改本地的 json 配置。
-	:param conf_file: 配置文件。给个默认值。
+
+	:param dummy: 登出的目标账户在 `config.json` 中的对应字符串键值。
+	:param token: 目标账户的 token。
+	:param conf_file: 配置文件。默认值给到 config.json。
 	"""
-	global token, header
+	global prefix, suffix
 	payload = f'{"{"}"csrf_token":"{token}"{"}"}'
-	resp = rep(prefix + suffix, headers=header, data=netease_encryptor(payload)[0])
+	resp = requests.post(
+		prefix + suffix + token,
+		data=netease_encryptor(payload)[0],
+		headers=HEADER, impersonate=BROWSER)
 	# 做完以后 token 作废，相应地应该删除所提供的token
 	if resp.status_code != 200:
 		DEBUG_LOGGER.error(f'{resp.status_code}, {resp.text}')
@@ -77,8 +63,8 @@ def user_logout(conf_file: str = 'config.json') -> None:
 
 		attempt_modify_json(
 			conf_file,
-			{   # 置空就行
-				args.exit_user: {
+			{
+				dummy: {
 					'csrf_token': '',
 					'cookie': ''
 				}
@@ -86,5 +72,14 @@ def user_logout(conf_file: str = 'config.json') -> None:
 		)
 
 if __name__ == "__main__":
-	user_logout()
+	from misc_utils.args_loader import PARSER
+	args = PARSER.parse_args()
+	victim = args.exit_user
+	victim_conf = PRIVATE_CONFIG[victim]
+	del args
+
+	tk = victim_conf['csrf_token']
+	HEADER['Cookie'] = victim_conf['cookie']
+
+	user_logout(victim, tk)
 	# TODO: 退了，但是如退。看样子好像要重新逆了。

@@ -17,7 +17,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from base64 import b64encode
-from utils.wrappers.err_wrap import seize_err_if_any
+from misc_utils.wrappers.err_wrap import seize_err_if_any
 
 """
 canvas 生成过程：
@@ -35,7 +35,7 @@ canvas 生成过程：
 """
 
 
-@seize_err_if_any
+@seize_err_if_any()
 def gen_fp_png_base64str(
 	rect_pos: tuple[int, int, int, int] = (125, 1, 187, 20),
 	rect_col: tuple[int, int, int] = (0xFF, 0x66, 0x00),

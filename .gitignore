@@ -6,20 +6,20 @@
 config.json
 analysis.txt
 wtf.txt
+
 static_assets/bot_hits.log
-multifn/login.py
+static_assets/bot_refs.log
+static_assets/output/*
+refs/*
 tmp/
 tmp*
-
 
 # 代码编辑工具乱七八糟的东西
 /workspace.xml
 .idea
 .vscode
 .dist
+.pytest_cache
 /shelf/
 __pycache__
-
-# 排除output内的内容而不排除output.
-static_assets/output/*
-!static_assets/output/
+diff_tests/_trial_temp/

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 import time, random
-from crypto.manual_deobfuscation import netease_md5
+from crypto_aux.manual_deobfus import netease_md5
 
 def _get_val(v: str) -> str:
 	"""

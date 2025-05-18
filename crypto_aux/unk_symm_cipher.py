@@ -60,7 +60,6 @@ _s_box_xc = [
 ]
 
 _k1 = "IUoKOfRm31Ck\e/EdVbz6XNHt5W+24P9i7Gc80xuFshSyYnDgZvljaABwrTQpJqM"  # 缺 L
-
 # TODO: k2, c2 这两个换得很频繁，在后端架构没有太大变动的情况下，需要通过自动化的方法来获取。否则需要一直人工干预更新。
 k2_1 = "icB3gaKm8J4fkrF9.2ZI651Wqw+xCDLMRbQYotu0/dXzjT7hnSspGyvleOVEUHNA" # 缺 P
 k2_2 = "NiYht0P.fcLyE8RH2dZXj1GCMFpWqvlAQT/4sw7amebBk6nUxKIJr5zuOV+SogD9" # 缺 3
@@ -160,7 +159,11 @@ def unk_block(inp: str, assign: list[int] = None) -> str:
 	return custom_encode(y, _k1, 'L')
 
 
-def unk_block2(inp: str, assign: list[int] = None, ck: str = c2_3, enck: str = k2_3, padk: str = 'l') -> str:
+def unk_block2(
+	inp: str, assign: list[int] = None,
+	ck: str = c2_3, enck: str = k2_3,
+	padk: str = 'l'
+) -> str:
 	""" watchman.js ? """
 	if assign is None or len(assign) < 4:
 		y = [random.randint(0, 255) for _ in range(4)]

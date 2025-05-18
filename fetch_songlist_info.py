@@ -24,55 +24,46 @@
 	- login_dummy: 傀儡账号。其中 token 和 cookie 必要。
 	- songlist_author: 目标歌单。list-id 必要，且目前 backup-dir 也必要。user-id 找到了可以填，找不到最好留成 ''。
 """
-import random, time, requests
+import random
+import threading
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
-
-from utils.json_conf_reader import (
-	PRIVATE_CONFIG,
-	load_json_from_str,
-	json2dict_via_str_or_die
-)
-from utils.args_loader import PARSER
-from utils.logger import DEBUG_LOGGER
-from utils.header import HEADER
-from utils.file_operator import (
+from typing import Optional
+from curl_cffi import requests
+from misc_utils.file_operator import (
 	write_in_given_mode,
-	append_from_read_only_file,
-	remove_file,
+	append_from_ro_file,
+	seek_to_remove_file,
 	dir2file
 )
-from utils.time_aux import unix_ts_to_time
+from misc_utils.header import HEADER, BROWSER
+from misc_utils.json_opt.conf_reader import (
+	PRIVATE_CONFIG,
+	load_json_from_str,
+	deserialize_json_or_die
+)
+from misc_utils.json_opt.resp_types import (
+	SongsResp,
+	PlaylistDetail,
+	PlaylistTrackInfo
+)
+from misc_utils.logger import DEBUG_LOGGER
+from misc_utils.time_aux import (
+	unix_ts_to_time,
+	curr_time_formatter
+)
 
-
-args = PARSER.parse_args()
-del PARSER # 鉴定为过河拆桥。不过有点担心执行隔离有没有做。
 host = "music.163.com"
-
-csrf_token = PRIVATE_CONFIG[args.login_dummy]["csrf_token"]
-assert len(csrf_token) == 32
 _https = 'https://'
 interface_prefix = f'{_https}interface.{host}'
-songs_list_api = f'/api/v6/playlist/detail?id='
+songlist_api = f'/api/v6/playlist/detail?id='
 song_detail_api = f'/api/song/detail?ids='
-target_song_list = f"{interface_prefix}{songs_list_api}{PRIVATE_CONFIG[args.songlist_author]['list-id']}"
-target_song_prefix = f"{interface_prefix}{song_detail_api}"
+target_songs_api = f"{interface_prefix}{song_detail_api}"
 
-_cookie = PRIVATE_CONFIG[args.login_dummy]["cookie"]
-assert f'__csrf={csrf_token}' in _cookie
-
-HEADER["Cookie"] = _cookie
-HEADER["Host"] = host
-HEADER["Referer"] = f"{_https}{host}/"
-HEADER["Connection"] = "keep-alive"
-
-work_size = args.threadpool_size
-assert 1 <= work_size # 不设上限，但至少要有。
 
 def query_song_detail_in_range(
 	target_dir: str,
 	l: int, r: int,
-	play_list: list
+	play_list: list[PlaylistTrackInfo]
 ) -> None:
 	"""
 	>>> {
@@ -98,58 +89,65 @@ def query_song_detail_in_range(
 	:param play_list: 歌单内歌曲 id 构成的列表
 	:return: None
 	"""
-	global target_song_prefix
-	tmp_file = f'{l}-{r}.tmp'
-	time.sleep(random.randint(1, 10))
-	# 搞不懂为什么后端要用 get 而不用 post
+	global target_songs_api
+	threading.Event().wait(random.randint(1, 10))
 	try:
-		res = requests.get(f'{target_song_prefix}{[play_list[i]["id"] for i in range(l, r)]}', headers=HEADER)
-		songs_detail = load_json_from_str(res.text)
+		# 搞不懂为什么后端要用 get 而不用 post
+		res = requests.get(
+			f'{target_songs_api}{[play_list[i]["id"] for i in range(l, r)]}',
+			headers=HEADER, impersonate=BROWSER
+		)
+		songs_detail: Optional[SongsResp] = load_json_from_str(res.text)
 	except Exception as e:
 		DEBUG_LOGGER.log(f'Catch an Exception in range [{l}, {r}]: {e}')
 		songs_detail = None
 
+	tmp_file = f'{l}-{r}.tmp'
 	with open(dir2file(target_dir, tmp_file), 'w', encoding='utf-8') as fd:
 		if songs_detail is None:
 			DEBUG_LOGGER.log(f'Error happened before writing into {tmp_file}')
 			fd.write(f'\n# Failed to fetch songs which in the range of {l}-{r}.\n\n')
 			return
 
-		# 格式对照 ./human_readable.json 来操作。
 		for a_song in songs_detail['songs']:
-			name, album_name = a_song['name'], a_song['album']['name']
+			song_name, album_name = a_song['name'], a_song['album']['name']
 			author_name = [_author['name'] for _author in a_song['artists']]
 			duration = a_song['duration']
-			minutes, millisec = duration // 60000, duration % 1000
-			sec = (duration - minutes * 60000 - millisec) % 1000
-			fd.write(f'\t{name}--{minutes}:{sec:02d}.{millisec:03d}--{author_name}--{album_name}\n')
+			mins, ms = duration // 60_000, duration % 1_000
+			sec = (duration - mins * 60_000 - ms) % 1_000
+			fd.write(
+				f'\t{song_name}--{mins}:{sec:02d}.{ms:03d}--'
+				f'{author_name}--{album_name}\n'
+			)
 
 
 def songs_tasks_distributor(
-	task_list: list,
+	workers: int,
+	task_list: list[PlaylistTrackInfo],
 	split_size: int = 100,
 	output_dir: str = '',
 	fn=query_song_detail_in_range
 ) -> list:
 	"""
+	:param workers: 线程池大小
 	:param output_dir: 目标目录
 	:param task_list:  待爬取的任务
 	:param split_size: 分片大小
 	:param fn: 待子线程执行的函数。函数格式应为 (int, int, list) -> None。
 	:return: 并发执行前计算得到的任务列表。
 	"""
-	global work_size
 	lena = len(task_list)
 	other, reminder = lena // split_size, lena % split_size
 	tasks_queue = [(_ * split_size, (_ + 1) * split_size) for _ in range(0, other)]
 	tasks_queue.append((other * split_size, (other * split_size) + reminder))
-	with ThreadPoolExecutor(max_workers=work_size) as per_mission:
+	with ThreadPoolExecutor(max_workers=workers) as per_mission:
 		for choice in tasks_queue:
 			per_mission.submit(fn, output_dir, choice[0], choice[1], task_list)
 	return tasks_queue
 
 
 def songlist_info_gen(
+	workers: int,
 	victimName: str = "user1",
 	output_dir: str = '',
 	split_size: int = 100
@@ -182,19 +180,23 @@ def songlist_info_gen(
 
 	只需传 id 参数就可以获取到歌单内的所有歌曲。
 
+	:param workers: 线程池大小
 	:param victimName: 目标用户。以抽取对应json内的歌单id。默认 `user1`。
 	:param output_dir: 提供给输出文件的文件夹。
 	:param split_size: 分片大小。默认 100。
 
 	- [1]: 2025/02/08: core_70d0eefb570184a2b62021346460be95.js，反正理解为 core.js。
 	"""
-	global target_song_list
-	def underscore_time() -> str:
-		""" 目前只在此函数内实现。日后如有需求，将定义移至别处。"""
-		return datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")[:-3]
+	global interface_prefix, songlist_api
 
+	target_songlist = f"{interface_prefix}{songlist_api}" \
+	                  f"{PRIVATE_CONFIG[victimName]['list-id']}"
 	try:
-		response = requests.get(target_song_list, headers=HEADER)
+		response = requests.get(
+			target_songlist,
+			headers=HEADER,
+			impersonate=BROWSER
+		)
 	except Exception as e:
 		DEBUG_LOGGER.info(f'fatal error while fetching songlist: {e}')
 		return
@@ -203,19 +205,19 @@ def songlist_info_gen(
 		exit(1)
 
 	serializer = response.text
-	# 留一个
-	tmp = json2dict_via_str_or_die(serializer, 'playlist')
-	with open(dir2file(output_dir, f'playlist_info_at_{underscore_time()}.txt'),
-              'w+', encoding='utf-8') as fd:
+	# 尝试反序列化为 TypedDict 对象
+	tmp: PlaylistDetail = deserialize_json_or_die(serializer, 'playlist')
+	playlist_rec_path = dir2file(output_dir, f'playlist_info_at_{curr_time_formatter()}.json')
+	with open(playlist_rec_path, 'w+', encoding='utf-8') as fd:
 		fd.write(serializer)
 
-	file_target = dir2file(output_dir, f'songs_list_at_{underscore_time()}.txt')
+	final_file = dir2file(output_dir, f'songs_list_at_{curr_time_formatter()}.txt')
 	write_in_given_mode(
-		path=file_target, mode='w',
+		path=final_file,
+		mode='w',
 		# 注意到 updateTime, createTime 精度到了 ms 。
-		payload=f'# [UPDATE AT {unix_ts_to_time(tmp["updateTime"] / 1000.)}]\n'
-		        f'# birth: {unix_ts_to_time(tmp["createTime"] / 1000.)}\n'
-		        f'# author-id: {PRIVATE_CONFIG[victimName]["user-id"]}\n'
+		payload=f'# [UPDATE AT {unix_ts_to_time(tmp["updateTime"] // 1_000)}]\n'
+		        f'# birth: {unix_ts_to_time(tmp["createTime"] // 1_000)}\n'
 		        f'# songs-list-id: {tmp["id"]}\n'
 		        f'# comment-thread-id: {tmp["commentThreadId"]}\n'
 		        f'# trackCount: {tmp["trackCount"]}\n'
@@ -226,12 +228,33 @@ def songlist_info_gen(
 	)
 	playlist = tmp['trackIds']
 	del tmp
-	for seq in songs_tasks_distributor(playlist, split_size, output_dir):
+	for seq in songs_tasks_distributor(workers, playlist, split_size, output_dir):
 		src_tmp_file = dir2file(output_dir, f'{seq[0]}-{seq[1]}.tmp')
-		append_from_read_only_file(src_tmp_file, file_target)
-		remove_file(src_tmp_file)
+		append_from_ro_file(src_tmp_file, final_file)
+		seek_to_remove_file(src_tmp_file)
 
 
 if __name__ == '__main__':
-	victim = args.songlist_author
-	songlist_info_gen(victim, PRIVATE_CONFIG[victim]['backup-dir'])
+	from misc_utils.args_loader import PARSER
+
+	_args = PARSER.parse_args()
+	del PARSER
+
+	victim: str = _args.songlist_author
+	dummy: str = _args.login_dummy
+	work_size = _args.threadpool_size
+	assert 1 <= work_size  # 不设上限，但至少要有。
+	del _args
+
+	dummy_conf: dict[str, str] = PRIVATE_CONFIG[dummy]
+	victim_conf: dict[str, str] = PRIVATE_CONFIG[victim]
+
+	csrf_token, _cookie = dummy_conf["csrf_token"], dummy_conf["cookie"]
+	assert len(csrf_token) == 32 and f'__csrf={csrf_token}' in _cookie
+
+	HEADER["Cookie"] = _cookie
+	HEADER["Host"] = host
+	HEADER["Referer"] = f"{_https}{host}/"
+	HEADER["Connection"] = "keep-alive"
+
+	songlist_info_gen(work_size, victim, victim_conf['backup-dir'])

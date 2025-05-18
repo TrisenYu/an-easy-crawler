@@ -1,7 +1,7 @@
 # Let's try to **DEPRECATE** this.
 from typing import Union
 
-from crypto.unk_symm_cipher import netease_wmjsonp_guid
+from crypto_aux.unk_symm_cipher import netease_wmjsonp_guid
 import time
 from urllib import parse
 import struct

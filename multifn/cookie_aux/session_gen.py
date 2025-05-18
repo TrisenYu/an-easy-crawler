@@ -17,11 +17,11 @@
 import time
 import random
 
-from crypto.manual_deobfuscation import (
+from crypto_aux.manual_deobfus import (
 	netease_crc32,
 	netease_mmh32_checksum
 )
-from crypto.unk_symm_cipher import unk_block
+from crypto_aux.unk_symm_cipher import unk_block
 
 
 _inject_str = "aZbY0cXdW1eVf2Ug3Th4SiR5jQk6PlO7mNn8MoL9pKqJrIsHtGuFvEwDxCyBzA"

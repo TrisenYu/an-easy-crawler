@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
-from utils.logger import DEBUG_LOGGER
+from misc_utils.logger import DEBUG_LOGGER
 
 
 def check_eq_after_time_gauge(payload):

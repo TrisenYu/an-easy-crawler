@@ -3,6 +3,8 @@
 # (c) Author: <kisfg@hotmail.com in 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 #
+# 仅供参考。费时费计算，算没有意义的指纹。
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
 # License as published by the Free Software Foundation.
@@ -18,7 +20,7 @@ import re, random, time
 from fake_useragent import UserAgent
 
 from multifn.cookie_aux.draw_canvas import gen_fp_png_base64str
-from crypto.manual_deobfuscation import (
+from crypto_aux.manual_deobfus import (
 	netease_mmh32,
 	netease_crc32
 )
