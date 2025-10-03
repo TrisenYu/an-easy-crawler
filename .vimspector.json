@@ -1,0 +1,27 @@
+{
+	"configurations": {
+		"py:launch": {
+			"adapter": "debugpy",
+			"filetypes": ["python"],
+			"default": true,
+			"configuration": {
+				"request": "launch",
+				"python": "./.venv/bin/python",
+				"cwd": "${workspaceFolder}",
+				"module": "misc_utils.opts.db.sqlite",
+				"stopOnEntry": true,
+				"debugOptions": [],
+				"args": [
+					"*${ProgramArgs}"
+				]
+			},
+			"breakpoints": {
+				"exception": {
+					"raised": "N",
+					"uncaught": "",
+					"userUnhandled": ""
+				}
+			}
+		}
+	}
+}

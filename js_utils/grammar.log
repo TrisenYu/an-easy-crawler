@@ -1,0 +1,302 @@
+expr -> asg EA
+EA -> , asg EA
+EA -> ''
+asg -> lhs asg_op asg
+asg -> cond_expr
+asg -> yield_expr
+asg -> arrow_expr
+asg -> async_arrow_expr
+arrow_expr -> arrow_id => arrow_body
+arrow_id -> bind_id
+arrow_id -> arrow_paren
+arrow_paren -> ( arrow_close
+arrow_close -> )
+arrow_close -> expr arrow_fin
+arrow_close -> arrow_fina
+arrow_fin -> , arrow_fina
+arrow_fin -> )
+arrow_fina -> )
+arrow_fina -> ... arrow_fina_midd )
+arrow_fina_midd -> bind_id
+arrow_fina_midd -> bind_patt
+async_arrow_expr -> async bind_id => arrow_body
+async_arrow_expr -> async ( form_params ) => arrow_body
+arrow_body -> { <stmt_list> }
+arrow_body -> asg
+bind_id -> id
+asg_op -> +=
+asg_op -> -=
+asg_op -> *=
+asg_op -> /=
+asg_op -> %=
+asg_op -> &=
+asg_op -> |=
+asg_op -> ^=
+asg_op -> &&=
+asg_op -> **=
+asg_op -> ||=
+asg_op -> ??=
+asg_op -> >>=
+asg_op -> <<=
+asg_op -> >>>=
+yield_expr -> yield yield_suff
+yield_suff -> asg
+yield_suff -> * asg
+yield_suff -> ''
+cond_expr -> short_expr cond_choice
+cond_choice -> ''
+cond_choice -> ? asg : asg
+short_expr -> lor_expr
+short_expr -> coal_expr
+coal_expr -> orr_expr COR
+COR -> ?? orr_expr COR
+COR -> ''
+lor_expr -> lnd_expr ORND
+ORND -> || lnd_expr ORND
+ORND -> ''
+lnd_expr -> orr_expr NDOR
+NDOR -> && orr_expr NDOR
+NDOR -> ''
+orr_expr -> xor_expr ORXO
+ORXO -> | xor_expr ORXO
+ORXO -> ''
+xor_expr -> and_expr XOND
+XOND -> ^ and_expr XOND
+XOND -> ''
+and_expr -> eq_expr NDEQ
+NDEQ -> & eq_expr NDEQ
+eq_ops -> ==
+eq_ops -> !=
+eq_ops -> ===
+eq_ops -> !===
+eq_expr -> rel_expr EQREL
+EQREL -> eq_ops rel_expr EQREL
+EQREL -> ''
+rel_expr -> shf_expr RELSHF
+rel_ops -> <
+rel_ops -> >
+rel_ops -> <=
+rel_ops -> >=
+rel_ops -> instanceof
+rel_ops -> in
+rel_expr -> pemID in shf_expr
+RELSHF -> rel_ops shf_expr RELSHF
+RELSHF -> ''
+shf_expr -> add_expr SHFADD
+shf_ops -> >>
+shf_ops -> <<
+shf_ops -> >>>
+SHFADD -> shf_ops add_expr SHFADD
+SHFADD -> ''
+add_ops -> +
+add_ops -> -
+add_expr -> mul_expr ADDMUL
+ADDMUL -> add_ops mul_expr ADDMUL
+ADDMUL -> ''
+mul_ops -> *
+mul_ops -> /
+mul_ops -> %
+mul_expr -> exp_expr MULEXP
+MULEXP -> mul_ops exp_expr MULEXP
+MULEXP -> ''
+exp_expr -> una_expr
+exp_expr -> upd_expr ** exp_expr 
+upd_ops -> ++
+upd_ops -> --
+upd_expr_claz -> upd_ops una_ops_claz upd_expr_claz
+upd_expr_claz -> ''
+upd_expr -> upd_expr_claz lhs upd_ops
+una_ops -> delete
+una_ops -> void
+una_ops -> typeof
+una_ops -> add_ops
+una_ops -> ~
+una_ops -> !
+una_ops -> await
+una_ops_claz -> una_ops una_ops_claz
+una_ops_claz -> una_ops
+una_expr -> una_ops_claz upd_expr_claz lhs upd_ops 
+lhs -> new_expr
+lhs -> call_expr
+lhs -> opt_expr
+new_expr -> mem_expr
+new_expr -> new new_expr
+invoke_params -> args
+invoke_params -> [ expr ]
+invoke_params -> . id
+invoke_params -> . pemID
+invoke_params -> tmpl_literal
+call_expr -> cover_call_expr_and_async_arrow CALLINV
+call_expr -> super_call CALLINV
+call_expr -> import_call CALLINV
+cover_call_expr_and_async_arrow -> mem_expr args
+super_call -> super args CALLINV
+CALLINV -> invoke_params CALLINV
+CALLINV -> ''
+opt_expr -> mem_expr OPTC
+opt_expr -> call_expr OPTC
+OPTC -> opt_chain OPTC
+OPTC -> ''
+opt_chain -> ?. invoke_params CALLINV
+args -> ( args_tail
+args_tail -> )
+args_tail -> args_list args_fin
+args_fin -> )
+args_fin -> , )
+args_elem -> asg
+args_elem -> ... asg
+args_list -> args_elem ARGS_RE
+ARGS_RE -> , args_elem ARGS_RE
+ARGS_RE -> ''
+pemID -> # id
+mem_prefix -> prim_expr
+mem_prefix -> super_proper
+mem_prefix -> meta_proper
+mem_expr -> mem_prefix MEM_RE
+NEW -> new new_next
+new_next -> new new_next
+new_next -> ''
+ARG -> args ARG
+ARG -> args
+mem_expr -> NEW mem_prefix MEM_RE ARG
+MEM_RER -> . id
+MEM_RER -> . pemID
+MEM_RER -> [ expr ]
+MEM_RE -> MEM_RER MEM_RE
+MEM_RE -> ''
+super_proper -> super [ expr ]
+super_proper -> super . id
+meta_proper -> new . target
+meta_proper -> import . meta
+import_call -> import ( asg import_call_tail
+import_call_tail -> )
+import_call_tail -> , import_call_fin
+import_call_fin -> asg import_call_fina
+import_call_fina -> )
+import_call_fina -> , )
+prim_expr -> this
+prim_expr -> number
+prim_expr -> string
+prim_expr -> regex
+prim_expr -> id
+prim_expr -> arr_reps
+prim_expr -> obj_reps
+prim_expr -> arrow_paren
+prim_expr -> tmpl_literal
+prim_expr -> class_expr
+prim_expr -> func
+prim_expr -> async func
+func_tail -> ( form_params ) { <stmt_list> }
+func -> function func_ty_judger
+func_ty_judger -> func_midd
+func_ty_judger -> * gen_expr
+func_midd -> bind_id func_tail
+func_midd -> func_tail
+gen_expr -> func_midd
+class_expr -> class class_midd
+class_midd -> bind_id class_tail
+class_midd -> class_tail
+class_tail -> class_open_body class_cloz_body
+class_open_body -> extends lhs {
+class_open_body -> {
+class_cloz_body -> class_body }
+class_cloz_body -> }
+class_body -> class_elem CLEM
+CLEM -> class_elem CLEM
+CLEM -> ''
+class_elem -> meth_def
+class_elem -> field_def ;
+class_elem -> static class_branch
+class_elem -> ;
+class_branch -> { <stmt_list> }
+class_branch -> meth_def
+class_branch -> class_elem_name meth_field_branch
+proper_name -> id
+proper_name -> string
+proper_name -> number
+proper_name -> [ asg ]
+class_elem_name -> proper_name
+class_elem_name -> pemID
+initor -> = asg
+meth_field_branch -> initor ;
+meth_field_branch -> ( form_params ) { <stmt_list> }
+meth_def -> get class_elem_name ( ) { <stmt_list> }
+meth_def -> set class_elem_name ( bind_elem ) { <stmt_list> }
+meth_def -> meth_branch
+meth_branch -> async gen_branch
+meth_branch -> gen_branch
+gen_branch -> * meth_gen_name
+meth_gen_name -> class_elem_name ( form_params ) { <stmt_list> }
+arr_reps -> arr_open ]
+arr_open -> [ arr_open_choice
+arr_open_choice -> commas
+arr_open_choice -> arr_elem_arr
+arr_elem_arr -> commas arr_elem_arr_next AEA_RE
+arr_elem_arr -> arr_elem_arr_next AEA_RE
+arr_elem_arr_next -> ... asg
+arr_elem_arr_next -> asg
+AEA_RE -> , commas arr_elem_arr_next AEA_RE
+AEA_RE -> , arr_elem_arr_next AEA_RE
+AEA_RE -> ''
+commas -> , COM_RE
+COM_RE -> , COM_RE
+COM_RE -> ''
+obj_reps -> { obj_close
+obj_close -> }
+obj_close -> proper_def_list obj_fin
+obj_fin -> , }
+obj_fin -> }
+proper_def_list -> proper_def PDEF
+PDEF -> , proper_def PDEF
+PDEF -> ''
+proper_def -> id proper_id_choice
+proper_id_choice -> ''
+proper_id_choice -> initor
+proper_def -> proper_name : asg
+proper_def -> meth_def
+proper_def -> ... asg
+bind_patt -> obj_patt
+bind_patt -> arr_patt
+obj_patt -> { obj_patt_cloz
+obj_patt_cloz -> bind_rest_proper }
+obj_patt_cloz -> bind_proper_arr obj_patt_cloz_fin
+obj_patt_cloz_fin -> }
+obj_patt_cloz_fin -> , obj_patt_cloz_final
+obj_patt_cloz_final -> bind_rest_proper }
+obj_patt_cloz_final -> }
+arr_patt -> [ arr_patt_midd ]
+arr_patt_midd -> commas
+arr_patt_midd -> arr_patt_arr arr_patt_nxt
+arr_patt_nxt -> ''
+arr_patt_nxt -> , arr_patt_next
+arr_patt_next -> commas bind_rest_elem
+arr_patt_next -> bind_rest_elem
+arr_patt_next -> ''
+bind_rest_proper -> ... bind_id
+bind_proper_arr -> bind_proper BPA
+BPA -> , bind_proper BPA
+BPA -> ''
+arr_patt_arr -> arr_patt_elem APA
+APA -> , arr_patt_elem APA
+APA -> ''
+arr_patt_elem -> commas bind_elem
+arr_patt_elem -> bind_elem
+bind_proper -> single_name_binding
+bind_proper -> proper_name : bind_elem
+single_name_binding -> bind_id bind_proper_init_check
+bind_proper_init_check -> initor
+bind_proper_init_check -> ''
+bind_elem -> single_name_binding
+bind_elem -> bind_patt bind_proper_init_check
+bind_rest_elem -> ... bind_id
+tmpl_literal -> ` string `
+form_params -> ''
+form_params -> bind_rest_elem
+form_params -> form_param_list form_param_tail
+form_param_tail -> ''
+form_param_tail -> , form_param_fin
+form_param_fin -> bind_rest_elem
+form_param_fin -> ''
+form_param_list -> bind_elem FPLBE
+FPLBE -> , bind_elem FPLBE
+FPLBE -> ''

@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
@@ -20,6 +20,9 @@ from functools import wraps
 def get_interval(fn):
 	@wraps(fn)
 	def wrapper(*args, **kwargs):
+		# TODO: perf_counter 有个问题，时间如果超过半分钟，内存就会被计算占满
+		# 		如果是类似临界区的场景用，这个是没问题的
+		# 但是cpu密集型任务在不需要太精确的情况下最好换成unix_time相减算
 		st = perf_counter()
 		ans = fn(*args, **kwargs)
 		ed = perf_counter()

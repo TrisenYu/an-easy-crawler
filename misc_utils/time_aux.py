@@ -1,4 +1,5 @@
-#! /usr/bin/env python3
+# Last modified at 2025/10/03 星期五 02:38:00
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author <kisfg@hotmail.com 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
@@ -18,7 +19,9 @@ import time
 from datetime import datetime
 
 __BASIC_TIME_FORMAT__: str = "%Y-%m-%d %H:%M:%S"    # 形如 2025-03-14 11:45:14
-__UNDERSCORE_FORMAT__: str = "%Y_%m_%d_%H_%M_%S_%f" # 到微秒
+US_TIME_FORMAT: str = "%Y-%m-%d %H:%M:%S.%f"
+UNDERSCORE_FORMAT: str = "%Y_%m_%d_%H_%M_%S_%f" # 到微秒
+LOG_TIME_FORMAT: str = "%Y-%m-%d"
 
 def unix_time() -> float:
 	""" 返回 unix 时间戳。结果形如 1741964349.3201044。 """
@@ -55,16 +58,21 @@ def unix_ms_of_next_year() -> int:
 	return unix_ms() + 31536000
 
 
-def unix_ts_to_time(unix_ts: int, time_format: str = __BASIC_TIME_FORMAT__) -> str:
+def unix_ts_to_time(
+	unix_ts: int | float,
+	format_str: str=__BASIC_TIME_FORMAT__
+) -> str:
 	""" 将 unix 时间戳按格式转为易于人类读取的时间。"""
-	return time.strftime(time_format, time.localtime(unix_ts))
+	return datetime.fromtimestamp(unix_ts).strftime(format_str)
 
 
-def curr_time_formatter(format_str: str = __UNDERSCORE_FORMAT__) -> str:
+def curr_time_formatter(
+	format_str: str=UNDERSCORE_FORMAT
+) -> str:
 	"""
 	按给定格式字符串解析当前时间。
 	"""
-	if format_str == __UNDERSCORE_FORMAT__:
+	if format_str == UNDERSCORE_FORMAT:
 		return datetime.now().strftime(format_str)[:-3]
 	return datetime.now().strftime(format_str)
 
@@ -74,3 +82,4 @@ if __name__ == "__main__":
 	print(unix_ms(), funix_ms())
 	print(unix_us())
 	print('\n', unix_ms(), unix_ms_of_next_year())
+	print(unix_ts_to_time(1759325083.902, US_TIME_FORMAT))

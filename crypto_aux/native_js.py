@@ -1,3 +1,4 @@
+# Last modified at 2025/09/30 星期二 21:51:22
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2025>
@@ -38,17 +39,21 @@ from misc_utils.file_operator import (
 	load_txt_via_file_or_die,
 	dir2file
 )
-from misc_utils.json_opt.conf_reader import PRIVATE_CONFIG
+from misc_utils.opts.json.conf_reader import PRIVATE_CONFIG
+from sys import platform as sys_platform
 
 _curr_dir = op_dirname(__file__)
-_obfus_dir = dir2file(_curr_dir, 'obfus')
-_defus_dir = dir2file(_curr_dir, 'deobfus')
+_obfus_dir = dir2file(_curr_dir, 'obfus-js')
+_defus_dir = dir2file(_curr_dir, 'deobfus-js')
 _fo = lambda s: load_txt_via_file_or_die(dir2file(_obfus_dir, s))
 _fd = lambda s: load_txt_via_file_or_die(dir2file(_defus_dir, s))
 
 try:
 	_crypto_sm4 = execjs.compile(_fo('crypto_sm4.js'))
-	_crypto_rsa = execjs.compile(_fo('crypto_rsa.js'), cwd=PRIVATE_CONFIG['npm-path'])
+	_crypto_rsa = execjs.compile(
+		_fo('crypto_rsa.js'),
+		cwd=PRIVATE_CONFIG[sys_platform+'-npm-path']
+	)
 	_crypto2rsa = execjs.compile(_fo('crypto2rsa.js'))
 	_crypto_md5 = execjs.compile(_fd('crypto_md5.js'))
 	_cryptommhx64_128 = execjs.compile(_fd('crypto_mmh3.js'))
@@ -57,6 +62,7 @@ except Exception as e:
 	DEBUG_LOGGER.critical(e)
 	exit(1)
 
+del _fo, _fd
 _rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17' \
               'a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c9387011' \
               '4af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef5' \
@@ -65,7 +71,6 @@ _rsa_pub2 = "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC
             "XWONB5TDcUd+xCz7ejOFHZKlcZDx+pF1i7Gsvi1vjyJoQhRtRSn950x498VUkx7rUxg1/ScBVfr" \
             "RxQOZ8xFBye3pjAzfb22+RCuYApSVpJ3OO3KsEuKExftz9oFBv3ejxPlYc5yq7YiBO8XlTnQN0S" \
             "a4R4qhPO3I2MQIDAQAB\n-----END PUBLIC KEY-----"
-
 
 def native_encSecKey_gen(ran_str: str) -> str:
 	"""
@@ -114,10 +119,13 @@ def native_wm_nike_gen(payload: str) -> str:
 	global _crypto_wm_nike
 	return _crypto_wm_nike.call('Na', payload)
 
-
-if __name__ == "main":
+if __name__ == "__main__":
+	from misc_utils.str_aux import dic2json_str
 	encSecKey = native_encSecKey_gen('e2yswfSf2Ac8CUpz')
-	csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["user1"]["csrf_token"]}"{"}"}'
+	csrf_token_json_deserializer = dic2json_str({
+		"csrf_token": f"{PRIVATE_CONFIG['user1']['csrf_token']}"
+	})
+	# csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["user1"]["csrf_token"]}"{"}"}'
 	data = {
 		"params"   : native_encText_gen('e2yswfSf2Ac8CUpz', csrf_token_json_deserializer),
 		"encSecKey": encSecKey

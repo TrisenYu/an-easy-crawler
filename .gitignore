@@ -1,25 +1,38 @@
-# 隐私文件定义
+# 文件
 *.tmp
 *.dll
 *.so
 *.exe
-config.json
-analysis.txt
+*.mp3
+*.pyc
+uv.lock
+configs/config.json
+workspace.xml
 wtf.txt
 
-static_assets/bot_hits.log
-static_assets/bot_refs.log
-static_assets/output/*
+# 目录
+assets/stat/bot_hits.log
+assets/stat/bot_refs.log
+assets/stat/outputs/*
+!assets/stat/outputs/.gitkeep
+assets/dyn/*
+!assets/dyn/.gitkeep
+assets/stat/logs/*
+!assets/stat/logs/.gitkeep
+.venv/
 refs/*
 tmp/
 tmp*
+js_utils/ref/
+diff_tests/js_src_testcase/obfus
+diff_tests/_trial_temp/
+__pycache__/
 
-# 代码编辑工具乱七八糟的东西
-/workspace.xml
+# 代码编辑工具等乱七八糟的东西
+
 .idea
 .vscode
 .dist
 .pytest_cache
-/shelf/
-__pycache__
-diff_tests/_trial_temp/
+.DS_Store
+shelf/

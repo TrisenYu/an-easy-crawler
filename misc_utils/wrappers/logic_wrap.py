@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
@@ -14,10 +14,12 @@
 #
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
+from typing import Any
+
 from misc_utils.logger import DEBUG_LOGGER
 
 
-def check_eq_after_time_gauge(payload):
+def eq_check_after_time_gauge(payload):
 	def dec(fn):
 		def wrapper(*args, **kwargs):
 			_ans, _spining = fn(*args, **kwargs)
@@ -28,10 +30,10 @@ def check_eq_after_time_gauge(payload):
 	return dec
 
 
-def check_eq(payload):
+def eq_check(payload: Any):
 	def dec(fn):
 		def wrapper(*args, **kwargs):
-			_ans = fn(*args, **kwargs)
+			_ans: Any = fn(*args, **kwargs)
 			if _ans != payload:
 				DEBUG_LOGGER.warning('not eq!')
 			return _ans

@@ -22,9 +22,9 @@ import math, os
 if __name__ == "__main__":
 	content, st = '', False
 	from misc_utils.args_loader import PARSER
-	from misc_utils.json_opt.conf_reader import PRIVATE_CONFIG
+	from misc_utils.opts.json.conf_reader import PRIVATE_CONFIG
 	args = PARSER.parse_args()
-	backup_dir = PRIVATE_CONFIG[args.songlist_author]['backup-dir']
+	backup_dir = PRIVATE_CONFIG[args.songslist_author]['backup-dir']
 	with open(os.path.join(backup_dir, 'songs-list.txt'), 'r', encoding='utf-8') as fd:
 		while True:
 			tmp = fd.readline()
@@ -34,8 +34,7 @@ if __name__ == "__main__":
 				continue
 			elif st and len(tmp) > 1:
 				content += tmp
-			else:
-				break
+			break
 
 	content = content[:-1].split('\n')
 

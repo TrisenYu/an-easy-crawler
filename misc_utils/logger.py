@@ -1,6 +1,7 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
+# Last modified at 2025/10/02 星期四 23:34:31
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -14,7 +15,11 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 import logging
-
+import os
+from misc_utils.time_aux import (
+	LOG_TIME_FORMAT,
+	curr_time_formatter
+)
 
 class _CustomFormatter(logging.Formatter):
 	"""
@@ -47,14 +52,17 @@ class _CustomFormatter(logging.Formatter):
 		return formatter.format(record)
 
 
-_format = '\n%(asctime)s [%(filename)s/%(funcName)s/line%(lineno)d]-%(levelname)s: \n\t%(message)s'
-_stdout_handler = logging.StreamHandler()
-_stdout_handler.setLevel(logging.DEBUG)
-_stdout_handler.setFormatter(_CustomFormatter(_format))
+_format = '%(asctime)s [%(filename)s|%(funcName)s|line%(lineno)d]-%(levelname)s: %(message)s'
+_logfiles_handler = logging.FileHandler(
+	filename=''+
+		os.path.join(os.path.dirname(__file__), '../assets/stat/logs/')+
+		curr_time_formatter(LOG_TIME_FORMAT)+"-debug.log"
+)
+_logfiles_handler.setFormatter(_CustomFormatter(_format))
 
 DEBUG_LOGGER = logging.getLogger(__name__)
 DEBUG_LOGGER.setLevel(logging.DEBUG)
-DEBUG_LOGGER.addHandler(_stdout_handler)
+DEBUG_LOGGER.addHandler(_logfiles_handler)
 
 if __name__ == "__main__":
 	DEBUG_LOGGER.info('hello world')

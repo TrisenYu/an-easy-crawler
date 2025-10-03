@@ -17,13 +17,14 @@
 """
 	登出操作。
 """
-from misc_utils.json_opt.conf_reader import (
+from misc_utils.opts.json.conf_reader import (
 	PRIVATE_CONFIG,
 	attempt_modify_json
 )
 from crypto_aux.manual_deobfus import netease_encryptor
 from misc_utils.logger import DEBUG_LOGGER
 from misc_utils.header import HEADER, BROWSER
+from misc_utils.str_aux import dic2json_str
 from curl_cffi import requests
 
 
@@ -49,7 +50,9 @@ def user_logout(
 	:param conf_file: 配置文件。默认值给到 config.json。
 	"""
 	global prefix, suffix
-	payload = f'{"{"}"csrf_token":"{token}"{"}"}'
+	payload = dic2json_str({
+		"csrf_token": token
+	})
 	resp = requests.post(
 		prefix + suffix + token,
 		data=netease_encryptor(payload)[0],
@@ -58,18 +61,16 @@ def user_logout(
 	if resp.status_code != 200:
 		DEBUG_LOGGER.error(f'{resp.status_code}, {resp.text}')
 		exit(1)
-	else:
-		DEBUG_LOGGER.info(f'{resp.text}')
-
-		attempt_modify_json(
-			conf_file,
-			{
-				dummy: {
-					'csrf_token': '',
-					'cookie': ''
-				}
+	DEBUG_LOGGER.info(f'{resp.text}')
+	attempt_modify_json(
+		conf_file,
+		{
+			dummy: {
+				'csrf_token': '',
+				'cookie': ''
 			}
-		)
+		}
+	)
 
 if __name__ == "__main__":
 	from misc_utils.args_loader import PARSER
@@ -77,9 +78,7 @@ if __name__ == "__main__":
 	victim = args.exit_user
 	victim_conf = PRIVATE_CONFIG[victim]
 	del args
-
 	tk = victim_conf['csrf_token']
 	HEADER['Cookie'] = victim_conf['cookie']
-
 	user_logout(victim, tk)
 	# TODO: 退了，但是如退。看样子好像要重新逆了。

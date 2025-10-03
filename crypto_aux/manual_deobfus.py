@@ -1,3 +1,4 @@
+# Last modified at 2025/09/06 星期六 22:48:01
 #! /usr/bin/env python3
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2025>
@@ -15,7 +16,9 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 """
-	diff_tests/estimator.py 下粗略比较了native和非native函数的执行用时，结果表明混淆后造成性能下降 10~100 倍。
+	TODO: 通用化配置？
+
+	diff_tests/crypto_tester.py 下粗略比较了native和非native函数的执行用时，结果表明混淆后造成性能下降 10~100 倍。
 	无非是一种为了反爬而导致的必然，但响应不怎么慢的感觉，掩盖了这点性能的下降。
 
 	**编写与调用函数时**，需特别注意混淆js脚本出入字符串的大小写以及格式要求。
@@ -224,29 +227,26 @@ def sha224_update(chunk: bytes) -> str:
 	return _sha224.hexdigest()
 
 
-def sha256_hmac() -> str:
-	pass
-
-
-def sha224_hmac() -> str:
-	pass
-
-
 if __name__ == '__main__':
 	# import sys
 	# print(sys.getsizeof(crypto_rsa), sys.getsizeof(crypto_rsa2), sys.getsizeof(crypto_sm4))
 	# 疑似指针，三者均为 56 字节
-	from misc_utils.json_opt.conf_reader import PRIVATE_CONFIG
-	csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["user1"]["csrf_token"]}"{"}"}'
+
+	from misc_utils.opts.json.conf_reader import PRIVATE_CONFIG
+	from misc_utils.str_aux import dic2json_str
+	csrf_token_json_deserializer = dic2json_str({
+		"csrf_token": f'{PRIVATE_CONFIG["user1"]["csrf_token"]}'
+	})
 	# 应由 dilphabet_16_str_gen 生成
 
 	# 生成 encText
 	encText = encText_gen('e2yswfSf2Ac8CUpz', csrf_token_json_deserializer)
 	# 生成 encSecKey
 	print(netease_encryptor(csrf_token_json_deserializer)[0])
-
-	print(netease_mmh128("PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
+	print(netease_mmh128(
+		"PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 		"Chrome PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 		"Chromium PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 		"Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
-		"WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"))
+		"WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"
+	))

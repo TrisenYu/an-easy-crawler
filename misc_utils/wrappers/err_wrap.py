@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 from misc_utils.logger import DEBUG_LOGGER
-
+import traceback
 
 def seize_err_if_any(logger_enable: bool = True):
 	def dec(fn_with_ret_val):
@@ -24,7 +24,8 @@ def seize_err_if_any(logger_enable: bool = True):
 				return fn_with_ret_val(*args, **kwargs)
 			except Exception as e:
 				if logger_enable:
-					DEBUG_LOGGER.error(f'{e}')
+					dump_stk = traceback.format_exc()
+					DEBUG_LOGGER.error(f'{e}\n{dump_stk}')
 			return None
 		return wrapper
 	return dec
@@ -36,9 +37,9 @@ def die_if_err(logger_enable: bool = True):
 			try:
 				return fn(*args, **kwargs)
 			except Exception as e:
+				dump_stk = traceback.format_exc()
 				if logger_enable:
-					DEBUG_LOGGER.critical(f'{e}')
+					DEBUG_LOGGER.critical(f'{e}\n{fn}\n{dump_stk}')
 				exit(1)
-			return None
 		return error_dumper
 	return dec

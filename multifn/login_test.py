@@ -29,7 +29,7 @@ from crypto_aux.manual_deobfus import (
 	dilphabet_32_str_gen,
 	rsa_encrypt_without_token
 )
-from misc_utils.json_opt.conf_reader import (
+from misc_utils.opts.json.conf_reader import (
 	PRIVATE_CONFIG,
 	load_json_from_str
 )
@@ -40,6 +40,7 @@ from misc_utils.time_aux import (
 from misc_utils.header import HEADER, BROWSER
 from misc_utils.args_loader import PARSER
 from misc_utils.wrappers.err_wrap import seize_err_if_any
+from misc_utils.str_aux import dic2json_str
 from multifn.cookie_aux.unid_gen import crack_vistor_hash
 
 # config of config.
@@ -91,29 +92,31 @@ _p._$addUtid = function() {
 # payload preparation.
 _rtid = dilphabet_32_str_gen()
 host = "music.163.com"
-init_inp = f'{"{"}'                               \
-           f'"pd":"music",'                       \
-           f'"pkid":"KGxdbOk",'                   \
-           f'"pkht":"music.163.com",'             \
-           f'"channel":0,'                        \
-           f'"topURL":"https://{host}/",'  \
-           f'"rtid":"{_rtid}"'                    \
-           f'{"}"}'
-modp_inp = f'{"{"}'                               \
-           f'"un":"{e_mail}",'                    \
-           f'"pkid":"KGxdbOk",'                   \
-           f'"pd":"music",'                       \
-           f'"channel":0,'                        \
-           f'"topURL": "https://{host}/",' \
-           f'"rtid": "{_rtid}"'                   \
-           f'{"}"}'
-cstk_inp = f'{"{"}"un":"{e_mail}",'               \
-           f'"pw":"{passwd}",'                    \
-           f'"pd":"music",'                       \
-           f'"l":0,"d":10,'                       \
-           f'"t":{funix_ms()},'			          \
-           f'"pkid": "KGxdbOk"'                   \
-           f'{"}"}'
+init_inp = {
+	"pd": "music",  # 猜测义为product
+	"pkid": "KGxdbOk",
+	"pkht": "music.163.com",
+	"channel": 0,
+	"topURL": f"https://{host}/",
+	"rtid": f"{_rtid}"
+}
+modp_inp = {
+	"un": f'{e_mail}',
+	"pkid": "KGxdbOk",
+	"pd": "music",
+	"channel": 0,
+	"topURL": f"https://{host}/",
+	"rtid": f"{_rtid}"
+}
+cstk_inp = {
+	"un": f'{e_mail}',
+	"pw": f"{passwd}",
+	"pd": "music",
+	"l": 0,
+	"d": 10,
+	"t": f"{funix_ms()}",
+	"pkid": "KGxdbOk",
+}
 
 
 # TODO: 拆这个函数为三个子函数的组合
@@ -124,6 +127,9 @@ def login_in_netease_music() -> None:
 	"""
 	global reg_host, init_api, modp_api, cstk_api
 	global accs_api, cstk_inp, modp_inp, init_inp
+	"""
+	"https://dl.reg.163.com/webzj/v1.0.1/pub/index_dl2_new.html?MGID=1749748386926.861&wdaId=&pkid=KGxdbOk&product=music"
+	"""
 	# resp = requests.get(f'https://{host}', headers=HEADER)  # place to fetch NMTID.
 	# if resp.status_code != 200:
 	# 	print(f'{resp.status_code}: {resp.cookies} {resp.content}')
@@ -137,7 +143,8 @@ def login_in_netease_music() -> None:
 	HEADER["Sec-Ch-Ua-Mobile"] = '?0'
 	HEADER["Content-Type"] = 'application/json'
 	# sec-ch-ua-mobile: ?0
-	# https://dl.reg.163.com/webzj/v1.0.1/pub/index_dl2_new.html?MGID=1742125340512.4631&wdaId=&pkid=KGxdbOk&product=music
+	# https://dl.reg.163.com/webzj/v1.0.1/pub/index_dl2_new.html?
+	# MGID=1742125340512.4631&wdaId=&pkid=KGxdbOk&product=music
 	_hash_val = crack_vistor_hash("just_crack")
 	HEADER["Cookie"] = f"_ntes_nnid={_hash_val},{unix_ms()}; " \
 	                   f"_ntes_nuid={_hash_val}; "             \
@@ -189,12 +196,13 @@ def login_in_netease_music() -> None:
 	    }
 	}
 	"""
-	modp_obs = sm4_encryptor(modp_inp)
-	HEADER["cookie"] += f" NTES_WEB_FP={crack_vistor_hash('FakeBrowserPayload' + ran_str_gen(2))};"
+	modp_obs = sm4_encryptor(dic2json_str(modp_inp))
+	HEADER["Cookie"] += f" NTES_WEB_FP={crack_vistor_hash('FakeBrowserPayload' + ran_str_gen(2))};"
 	resp = requests.post(
 		reg_host + modp_api,
-		data={"encParams": f"{modp_obs}"},
-		headers=HEADER, impersonate=BROWSER
+		data={ "encParams": f"{modp_obs}" },
+		headers=HEADER,
+		impersonate=BROWSER
 	)
 	if resp.status_code != 200:
 		print(f'{resp.status_code}, {resp.text}')
@@ -207,10 +215,10 @@ def login_in_netease_music() -> None:
 	_9_hex = modp_info['pVParam']['x']
 
 	# 200-resp-of-cstk: {"ret":"201","tk":"before_starting_logining_token"}
-	cstk_obs = sm4_encryptor(cstk_inp)
+	cstk_obs = sm4_encryptor(dic2json_str(cstk_inp))
 	resp = requests.post(
 		reg_host + cstk_api,
-		data={"encParams": f"{cstk_obs}"},
+		data={ "encParams": f"{cstk_obs}" },
 		headers=HEADER, impersonate=BROWSER
 	)
 	if resp.status_code != 200:
@@ -292,7 +300,10 @@ def login_in_netease_music() -> None:
 	
 	手机做了什么，目前不知道。
 	"""
-
+	# 简单来看就是安卓内可用的Url Scheme，一种页面内跳转协议，通过定义自己的URL Scheme协议，
+	# 可以从一个APP中打开另外一个APP指定的页面。与远程服务器的交互逻辑由APP内部实现
+	# orpheus姑且理解为冈难的包名。
+	# 似乎本地下载了冈难的应用后，可以直接在浏览器内用"orpheus://"唤起。
 
 if __name__ == '__main__':
 	login_in_netease_music()

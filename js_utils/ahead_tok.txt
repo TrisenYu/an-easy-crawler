@@ -1,0 +1,47 @@
+this
+id
+num
+string
+	" strings "
+	' strings '
+regex
+[] # arr
+{} # obj
+`` # tmpl
+( expr ) # mal
+async ( expr ) => actor
+async bid => actor
+( expr ) => actor
+function
+class
+++  --
+delete void typeof await + - ~ !
+super # mal super [ expr ] or super . args or super . id
+import # mal
+new	# mal
+yield
+
+## in the middle process
++ -
+>> >>> <<
+< > <= >=
+== != === !==
+&
+^
+|
+&&
+||
+??
+? asg : asg
+
+?.
+# mem_expr
+[ expr ]
+. pbid
+` tmpl `
+( fn(asg) )
+
+# args
+...
+# class meth
+async

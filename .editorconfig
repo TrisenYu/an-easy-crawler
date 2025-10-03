@@ -1,5 +1,7 @@
-root = true
 # configuration for all files
+root = true
+
 [*]
 indent_style = tab
 indent_size = 4
+charset = utf-8
