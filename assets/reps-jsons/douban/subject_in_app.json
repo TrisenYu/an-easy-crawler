@@ -1,0 +1,496 @@
+{
+	"rating": {
+		"count": 28904,
+		"max": 10,
+		"star_count": 4,
+		"value": 7.8
+	},
+	"lineticket_url": "",
+	"controversy_reason": "",
+	"pubdate": [
+		"2025-09-30(中国大陆)"
+	],
+	"last_episode_number": null,
+	"interest_control_info": null,
+	"pic": {
+		"large": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2925525277.jpg",
+		"normal": "https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2925525277.jpg"
+	},
+	"year": "2025",
+	"vendor_count": 2,
+	"body_bg_color": "f9f4f6",
+	"is_tv": true,
+	"card_subtitle": "2025 / 中国大陆 / 剧情 / 杨亚洲 于晗 赵文赫 / 于和伟 吴越",
+	"album_no_interact": false,
+	"ticket_price_info": "",
+	"pre_playable_date": null,
+	"can_rate": true,
+	"head_info": null,
+	"forum_info": null,
+	"share_activities": [],
+	"webisode": null,
+	"id": "36516431",
+	"gallery_topic_count": 0,
+	"languages": [
+		"汉语普通话"
+	],
+	"genres": [
+		"剧情"
+	],
+	"review_count": 239,
+	"variable_modules": [
+		{
+			"sub_modules": [],
+			"id": "rating"
+		},
+		{
+			"sub_modules": [],
+			"id": "other_interests"
+		},
+		{
+			"sub_modules": [],
+			"id": "video_photos"
+		},
+		{
+			"sub_modules": [],
+			"id": "episode_discussions"
+		},
+		{
+			"sub_modules": [],
+			"id": "tags"
+		},
+		{
+			"sub_modules": [
+				{
+					"id": "screenshot"
+				},
+				{
+					"id": "doulist"
+				},
+				{
+					"id": "status"
+				},
+				{
+					"id": "other_channels"
+				}
+			],
+			"id": "share"
+		},
+		{
+			"sub_modules": [],
+			"id": "honor_infos"
+		},
+		{
+			"sub_modules": [
+				{
+					"id": "count"
+				},
+				{
+					"data": [
+						{
+							"name": "热门",
+							"id": "hot"
+						},
+						{
+							"name": "最新",
+							"id": "latest"
+						},
+						{
+							"name": "友邻",
+							"id": "friend"
+						}
+					],
+					"id": "sort_by",
+					"data_type": "sort_by"
+				},
+				{
+					"id": "rating_scope"
+				}
+			],
+			"id": "comments"
+		},
+		{
+			"sub_modules": [],
+			"id": "related_items"
+		},
+		{
+			"sub_modules": [],
+			"id": "interest"
+		},
+		{
+			"sub_modules": [],
+			"id": "related_subjects"
+		},
+		{
+			"sub_modules": [
+				{
+					"data": {
+						"count": 1342,
+						"title": "综合",
+						"uri": "douban://partial.douban.com/subject/36516431/suggest",
+						"source": "综合",
+						"type": "mixed_suggestion",
+						"id": "mixed_suggestion"
+					},
+					"id": "ugc_tab",
+					"data_type": "ugc_tab"
+				},
+				{
+					"data": {
+						"source": "reviews",
+						"title": "剧评",
+						"type": "review",
+						"sort_by": [
+							{
+								"name": "热门",
+								"id": "hot"
+							},
+							{
+								"name": "最新",
+								"id": "latest"
+							},
+							{
+								"name": "友邻",
+								"id": "friend"
+							}
+						]
+					},
+					"id": "ugc_tab",
+					"data_type": "ugc_tab"
+				},
+				{
+					"data": {
+						"count": 641,
+						"title": "小组讨论",
+						"uri": "douban://partial.douban.com/subject/36516431/group_topic/_content?group_id=756336",
+						"source": "小组讨论",
+						"type": "custom",
+						"id": "group"
+					},
+					"id": "ugc_tab",
+					"data_type": "ugc_tab"
+				}
+			],
+			"id": "ugc_tabs"
+		}
+	],
+	"title": "沉默的荣耀",
+	"intro": "1949年8月，本来要在福州迎接解放的吴石，突然被蒋介石任命为国民政府国防部次长。为了获得更多情报，吴石按照党组织的指示毅然前往台湾就职，利用工作便利陆续向中共华东局提供了有关金门岛兵力变化、西南战役国军调动等重要情报。原本要回上海的朱枫在得知吴石原来的交通员牺牲、组织上需要派新的交通员去台湾时，也毅然放弃了阖家团圆的机会，只身去了台湾。吴石、朱枫密切合作，送出了多份重要情报。1950年2月，由于叛徒出卖，吴石、朱枫、陈宝仓和聂曦等人不幸被捕，牺牲在台北西马场町，但他们送出的舟山兵力部署图帮助解放军顺利解放舟山群岛，为全国解放事业作出了贡献。",
+	"interest_cmt_earlier_tip_title": "发布于上映前",
+	"has_linewatch": true,
+	"comment_count": 11721,
+	"forum_topic_count": 1,
+	"ticket_promo_text": "",
+	"webview_info": {},
+	"is_released": true,
+	"vendors": [
+		{
+			"accessible": true,
+			"labels": [],
+			"click_trackings": [
+				"https://frodo.douban.com/rohirrim/video_tracking/click?subject_id=36516431&video_type=movie&video_id=1004739&source=miguvideo&user_id=292081526&douban_udid=&platform=&location=vendor_section"
+			],
+			"book_type_cn": "",
+			"payment_desc": "VIP免费观看",
+			"id": "miguvideo",
+			"impression_trackings": [
+				"https://frodo.douban.com/rohirrim/video_tracking/impression?subject_id=36516431&video_type=movie&video_id=1004739&source=miguvideo&user_id=292081526&douban_udid=&platform=&location=vendor_section"
+			],
+			"style": "large",
+			"app_uri": "miguvideo://skynet.douban.com",
+			"title": "咪咕视频",
+			"app_bundle_id": "com.cmcc.cmvideo",
+			"click_tracking": "",
+			"bg_image": "https://img1.doubanio.com/view/files/raw/file-1760166508.png",
+			"is_ad": true,
+			"impression_tracking": "",
+			"promote_desc": "",
+			"book_type": "",
+			"icon": "https://img2.doubanio.com/f/frodo/8e1b7f8b48804cf759fc411e75d62c5ffd4f8f42/pics/vendors/migu_video.png",
+			"grey_icon": "https://img2.doubanio.com/f/frodo/a67b9d0d1e7a60e5529dcbb53a69575ee8b55d5a/pics/vendors/migu_video_grey.png",
+			"url": "https://m.miguvideo.com/mgs/msite/prd/detail.html?cid=958747575&pwId=d01197d3076b4164af82983c408bb996&pkgId=null",
+			"is_paid": true,
+			"uri": "miguvideo://miguvideo?action=%7B%22type%22%3A%22JUMP_DETAIL_PAGE%22%2C%22timeStamp%22%3A0%2C%22params%22%3A%7B%22pageID%22%3A%2261fb7b0ec4c745bb97b90eb2b14b83c7%22%2C%22frameID%22%3A%22default-frame%22%2C%22contentID%22%3A%22958747575%22%2C%22location%22%3A%22H5%22%7D%7D",
+			"episodes_info": "39集全",
+			"is_in_whitelist": false,
+			"payments": [
+				{
+					"price": "",
+					"description": "",
+					"method": "VIP免费观看"
+				}
+			],
+			"pre_release_desc": "",
+			"subject_id": "36516431"
+		},
+		{
+			"accessible": true,
+			"labels": [],
+			"click_trackings": [
+				"https://frodo.douban.com/rohirrim/video_tracking/click?subject_id=36516431&video_type=movie&video_id=1004605&source=iqiyi&user_id=292081526&douban_udid=&platform=&location=vendor_section"
+			],
+			"book_type_cn": "",
+			"payment_desc": "VIP免费观看",
+			"id": "iqiyi",
+			"impression_trackings": [
+				"https://frodo.douban.com/rohirrim/video_tracking/impression?subject_id=36516431&video_type=movie&video_id=1004605&source=iqiyi&user_id=292081526&douban_udid=&platform=&location=vendor_section"
+			],
+			"style": "large",
+			"app_uri": "iqiyi://skynet.douban.com",
+			"title": "爱奇艺",
+			"app_bundle_id": "com.qiyi.video",
+			"click_tracking": "",
+			"bg_image": "",
+			"is_ad": false,
+			"impression_tracking": "",
+			"promote_desc": "",
+			"book_type": "",
+			"icon": "https://img9.doubanio.com/f/frodo/6c7b857e6b2255201e73bf83732d95d572f3f9f7/pics/vendors/iqiyi.png",
+			"grey_icon": "https://img2.doubanio.com/f/frodo/6961bd6fe7052dbfc947a9dd47b84955b323ff13/pics/vendors/iqiyi_grey.png",
+			"url": "http://www.iqiyi.com/v_uf7dtof1l4.html?vfm=m_331_dbdy&fv=4904d94982104144a1548dd9040df241",
+			"is_paid": true,
+			"uri": "iqiyi://mobile/player?aid=8894916273066301&tvid=2972525822056100&ftype=27&subtype=333",
+			"episodes_info": "39集全",
+			"is_in_whitelist": false,
+			"payments": [
+				{
+					"price": "",
+					"description": "",
+					"method": "VIP免费观看"
+				}
+			],
+			"pre_release_desc": "",
+			"subject_id": "36516431"
+		}
+	],
+	"actors": [
+		{
+			"name": "于和伟"
+		},
+		{
+			"name": "吴越"
+		},
+		{
+			"name": "魏晨"
+		},
+		{
+			"name": "曾黎"
+		},
+		{
+			"name": "余皑磊"
+		},
+		{
+			"name": "隆妮"
+		},
+		{
+			"name": "那志东"
+		},
+		{
+			"name": "曹磊"
+		},
+		{
+			"name": "郑家彬"
+		},
+		{
+			"name": "喻恩泰"
+		},
+		{
+			"name": "张晞临"
+		},
+		{
+			"name": "郝平"
+		},
+		{
+			"name": "谭凯"
+		},
+		{
+			"name": "傅程鹏"
+		},
+		{
+			"name": "郑晓宁"
+		},
+		{
+			"name": "李健"
+		},
+		{
+			"name": "徐佳"
+		},
+		{
+			"name": "巩峥"
+		},
+		{
+			"name": "霍青"
+		},
+		{
+			"name": "马晓伟"
+		},
+		{
+			"name": "黄俊鹏"
+		},
+		{
+			"name": "秦焰"
+		},
+		{
+			"name": "艾东"
+		},
+		{
+			"name": "徐洪浩"
+		}
+	],
+	"interest": null,
+	"subtype": "tv",
+	"episodes_count": 39,
+	"color_scheme": {
+		"is_dark": true,
+		"primary_color_light": "725c62",
+		"_base_color": [
+			0.9583333333333334,
+			0.19047619047619047,
+			0.24705882352941178
+		],
+		"secondary_color": "f9f4f6",
+		"_avg_color": [
+			0.009259259259259226,
+			0.1636363636363637,
+			0.43137254901960786
+		],
+		"primary_color_dark": "4c3d41"
+	},
+	"type": "tv",
+	"linewatches": [],
+	"info_url": "https://www.douban.com/doubanapp//h5/movie/36516431/desc",
+	"tags": [],
+	"vendor_desc": "",
+	"durations": [
+		"45分钟"
+	],
+	"cover": {
+		"description": "",
+		"author": {
+			"loc": null,
+			"kind": "user",
+			"name": "安静就好",
+			"reg_time": "2020-08-11 15:00:28",
+			"url": "https://www.douban.com/people/221005599/",
+			"uri": "douban://douban.com/user/221005599",
+			"avatar": "https://img3.doubanio.com/icon/up221005599-2.jpg",
+			"is_club": false,
+			"type": "user",
+			"id": "221005599",
+			"uid": "221005599"
+		},
+		"url": "https://movie.douban.com/photos/photo/2925525277/",
+		"image": {
+			"normal": {
+				"url": "https://img3.doubanio.com/view/photo/m/public/p2925525277.jpg",
+				"width": 337,
+				"height": 600,
+				"size": 0
+			},
+			"large": {
+				"url": "https://img3.doubanio.com/view/photo/l/public/p2925525277.jpg",
+				"width": 899,
+				"height": 1600,
+				"size": 0
+			},
+			"raw": null,
+			"is_live": false,
+			"small": {
+				"url": "https://img3.doubanio.com/view/photo/s/public/p2925525277.jpg",
+				"width": 337,
+				"height": 600,
+				"size": 0
+			},
+			"primary_color": "",
+			"is_animated": false
+		},
+		"uri": "douban://douban.com/photo/2925525277",
+		"create_time": "2025-09-25 13:07:55",
+		"position": 0,
+		"owner_uri": "douban://douban.com/tv/36516431",
+		"type": "photo",
+		"id": "2925525277",
+		"sharing_url": "https://www.douban.com/doubanapp/dispatch?uri=/photo/2925525277/"
+	},
+	"cover_url": "https://img3.doubanio.com/view/photo/m_ratio_poster/public/p2925525277.jpg",
+	"trailers": [
+		{
+			"sharing_url": "https://www.douban.com/doubanapp/dispatch?uri=/tv/36516431/trailer%3Ftrailer_id%3D322285%26trailer_type%3DA",
+			"video_url": "https://vt1.doubanio.com/202511060010/3ef880b32fc651db44022d2a890bb567/view/movie/M/703220285.mp4",
+			"title": "预告片 (中文字幕)",
+			"type_name": "预告片",
+			"uri": "douban://douban.com/tv/36516431/trailer?trailer_id=322285&trailer_type=A",
+			"cover_url": "https://img9.doubanio.com/img/trailer/medium/2925729595.jpg",
+			"term_num": 0,
+			"n_comments": 27,
+			"create_time": "2025-10-02",
+			"file_size": 46294983,
+			"runtime": "02:03",
+			"type": "A",
+			"id": "322285",
+			"desc": ""
+		}
+	],
+	"header_bg_color": "4c3d41",
+	"is_douban_intro": false,
+	"ticket_vendor_icons": [
+		"https://img9.doubanio.com/view/dale-online/dale_ad/public/0589a62f2f2d7c2.jpg"
+	],
+	"honor_infos": [
+		{
+			"kind": "tv",
+			"uri": "douban://douban.com/subject_collection/tv_chinese_best_weekly?type=rank&category=movie&rank_type=weekly",
+			"rank": 2,
+			"title": "一周华语口碑剧集榜"
+		}
+	],
+	"sharing_url": "https://www.douban.com/doubanapp/dispatch/movie/36516431",
+	"subject_collections": [],
+	"wechat_timeline_share": "screenshot",
+	"uri": "douban://douban.com/tv/36516431",
+	"restrictive_icon_url": "",
+	"rate_info": "",
+	"release_date": null,
+	"countries": [
+		"中国大陆"
+	],
+	"original_title": "",
+	"is_restrictive": false,
+	"webisode_count": 0,
+	"episodes_info": "39集全",
+	"url": "https://movie.douban.com/subject/36516431/",
+	"directors": [
+		{
+			"name": "杨亚洲"
+		},
+		{
+			"name": "于晗"
+		},
+		{
+			"name": "赵文赫"
+		}
+	],
+	"is_show": false,
+	"vendor_icons": [
+		"https://img2.doubanio.com/f/frodo/8e1b7f8b48804cf759fc411e75d62c5ffd4f8f42/pics/vendors/migu_video.png",
+		"https://img9.doubanio.com/f/frodo/6c7b857e6b2255201e73bf83732d95d572f3f9f7/pics/vendors/iqiyi.png"
+	],
+	"pre_release_desc": "",
+	"video": null,
+	"aka": [
+		"暗夜深海",
+		"破晓时分",
+		"深海1950"
+	],
+	"realtime_hot_honor_infos": [
+		{
+			"kind": "tv",
+			"score": 221400,
+			"uri": "douban://douban.com/subject_collection/tv_real_time_hotest?type=rank&category=movie&rank_type=realtime_hot",
+			"rank": 10,
+			"title": "热门电视"
+		}
+	],
+	"null_rating_reason": "",
+	"interest_cmt_earlier_tip_desc": "该短评的发布时间早于公开上映时间，作者可能通过其他渠道提前观看，请谨慎参考。其评分将不计入总评分。"
+}

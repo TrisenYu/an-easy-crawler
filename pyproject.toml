@@ -1,22 +1,66 @@
+# uv self update # 更新uv
+## 与包依赖相关的保留操作
+# uv pip freeze > requirements.txt
+# uv add -r requirements.txt
+# uv lock
+
 [project]
 name = "proj"
-version = "0.1.0"
-description = "web端js逆向分析"
+# 改用 月度版本号, 不区分重要程度
+version = "2511.1"
+description = "js逆向分析"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "argparse>=1.4.0",
-    "curl-cffi>=0.13.0",
-    "fake-useragent>=2.2.0",
-    "fastapi>=0.116.1",
-    "gmssl>=3.2.2",
-    "mmh3>=5.2.0",
-    "pillow>=11.3.0",
-    "pyexecjs>=1.5.1",
-    "user-agents>=2.2.0",
-    "pycryptodome>=3.23.0",
-    "rich>=13.6.0",
-    "pylint>=3.3.8",
+    "argparse==1.4.0",
+    "curl-cffi==0.13.0",
+    "fake-useragent==2.2.0",
+    "gmssl==3.2.2",
+    "mmh3==5.2.0",
+    "pillow==11.3.0",
+    "pyexecjs==1.5.1",
+    "user-agents==2.2.0",
+    "pycryptodome==3.23.0",
+    "rich==14.1.0",
+    "pylint==3.3.9",
+    "annotated-types==0.7.0",
+    "anyio==4.11.0",
+    "astroid==3.3.11",
+    "certifi==2025.10.5",
+    "cffi==2.0.0",
+    "colorama==0.4.6",
+    "dill==0.4.0",
+    "ffmpeg-python==0.2.0",
+    "future==1.0.0",
+    "idna==3.10",
+    "isort==6.1.0",
+    "loguru==0.7.3",
+    "markdown-it-py==4.0.0",
+    "mccabe==0.7.0",
+    "mdurl==0.1.2",
+    "pip==25.2",
+    "platformdirs==4.4.0",
+    "pycparser==2.23",
+    "pycryptodomex==3.23.0",
+    "pydantic==2.11.10",
+    "pydantic-core==2.33.2",
+    "pygments==2.19.2",
+    "six==1.17.0",
+    "sniffio==1.3.1",
+    "starlette==0.48.0",
+    "tomlkit==0.13.3",
+    "typing-extensions==4.15.0",
+    "typing-inspection==0.4.2",
+    "ua-parser==1.0.1",
+    "ua-parser-builtins==0.18.0.post1",
+    "win32-setctime==1.2.0",
+    "beautifulsoup4==4.14.2",
+    "iniconfig==2.3.0",
+    "packaging==25.0",
+    "pluggy==1.6.0",
+    "pytest==8.4.2",
+    "soupsieve==2.8",
+    "psycopg2==2.9.11",
 ]
 
 [[tool.uv.index]]

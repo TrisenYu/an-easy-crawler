@@ -2,13 +2,15 @@
 	"configurations": {
 		"py:launch": {
 			"adapter": "debugpy",
-			"filetypes": ["python"],
+			"filetypes": [
+				"python"
+			],
 			"default": true,
 			"configuration": {
 				"request": "launch",
 				"python": "./.venv/bin/python",
 				"cwd": "${workspaceFolder}",
-				"module": "misc_utils.opts.db.sqlite",
+				"module": "${fileRelativePath//[\\/]/.}",
 				"stopOnEntry": true,
 				"debugOptions": [],
 				"args": [

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
 # (c) Author: <kisfg@hotmail.com, 2025>
-# Last modified at 2025/10/04 星期六 21:56:20
+# Last modified at 2025/10/26 星期日 22:01:29
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -16,7 +16,8 @@
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 
-# 单行最大字符数不超过100
+# 仅供参考，未在实际机器上部署测试过
+# 单行最大字符数建议不超过100
 
 # 这里每次动一下会影响 songslist_hit_bot.py 的执行
 # 有没有为了防止AI用源代码训练而直接加不可见字符又不影响人阅读的可能？
@@ -24,7 +25,7 @@
 set -e
 sh_name="$0"
 hash_val=$(sha256sum "$sh_name" | awk -F' ' '{ print $1 }') # 不care成功与否
-version_numno="bot_hits.sh v1.0.3-$hash_val"
+version_numno="bot_hits.sh v2510.1-$hash_val"
 
 function deps_check() {
 	py3=$(which python3)
@@ -45,8 +46,8 @@ function deps_check() {
 END_OF_LINE
 		exit 1
 	fi
-	uv_check=$(which uv)
-	if [[ $? != 0 ]]; then
+	_uv_test=$(which uv)
+	if [[ "$?" != 0 ]]; then
 		cat << END_OF_LINE
 似乎没有下载uv以管理环境。
 END_OF_LINE
@@ -57,14 +58,14 @@ END_OF_LINE
 
 ### 默认参数 ======================================================
 "deps_check"
-curr_dir=$(readlink -f $0)
-curr_dir=$(dirname $curr_dir)
-bot_src_dir="$curr_dir/multifn"
-init_logdir="$curr_dir/assets/stat"
+curr_dir=$(readlink -f "$0")
+curr_dir=$(dirname "$curr_dir")
+bot_src_dir="$curr_dir/multtp/easynet"
+init_logdir="$curr_dir/assets/stat/logs"
 
 # TODO: 建议多dummy执行时对应存放或改用数据库
-logging_path="$init_logdir/bot_hits.log"
-refresh_path="$init_logdir/bot_refr.log"
+logging_path="$init_logdir/sh_bot_hits.log"
+refresh_path="$init_logdir/sh_bot_refr.log"
 func_name=''
 dummy=''
 refr_dummy=''
@@ -73,7 +74,7 @@ songslist=''
 ggetopt="getopt"
 gsed="sed"
 ggrep='grep'
-if [[ "`uname -o`" == "Darwin" ]]; then
+if [[ "$(uname -o)" == "Darwin" ]]; then
 	# 还是假定用这个脚本的人至少是懂装brew的
 	brew install gnu-getopt gnu-sed
 	ggetopt="/opt/homebrew/opt/gnu-getopt/bin/getopt"
@@ -137,7 +138,7 @@ details  := write2crontab <-s, songslist-refname> <-d, dummy-refname>: 将定时
           | refresh-path(refresh-path) 默认指向  ./assets/stat/bot_refr.log
           | logging-path(hit-logg-path) 默认指向 ./assets/stat/bot_hits.log
           |
-          | 因该脚本协同multifn/songslist_hit_bot.py一起使用，且脚本自身的sha256为
+          | 因该脚本协同multtp/songslist_hit_bot.py一起使用，且脚本自身的sha256为
           | songslist_hit_bot.py所硬编码。因此脚本内假定脚本与songslist_hit_bot.py的相对位置不变。
           | 一旦脚本本身出现任何修改，则会直接影响到songslist_hit_bot.py中remedy_for_post_crash的执行。
           | 相对位置关系具体以 bot_src_dir 变量保持。如果需要变更，则必须要提供 -b 参数。
@@ -201,6 +202,10 @@ function parse_options() {
 # TODO: sync information in certain songslist
 # deps: grasp the whole logic for generating cookie...
 #		and corresponding counteractive methods
+function sync_for_songslist() {
+	echo '尚未实现...'
+	exit 1
+}
 
 function validator() {
 	trusted_list=(
@@ -232,7 +237,7 @@ function boot() {
 		return
 	fi
 	# shellcheck disable=SC2086
-	$py3 -m multifn.songslist_hit_bot \
+	$py3 -m multtp.songslist_hit_bot \
 		--author="$songslist" \
 		--dummy="$dummy" \
 		&>> "$logging_path"
@@ -246,7 +251,7 @@ function refresh_token() {
 		echo '参数 refr_dummy 缺失' | tee -a "$refresh_path"
 		return
 	fi
-	$py3 -m multifn.refresh_token \
+	$py3 -m multtp.refresh_token \
 		--refresh-dummy="$refr_dummy" \
 		&>> "$refresh_path"
 }
@@ -266,11 +271,11 @@ function clean_crontab() {
 #		不然每次都要到crontab里改还是比较繁琐的
 function write2crontab() {
 	echo -e "\
-*/6 * */2 * * cd $curr_dir && /usr/bin/zsh $curr_dir/${0##*/}\
+*/6 * */2 * * cd $curr_dir && source .venv/bin/activate && /usr/bin/zsh $curr_dir/${0##*/}\
  -fboot -s$songslist -d$dummy\n\
 1   0 */5 * * /usr/bin/cat /dev/null > $logging_path\n\
-32  2  *  * 0 cd $curr_dir && /usr/bin/zsh $curr_dir/${0##*/}\
- -frefresh_token -n$dummy" | tee -a a.txt # crontab
+32  2  *  * 0 cd $curr_dir && source .venv/bin/activate && /usr/bin/zsh $curr_dir/${0##*/}\
+ -frefresh_token -n$dummy" | tee -a crontab
 	crontab -l
 }
 
@@ -302,12 +307,12 @@ function self_validate() {
 "parse_options" "$@"
 "validator"
 
-# 目前调的都是multifn模块，所以只需将 bot_hits.sh 所在目录提供给sys.path
+# 目前调的都是multtp模块，所以只需将 bot_hits.sh 所在目录提供给sys.path
 # export PYTHONPATH="$bot_src_dir:$PYTHONPATH"
 # 先检查有没有虚拟环境
 [ ! -f "$curr_dir/.venv/bin/python" ] && uv venv
-source "$curr_dir/.venv/bin/activate"
 uv sync
+source "$curr_dir/.venv/bin/activate"
 py3="$curr_dir/.venv/bin/python"
 set -u
 "$func_name"

@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2025-06>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
-# Last modified at 2025/10/01 星期三 20:13:06
+# Last modified at 2025/10/26 星期日 21:22:46
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -15,12 +15,15 @@
 #
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
+from typing import Optional
+from functools import partial
 
-def dic2json_str(_dict: dict) -> str:
-	"""将dict的字符串表示替换为浏览器中的规范"""
+
+def dic2ease_json_str(dic: dict) -> str:
+	"""将dict的字符串表示替换为浏览器中javascript的规范"""
 	res = ''
-	for _ in _dict.__str__():
-		if _ == '\'':
+	for _ in dic.__str__():
+		if _ == "'":
 			res += '"'
 			continue
 		elif _ == ' ':
@@ -28,7 +31,6 @@ def dic2json_str(_dict: dict) -> str:
 		res += _
 	return res
 
-from functools import partial
 
 def _strip_x(inp: str, x: str) -> str:
 	res: str = ''
@@ -38,5 +40,24 @@ def _strip_x(inp: str, x: str) -> str:
 		res += c
 	return res
 
+
 strip_underscore = partial(_strip_x, x='_')
 strip_space = partial(_strip_x, x=' ')
+
+
+def streplacer(
+	inp: str,
+	unwant: Optional[list[str]]=None, # TODO: set 可能会更高效一点？
+	ch: str='_'
+) -> str:
+	"""
+	将输入字符串(inp)中不想要(unwant)的字符列表替换为给定的字符(ch)
+	然后作为结果返回
+	"""
+	if unwant is None:
+		unwant = [
+			'~', ',', ';', ' ', ':', '\\', '|', '/', '<', '>', '$',
+            '%', '^', '&', '*', '(', ')', '[', ']', '{', '}',
+            '!', '@', '#', '"', '\'', '?'
+		]
+	return ''.join([_ if _ not in unwant else ch for _ in inp])

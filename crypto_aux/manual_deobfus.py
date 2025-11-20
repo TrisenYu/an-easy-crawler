@@ -23,10 +23,8 @@
 
 	**编写与调用函数时**，需特别注意混淆js脚本出入字符串的大小写以及格式要求。
 """
-import subprocess
+import subprocess, math, os, hashlib, base64, random, binascii
 from functools import partial
-import math, os
-import hashlib, base64, random, binascii
 
 if os.name == 'nt':
 	_Popen = subprocess.Popen
@@ -57,7 +55,6 @@ else:
 	from Crypto.Util.Padding import pad
 	from Crypto.Util.number import bytes_to_long
 
-
 import mmh3
 from gmssl import sm4
 
@@ -73,10 +70,7 @@ _rsa_pub2 = "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC
 
 _rsa_enc2 = PKCS1_v1_5.new(RSA.importKey(_rsa_pub2))
 _sm4_enc = sm4.CryptSM4(padding_mode=sm4.PKCS7)  # PKCS7 在实现上和 PKCS5 一致。
-# 下一行写法调了很久才调出来。属于是难绷了
 _sm4_enc.set_key(0xbc60b8b9e4ffeffa219e5ad77f11f9e2.to_bytes(16, 'big'), sm4.SM4_ENCRYPT)
-_aes_cbc_iv = b'0102030405060708'
-_cloud_music_aes_cbc_key = b'0CoJUm6Qyw8W8jud'
 
 
 def ran_str_gen(lenp: int) -> str:
@@ -131,11 +125,10 @@ def encText_gen(random_16_bytes: str, payload: str) -> str:
 		:param inpt: 待加密字符串
 		"""
 		binary_payload = pad(inpt.encode('utf8'), 16)
-		aes = AES.new(enc_key, AES.MODE_CBC, iv=_aes_cbc_iv)
+		aes = AES.new(enc_key, AES.MODE_CBC, iv=b'0102030405060708')
 		return aes.encrypt(binary_payload)
 
-	global _cloud_music_aes_cbc_key
-	middle = base64_str_gen(aes_cbc_encryptor(_cloud_music_aes_cbc_key, payload))
+	middle = base64_str_gen(aes_cbc_encryptor(b'0CoJUm6Qyw8W8jud', payload))
 	raw_enc = aes_cbc_encryptor(random_16_bytes.encode('iso-8859-1'), middle)
 	return base64_str_gen(raw_enc)
 
@@ -228,13 +221,9 @@ def sha224_update(chunk: bytes) -> str:
 
 
 if __name__ == '__main__':
-	# import sys
-	# print(sys.getsizeof(crypto_rsa), sys.getsizeof(crypto_rsa2), sys.getsizeof(crypto_sm4))
-	# 疑似指针，三者均为 56 字节
-
 	from misc_utils.opts.json.conf_reader import PRIVATE_CONFIG
-	from misc_utils.str_aux import dic2json_str
-	csrf_token_json_deserializer = dic2json_str({
+	from misc_utils.str_aux import dic2ease_json_str
+	csrf_token_json_deserializer = dic2ease_json_str({
 		"csrf_token": f'{PRIVATE_CONFIG["user1"]["csrf_token"]}'
 	})
 	# 应由 dilphabet_16_str_gen 生成
@@ -250,3 +239,17 @@ if __name__ == '__main__':
 		"Microsoft Edge PDF Viewer::Portable Document Format::application/pdf~pdf,text/pdf~pdf~"
 		"WebKit built-in PDF::Portable Document Format::application/pdf~pdf,text/pdf~pdf"
 	))
+	# print(sha224(b'music.163.com'))
+	# print(
+	# 	sha224_update(b'music.163.com'),
+	# 	sha224_update(b'music.163.com'),
+	# 	sha224_update(b'music.163.com'),
+	# 	sha224_update(b'music.163.com'),
+	# )
+	print(
+		# 不知道混淆代码里用这两个干什么？每次投入去算都是单次的
+		sha256(b'music.163.com'),
+		sha256(b'/#/user/level')
+		# /user/level
+		# /my/#/music/edit?id={songslist_id}
+	)

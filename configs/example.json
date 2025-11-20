@@ -1,29 +1,41 @@
 {
-    "linux-npm-path": "/usr/local/lib/node_modules/",
-    "darwin-npm-path": "/opt/brew/lib/node_modules/",
-    "win32-npm-path": "C:\\Users\\user\\AppData\\Roaming\\npm\\node_modules",
-    "user1": {
-        "cookie": "all field must be defined as `str` otherwise python will failed.",
-        "user-id": "1",
-        "list-id": "1",
-        "email": "your-email",
-        "password": "your-password-should-not-be-disclosed-in-any-possible-channel",
-        "csrf_token": "a 32 bits hex digits, should be well kept."
-    },
-    "user2": {
-        "cookie": "cookie必填不要留空。user-id目前还可选，类型没有严格限制",
-        "user-id": 123,
-        "email": "email其实还没用到",
-        "password": "321",
-        "list-id": "必填，不要留空",
-        "csrf_token": "必填，不要留空"
-    },
-    "any-other-name-both-you-and-program-like": {
-        "cookie": "aaaa",
-        "user-id": "123",
-        "email": "117",
-        "password": "",
-        "list-id": "117",
-        "csrf_token": "aaaa"
-    }
+	"linux-npm-path": "/usr/local/lib/node_modules/",
+	"darwin-npm-path": "/opt/brew/lib/node_modules/",
+	"win32-npm-path": "C:\\Users\\user\\AppData\\Roaming\\npm\\node_modules",
+	"# 评估一下其它网站的爬取改怎么办？": "这一项拿来做注释，实际不需要有",
+	"netease": {
+		"user1": {
+			"cookie": "all field must be defined as `str` otherwise python will failed.",
+			"user-id": "1",
+			"list-id": "1",
+			"email": "your-email",
+			"password": "your-password-should-not-be-disclosed-in-any-possible-channel",
+			"csrf_token": "a 32 bits hex digits, should be well kept."
+		},
+		"user2": {
+			"cookie": "cookie必填不要留空。user-id目前还可选，类型没有严格限制",
+			"user-id": 123,
+			"email": "email其实还没用到",
+			"password": "321",
+			"list-id": "必填，不要留空",
+			"csrf_token": "必填，不要留空"
+		}
+	},
+	"douban": {
+		"guest": {
+			"cookie": "",
+			"ck": ""
+		}
+	},
+	"ctrip": {
+		"guest": {
+			"cookie": "",
+			"GUID": ""
+		}
+	},
+	"其它业务": {
+		"any-other-name-both-you-and-program-like": {
+			"cookie": "aaaa"
+		}
+	}
 }

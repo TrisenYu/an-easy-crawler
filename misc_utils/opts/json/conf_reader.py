@@ -20,19 +20,18 @@ from typing import (
 	Optional,
 	Union
 )
-from functools import partial
+from pathlib import Path
 
 from misc_utils.wrappers.err_wrap import (
 	die_if_err,
 	seize_err_if_any
 )
-from misc_utils.file_operator import dir2file
-from misc_utils.args_loader import PARSER
+from configs.args_loader import PARSER
 from misc_utils.time_aux import curr_time_formatter
 
-
+# TODO: 配置与功能函数分开
 @die_if_err()
-def load_config(inp: str) -> dict[str, Union[str, dict[str, str]]]:
+def _load_config(inp: str) -> dict[str, Union[str, dict[str, str]]]:
 	payload_str: str = ''
 	with open(inp, 'r', encoding='utf-8') as fd:
 		while True:
@@ -42,7 +41,6 @@ def load_config(inp: str) -> dict[str, Union[str, dict[str, str]]]:
 			payload_str += flows
 	payload = json.loads(payload_str)
 	return payload
-
 
 @die_if_err()
 def deserialize_json_or_die(inp: str, key: Optional[str] = None) -> dict:
@@ -84,13 +82,14 @@ def attempt_modify_json(
 	global _conf_gopher
 	if keyval is None or len(keyval) == 0:
 		raise ValueError('empty parameters')
-	pattern = load_config(_conf_gopher(filename=filename))
+	pattern = _load_config(_conf_gopher(filename))
 	# 留个备份，以防毁灭性修改。以后要删，自己评估完了删。
 	# TODO: 选数据库来读写。直接写到某个文件夹就像是拉了一样
 	#       分布式还是？一个人自用？
+	# 		有点抽象了，数据库来存配置？改还要写sql或者找sql-gui？
 	# 或者开发一个类似于git的版本控制系统？
 	date = curr_time_formatter("-%Y-%m-%d-%H-%M-%S-")
-	pmt = _conf_gopher(filename='before' + date + filename + '.tmp')
+	pmt = _conf_gopher('before' + date + filename + '.tmp')
 
 	with open(pmt, 'w+', encoding='utf-8') as fd:
 		json.dump(pattern, fd, indent=4, ensure_ascii=False)
@@ -105,22 +104,13 @@ def attempt_modify_json(
 				raise ValueError('invalid key-field')
 			pattern[attr][val] = keyval[attr][val]
 
-	with open(_conf_gopher(filename=filename), 'w+', encoding='utf-8') as fd:
+	with open(_conf_gopher(filename), 'w+', encoding='utf-8') as fd:
 		json.dump(pattern, fd, indent=4, ensure_ascii=False)
 
 
 _args = PARSER.parse_args()
-_conf_gopher = partial(dir2file, dirname=_args.config_dir)
-PRIVATE_CONFIG = load_config(_conf_gopher(filename="config.json"))
+_conf_gopher = lambda _x: str(Path(_args.config_dir).joinpath(_x))
+PRIVATE_CONFIG = _load_config(_conf_gopher("config.json"))
 
 if __name__ == "__main__":
 	print(PRIVATE_CONFIG)
-	attempt_modify_json(
-		'example.json',
-		{
-			"user2": {
-				'user-id' : 123,
-				'password': "321"
-			}
-		}
-	)

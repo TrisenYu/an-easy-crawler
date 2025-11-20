@@ -1,3 +1,4 @@
+# Last modified at 2025/10/25 星期六 21:06:39
 #!/usr/bin/env python3
 # SPDX-LICENSE-IDENTIFIER: GPL2.0
 # (C) All rights reserved. Author: <kisfg@hotmail.com, 2025>
@@ -13,31 +14,47 @@
 #
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
-from js_utils.dfa.any_dfa import AbstractDFA
-from js_utils.dfa.numeric_dfa import JS_num_literal_DFA
+import sys
 
-from misc_utils.logger import DEBUG_LOGGER
+from loguru import logger
+
+from _js_utils.dfa.any_dfa import AbstractDFA
+from _js_utils.dfa.numeric_dfa import JS_num_literal_DFA
+from misc_utils.logger import GLOB_LOG_FORMAT, GLOB_MAIN_LOG_PATH
+
+logger.remove()
+logger.add(
+	GLOB_MAIN_LOG_PATH,
+	format=GLOB_LOG_FORMAT,
+	colorize=True,
+	rotation='16MB',
+	compression='zip'
+)
+logger.add(
+	sys.stdout,
+	format=GLOB_LOG_FORMAT,
+	colorize=True
+)
 
 def dfa_test(
 	inp: str,
 	dfa: AbstractDFA,
 	exp_res: bool=True,
-	debug: bool = False
+	debug: bool=True
 ) -> str:
 	cur_state: str = '1'
 	ok: bool = False
 	for idx, c in enumerate(inp):
 		cur_state, ok = dfa.state_machine(c, cur_state)
 		if debug:
-			DEBUG_LOGGER.debug(f'[debug] {cur_state}: {ok}')
+			logger.debug(f'{cur_state}: {ok}')
 	if ok != exp_res:
-		DEBUG_LOGGER.warning(f'{inp}, {cur_state}')
+		logger.warning(f'{inp}, {cur_state}')
 	return cur_state
 
 
 if __name__ == '__main__':
 	fjudger = JS_num_literal_DFA()
-
 	print()
 	dfa_test('0_00_12_3_4', fjudger, False)
 	dfa_test('01234554', fjudger)
@@ -183,5 +200,5 @@ if __name__ == '__main__':
 	dfa_test('00000000', fjudger)
 	dfa_test('0', fjudger)
 	dfa_test('1', fjudger)
-	dfa_test('2', fjudger)
+	dfa_test('.2', fjudger)
 

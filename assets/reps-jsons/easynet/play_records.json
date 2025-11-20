@@ -1,0 +1,709 @@
+{
+    "allData": [
+        {
+            "playCount": 955,
+            "score": 100,
+            "song": {
+                "name": "Tear Rain feat. えみぃ",
+                "mainTitle": null,
+                "additionalTitle": null,
+                "id": 29247549,
+                "pst": 0,
+                "t": 0,
+                "ar": [
+                    {
+                        "id": 783187,
+                        "name": "cYsmix",
+                        "tns": [],
+                        "alias": []
+                    },
+                    {
+                        "id": 191181,
+                        "name": "えみぃ",
+                        "tns": [],
+                        "alias": []
+                    }
+                ],
+                "alia": [],
+                "pop": 55.0,
+                "st": 0,
+                "rt": null,
+                "fee": 8,
+                "v": 163,
+                "crbt": null,
+                "cf": "",
+                "al": {
+                    "id": 2999776,
+                    "name": "Radical Destruction",
+                    "picUrl": "http://p1.music.126.net/giKULIEJbsRIRkGNUxhKRQ==/109951169299675814.jpg",
+                    "tns": [],
+                    "pic_str": "109951169299675814",
+                    "pic": 109951169299675814
+                },
+                "dt": 306253,
+                "h": {
+                    "br": 320000,
+                    "fid": 0,
+                    "size": 12252517,
+                    "vd": -72186.0,
+                    "sr": 44100
+                },
+                "m": {
+                    "br": 192000,
+                    "fid": 0,
+                    "size": 7351528,
+                    "vd": -69779.0,
+                    "sr": 44100
+                },
+                "l": {
+                    "br": 128000,
+                    "fid": 0,
+                    "size": 4901033,
+                    "vd": -68610.0,
+                    "sr": 44100
+                },
+                "sq": {
+                    "br": 1075611,
+                    "fid": 0,
+                    "size": 41176191,
+                    "vd": -72161.0,
+                    "sr": 44100
+                },
+                "hr": null,
+                "a": null,
+                "cd": "1",
+                "no": 5,
+                "rtUrl": null,
+                "ftype": 0,
+                "rtUrls": [],
+                "djId": 0,
+                "copyright": 2,
+                "s_id": 523832940,
+                "mark": 9007199255011456,
+                "originCoverType": 0,
+                "originSongSimpleData": null,
+                "tagPicList": null,
+                "resourceState": true,
+                "version": 128,
+                "songJumpInfo": null,
+                "entertainmentTags": null,
+                "awardTags": null,
+                "displayTags": null,
+                "single": 0,
+                "noCopyrightRcmd": null,
+                "rtype": 0,
+                "rurl": null,
+                "mst": 9,
+                "cp": 743010,
+                "mv": 0,
+                "publishTime": 1376236800000,
+                "pc": {
+                    "nickname": "",
+                    "sn": "Tear Rain",
+                    "ar": "cYsmix/えみぃ",
+                    "uid": 0,
+                    "br": 326,
+                    "fn": "Tear Rain.mp3",
+                    "cid": "",
+                    "alb": "Radical Destruction"
+                },
+                "tns": [
+                    "泪雨"
+                ],
+                "privilege": {
+                    "id": 29247549,
+                    "fee": 8,
+                    "payed": 0,
+                    "st": 0,
+                    "pl": 326000,
+                    "dl": 326000,
+                    "sp": 7,
+                    "cp": 1,
+                    "subp": 1,
+                    "cs": true,
+                    "maxbr": 999000,
+                    "fl": 320000,
+                    "toast": false,
+                    "flag": 13,
+                    "preSell": false,
+                    "playMaxbr": 999000,
+                    "downloadMaxbr": 999000,
+                    "maxBrLevel": "lossless",
+                    "playMaxBrLevel": "lossless",
+                    "downloadMaxBrLevel": "lossless",
+                    "plLevel": "exhigh",
+                    "dlLevel": "exhigh",
+                    "flLevel": "exhigh",
+                    "rscl": null,
+                    "freeTrialPrivilege": {
+                        "resConsumable": false,
+                        "userConsumable": false,
+                        "listenType": 0,
+                        "cannotListenReason": 1,
+                        "playReason": null,
+                        "freeLimitTagType": null
+                    },
+                    "rightSource": 0,
+                    "chargeInfoList": [
+                        {
+                            "rate": 128000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 192000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 320000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 999000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 1
+                        }
+                    ],
+                    "code": 0,
+                    "message": null,
+                    "plLevels": null,
+                    "dlLevels": null,
+                    "ignoreCache": null,
+                    "bd": null
+                }
+            }
+        },
+        {
+            "playCount": 406,
+            "score": 42,
+            "song": {
+                "name": "詠奏妖華～明鏡止水～",
+                "mainTitle": null,
+                "additionalTitle": null,
+                "id": 26127127,
+                "pst": 0,
+                "t": 0,
+                "ar": [
+                    {
+                        "id": 17601,
+                        "name": "茶太",
+                        "tns": [],
+                        "alias": []
+                    }
+                ],
+                "alia": [
+                    "原曲：東方妖怪小町"
+                ],
+                "pop": 70.0,
+                "st": 0,
+                "rt": "",
+                "fee": 8,
+                "v": 51,
+                "crbt": null,
+                "cf": "",
+                "al": {
+                    "id": 2393649,
+                    "name": "Auxiliary Brightness",
+                    "picUrl": "http://p1.music.126.net/hYJb-ZwfVk7u7LbydlBmkw==/109951166050107996.jpg",
+                    "tns": [],
+                    "pic_str": "109951166050107996",
+                    "pic": 109951166050107996
+                },
+                "dt": 219529,
+                "h": {
+                    "br": 320000,
+                    "fid": 0,
+                    "size": 8783456,
+                    "vd": -65863.0,
+                    "sr": 44100
+                },
+                "m": {
+                    "br": 192000,
+                    "fid": 0,
+                    "size": 5270091,
+                    "vd": -63573.0,
+                    "sr": 44100
+                },
+                "l": {
+                    "br": 128000,
+                    "fid": 0,
+                    "size": 3513408,
+                    "vd": -62552.0,
+                    "sr": 44100
+                },
+                "sq": {
+                    "br": 1096856,
+                    "fid": 0,
+                    "size": 30099047,
+                    "vd": -65803.0,
+                    "sr": 44100
+                },
+                "hr": null,
+                "a": null,
+                "cd": "1",
+                "no": 6,
+                "rtUrl": null,
+                "ftype": 0,
+                "rtUrls": [],
+                "djId": 0,
+                "copyright": 2,
+                "s_id": 1417140831,
+                "mark": 9007199255011456,
+                "originCoverType": 0,
+                "originSongSimpleData": null,
+                "tagPicList": null,
+                "resourceState": true,
+                "version": 16,
+                "songJumpInfo": null,
+                "entertainmentTags": null,
+                "awardTags": null,
+                "displayTags": null,
+                "single": 0,
+                "noCopyrightRcmd": null,
+                "rtype": 0,
+                "rurl": null,
+                "mst": 9,
+                "cp": 743010,
+                "mv": 0,
+                "publishTime": 1356796800007,
+                "pc": {
+                    "nickname": "",
+                    "sn": "詠奏妖華 ～明鏡止水～",
+                    "ar": "EastNewSound",
+                    "uid": 0,
+                    "br": 351,
+                    "fn": "詠奏妖華 ～明鏡止水～.mp3",
+                    "cid": "",
+                    "alb": "Auxiliary Brightness"
+                },
+                "tns": [
+                    "Eisouyouka~meikyoushisui~"
+                ],
+                "privilege": {
+                    "id": 26127127,
+                    "fee": 8,
+                    "payed": 0,
+                    "st": 0,
+                    "pl": 351000,
+                    "dl": 351000,
+                    "sp": 7,
+                    "cp": 1,
+                    "subp": 1,
+                    "cs": true,
+                    "maxbr": 999000,
+                    "fl": 320000,
+                    "toast": false,
+                    "flag": 13,
+                    "preSell": false,
+                    "playMaxbr": 999000,
+                    "downloadMaxbr": 999000,
+                    "maxBrLevel": "lossless",
+                    "playMaxBrLevel": "lossless",
+                    "downloadMaxBrLevel": "lossless",
+                    "plLevel": "exhigh",
+                    "dlLevel": "exhigh",
+                    "flLevel": "exhigh",
+                    "rscl": null,
+                    "freeTrialPrivilege": {
+                        "resConsumable": false,
+                        "userConsumable": false,
+                        "listenType": 0,
+                        "cannotListenReason": 1,
+                        "playReason": null,
+                        "freeLimitTagType": null
+                    },
+                    "rightSource": 0,
+                    "chargeInfoList": [
+                        {
+                            "rate": 128000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 192000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 320000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 999000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 1
+                        }
+                    ],
+                    "code": 0,
+                    "message": null,
+                    "plLevels": null,
+                    "dlLevels": null,
+                    "ignoreCache": null,
+                    "bd": null
+                }
+            }
+        }
+    ],
+    "weekData": [
+        {
+            "playCount": 8,
+            "score": 100,
+            "song": {
+                "name": "BINARY CATWALK feat. Mei Ayakura",
+                "mainTitle": null,
+                "additionalTitle": null,
+                "id": 27582600,
+                "pst": 0,
+                "t": 0,
+                "ar": [
+                    {
+                        "id": 190969,
+                        "name": "綾倉盟",
+                        "tns": [],
+                        "alias": []
+                    }
+                ],
+                "alia": [],
+                "pop": 10.0,
+                "st": 0,
+                "rt": "",
+                "fee": 8,
+                "v": 53,
+                "crbt": null,
+                "cf": "",
+                "al": {
+                    "id": 2640869,
+                    "name": "POP CULTURE",
+                    "picUrl": "http://p2.music.126.net/uCdldpcflVFLTYEEv4Uvuw==/109951167129146854.jpg",
+                    "tns": [],
+                    "pic_str": "109951167129146854",
+                    "pic": 109951167129146854
+                },
+                "dt": 295493,
+                "h": {
+                    "br": 320000,
+                    "fid": 0,
+                    "size": 11822019,
+                    "vd": -80988.0,
+                    "sr": 44100
+                },
+                "m": {
+                    "br": 192000,
+                    "fid": 0,
+                    "size": 7093229,
+                    "vd": -78567.0,
+                    "sr": 44100
+                },
+                "l": {
+                    "br": 128000,
+                    "fid": 0,
+                    "size": 4728834,
+                    "vd": -76708.0,
+                    "sr": 44100
+                },
+                "sq": {
+                    "br": 1181256,
+                    "fid": 0,
+                    "size": 43631682,
+                    "vd": -81452.0,
+                    "sr": 44100
+                },
+                "hr": null,
+                "a": null,
+                "cd": "1",
+                "no": 4,
+                "rtUrl": null,
+                "ftype": 0,
+                "rtUrls": [],
+                "djId": 0,
+                "copyright": 2,
+                "s_id": 1424960534,
+                "mark": 9007199255011456,
+                "originCoverType": 0,
+                "originSongSimpleData": null,
+                "tagPicList": null,
+                "resourceState": true,
+                "version": 18,
+                "songJumpInfo": null,
+                "entertainmentTags": null,
+                "awardTags": null,
+                "displayTags": null,
+                "single": 0,
+                "noCopyrightRcmd": null,
+                "rtype": 0,
+                "rurl": null,
+                "mst": 9,
+                "cp": 743010,
+                "mv": 0,
+                "publishTime": 1376236800007,
+                "pc": {
+                    "nickname": "",
+                    "sn": "BINARY CATWALK",
+                    "ar": "綾倉盟",
+                    "uid": 0,
+                    "br": 320,
+                    "fn": "綾倉盟 - BINARY CATWALK.mp3",
+                    "cid": "109951164727955536",
+                    "alb": "POP | CULTURE"
+                },
+                "tns": [
+                    "BINARY CATWALK feat. Mei Ayakura"
+                ],
+                "privilege": {
+                    "id": 27582600,
+                    "fee": 8,
+                    "payed": 0,
+                    "st": 0,
+                    "pl": 320000,
+                    "dl": 320000,
+                    "sp": 7,
+                    "cp": 1,
+                    "subp": 1,
+                    "cs": true,
+                    "maxbr": 999000,
+                    "fl": 320000,
+                    "toast": false,
+                    "flag": 13,
+                    "preSell": false,
+                    "playMaxbr": 999000,
+                    "downloadMaxbr": 999000,
+                    "maxBrLevel": "lossless",
+                    "playMaxBrLevel": "lossless",
+                    "downloadMaxBrLevel": "lossless",
+                    "plLevel": "exhigh",
+                    "dlLevel": "exhigh",
+                    "flLevel": "exhigh",
+                    "rscl": null,
+                    "freeTrialPrivilege": {
+                        "resConsumable": false,
+                        "userConsumable": false,
+                        "listenType": 0,
+                        "cannotListenReason": 1,
+                        "playReason": null,
+                        "freeLimitTagType": null
+                    },
+                    "rightSource": 0,
+                    "chargeInfoList": [
+                        {
+                            "rate": 128000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 192000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 320000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 999000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 1
+                        }
+                    ],
+                    "code": 0,
+                    "message": null,
+                    "plLevels": null,
+                    "dlLevels": null,
+                    "ignoreCache": null,
+                    "bd": null
+                }
+            }
+        },
+        {
+            "playCount": 7,
+            "score": 87,
+            "song": {
+                "name": "オズネイ・ハマンはもういらない",
+                "mainTitle": null,
+                "additionalTitle": null,
+                "id": 832243,
+                "pst": 0,
+                "t": 0,
+                "ar": [
+                    {
+                        "id": 150785,
+                        "name": "Yana",
+                        "tns": [],
+                        "alias": []
+                    }
+                ],
+                "alia": [
+                    "[原曲：虎柄の毘沙門天]"
+                ],
+                "pop": 30.0,
+                "st": 0,
+                "rt": "",
+                "fee": 8,
+                "v": 52,
+                "crbt": null,
+                "cf": "",
+                "al": {
+                    "id": 82638,
+                    "name": "ムソウマテリアライズ",
+                    "picUrl": "http://p2.music.126.net/qDwMVqjDuOS6lVIoj8ARKw==/109951166028430703.jpg",
+                    "tns": [],
+                    "pic_str": "109951166028430703",
+                    "pic": 109951166028430703
+                },
+                "dt": 447500,
+                "h": {
+                    "br": 320000,
+                    "fid": 0,
+                    "size": 17902280,
+                    "vd": -71939.0,
+                    "sr": 44100
+                },
+                "m": {
+                    "br": 192000,
+                    "fid": 0,
+                    "size": 10741386,
+                    "vd": -69467.0,
+                    "sr": 44100
+                },
+                "l": {
+                    "br": 128000,
+                    "fid": 0,
+                    "size": 7160938,
+                    "vd": -68087.0,
+                    "sr": 44100
+                },
+                "sq": {
+                    "br": 1113863,
+                    "fid": 0,
+                    "size": 62306724,
+                    "vd": -72086.0,
+                    "sr": 44100
+                },
+                "hr": null,
+                "a": null,
+                "cd": "1",
+                "no": 4,
+                "rtUrl": null,
+                "ftype": 0,
+                "rtUrls": [],
+                "djId": 0,
+                "copyright": 2,
+                "s_id": 1495999557,
+                "mark": 9007199255011456,
+                "originCoverType": 0,
+                "originSongSimpleData": null,
+                "tagPicList": null,
+                "resourceState": true,
+                "version": 17,
+                "songJumpInfo": null,
+                "entertainmentTags": null,
+                "awardTags": null,
+                "displayTags": null,
+                "single": 0,
+                "noCopyrightRcmd": null,
+                "rtype": 0,
+                "rurl": null,
+                "mst": 9,
+                "cp": 743010,
+                "mv": 0,
+                "publishTime": 1319904000000,
+                "pc": {
+                    "nickname": "",
+                    "sn": "オズネイ・ハマンはもういらない",
+                    "ar": "Yana",
+                    "uid": 0,
+                    "br": 338,
+                    "fn": "オズネイ・ハマンはもういらない.mp3",
+                    "cid": "",
+                    "alb": "ムソウマテリアライズ"
+                },
+                "tns": [
+                    "不需要奥兹国的魔法师了"
+                ],
+                "privilege": {
+                    "id": 832243,
+                    "fee": 8,
+                    "payed": 0,
+                    "st": 0,
+                    "pl": 338000,
+                    "dl": 338000,
+                    "sp": 7,
+                    "cp": 1,
+                    "subp": 1,
+                    "cs": true,
+                    "maxbr": 999000,
+                    "fl": 320000,
+                    "toast": false,
+                    "flag": 13,
+                    "preSell": false,
+                    "playMaxbr": 999000,
+                    "downloadMaxbr": 999000,
+                    "maxBrLevel": "lossless",
+                    "playMaxBrLevel": "lossless",
+                    "downloadMaxBrLevel": "lossless",
+                    "plLevel": "exhigh",
+                    "dlLevel": "exhigh",
+                    "flLevel": "exhigh",
+                    "rscl": null,
+                    "freeTrialPrivilege": {
+                        "resConsumable": false,
+                        "userConsumable": false,
+                        "listenType": 0,
+                        "cannotListenReason": 1,
+                        "playReason": null,
+                        "freeLimitTagType": null
+                    },
+                    "rightSource": 0,
+                    "chargeInfoList": [
+                        {
+                            "rate": 128000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 192000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 320000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 0
+                        },
+                        {
+                            "rate": 999000,
+                            "chargeUrl": null,
+                            "chargeMessage": null,
+                            "chargeType": 1
+                        }
+                    ],
+                    "code": 0,
+                    "message": null,
+                    "plLevels": null,
+                    "dlLevels": null,
+                    "ignoreCache": null,
+                    "bd": null
+                }
+            }
+        }
+    ],
+    "code": 200
+}

@@ -19,9 +19,9 @@
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 import subprocess
 from functools import partial
-
+from pathlib import Path
 from os import name as os_name
-from os.path import dirname as op_dirname
+from sys import platform as sys_platform
 
 # 不同操作系统上Popen的编码不一。
 if os_name != 'nt':
@@ -34,19 +34,26 @@ else:
 	subprocess.Popen = partial(subprocess.Popen, encoding="utf-8")
 	import execjs
 
-from misc_utils.logger import DEBUG_LOGGER
-from misc_utils.file_operator import (
-	load_txt_via_file_or_die,
-	dir2file
-)
-from misc_utils.opts.json.conf_reader import PRIVATE_CONFIG
-from sys import platform as sys_platform
+from loguru import logger
 
-_curr_dir = op_dirname(__file__)
-_obfus_dir = dir2file(_curr_dir, 'obfus-js')
-_defus_dir = dir2file(_curr_dir, 'deobfus-js')
-_fo = lambda s: load_txt_via_file_or_die(dir2file(_obfus_dir, s))
-_fd = lambda s: load_txt_via_file_or_die(dir2file(_defus_dir, s))
+# 此处必须按需导入
+from misc_utils.opts.json.conf_reader import PRIVATE_CONFIG
+from misc_utils.file_operator import load_txt_via_file_or_die
+from misc_utils.logger import GLOB_MAIN_LOG_PATH, GLOB_LOG_FORMAT
+
+logger.remove()
+logger.add(
+	GLOB_MAIN_LOG_PATH,
+	colorize=True,
+	rotation="16MB",
+	format=GLOB_LOG_FORMAT,
+	compression='zip'
+)
+
+_obfus_dir = Path(__file__).parent.absolute().joinpath('obfus-js')
+_defus_dir = Path(__file__).parent.absolute().joinpath('deobfus-js')
+_fo = lambda s: load_txt_via_file_or_die(str(_obfus_dir.joinpath(s)))
+_fd = lambda s: load_txt_via_file_or_die(str(_defus_dir.joinpath(s)))
 
 try:
 	_crypto_sm4 = execjs.compile(_fo('crypto_sm4.js'))
@@ -59,10 +66,10 @@ try:
 	_cryptommhx64_128 = execjs.compile(_fd('crypto_mmh3.js'))
 	_crypto_wm_nike = execjs.compile(_fo('wmlike_gen.js'))
 except Exception as e:
-	DEBUG_LOGGER.critical(e)
+	logger.critical(e)
 	exit(1)
 
-del _fo, _fd
+del _fo, _fd, _obfus_dir, _defus_dir
 _rsa_modulo = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17' \
               'a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c9387011' \
               '4af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef5' \
@@ -99,7 +106,6 @@ def native_sm4_encryptor(payload: str) -> str:
 	global _crypto_sm4
 	return _crypto_sm4.call('cloudmusic_sm4_encrypt', payload)
 
-
 def native_rsa_encrypt_without_token(payload: str) -> str:
 	global _crypto2rsa
 	return _crypto2rsa.call('pwd_encrypt_wrapper', payload)
@@ -120,12 +126,11 @@ def native_wm_nike_gen(payload: str) -> str:
 	return _crypto_wm_nike.call('Na', payload)
 
 if __name__ == "__main__":
-	from misc_utils.str_aux import dic2json_str
+	from misc_utils.str_aux import dic2ease_json_str
 	encSecKey = native_encSecKey_gen('e2yswfSf2Ac8CUpz')
-	csrf_token_json_deserializer = dic2json_str({
+	csrf_token_json_deserializer = dic2ease_json_str({
 		"csrf_token": f"{PRIVATE_CONFIG['user1']['csrf_token']}"
 	})
-	# csrf_token_json_deserializer = f'{"{"}"csrf_token":"{PRIVATE_CONFIG["user1"]["csrf_token"]}"{"}"}'
 	data = {
 		"params"   : native_encText_gen('e2yswfSf2Ac8CUpz', csrf_token_json_deserializer),
 		"encSecKey": encSecKey

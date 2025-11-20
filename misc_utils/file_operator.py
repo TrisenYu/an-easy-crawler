@@ -19,22 +19,13 @@
 """
 文件操作简化函数。
 """
-import os
+from pathlib import Path
 from typing import Optional
+
 from misc_utils.wrappers.err_wrap import (
 	seize_err_if_any,
 	die_if_err
 )
-
-
-def dir2file(dirname: str, filename: str) -> str:
-	"""
-	:param dirname: 给定目录。
-	:param filename: 给定文件名。
-	:return: 各操作系统下到文件的绝对路径
-	"""
-	# os.path.abspath
-	return os.path.join(dirname, filename)
 
 
 def unsafe_read_text(
@@ -53,21 +44,28 @@ def unsafe_read_text(
 
 
 def is_fpath(path: str) -> bool:
-	return os.path.isfile(path)
+	return Path(path).is_file()
+
 
 def is_path_ok(path: str) -> bool:
-	return os.path.exists(path)
+	return Path(path).exists()
+
 
 @seize_err_if_any()
 def write_in_given_mode(
-	path: str, mode: str,
+	path: str,
+	mode: str,
 	payload: str,
 	encoden: Optional[str] = 'utf-8'
 ) -> None:
+
 	if encoden is None:
 		encoden = 'utf-8'
+	if 'b' in mode:
+		encoden = None
 	with open(path, mode, encoding=encoden) as _fd:
 		_fd.write(payload)
+	
 
 
 @seize_err_if_any()
@@ -76,21 +74,24 @@ def append_from_ro_file(
 	src_encd: str = 'utf-8',
 	dst_encd: str = 'utf-8'
 ) -> None:
-	with open(src_path, 'r', encoding=src_encd) as sd:
-		with open(dst_path, 'a', encoding=dst_encd) as dd:
-			while True:
-				tmp = sd.read()
-				if tmp is None or len(tmp) <= 0:
-					break
-				dd.write(tmp)
+	with (open(src_path, 'r', encoding=src_encd) as sd,
+	      open(dst_path, 'a', encoding=dst_encd) as dd):
+		while True:
+			tmp = sd.read()
+			if tmp is None or len(tmp) <= 0:
+				break
+			dd.write(tmp)
 
 
 @seize_err_if_any()
 def seek_to_remove_file(abspath: str) -> None:
-	os.remove(abspath)
+	Path(abspath).unlink()
 
 
 @die_if_err()
 def load_txt_via_file_or_die(abspath: str) -> str:
+	"""
+	这个函数最好只在导入库时定义某些重要的常量出现失败时使用。
+	"""
 	return unsafe_read_text(abspath)
 

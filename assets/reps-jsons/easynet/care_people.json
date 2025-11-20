@@ -1,0 +1,83 @@
+{
+    "follow": [
+        {
+            "py": "JacobCollierMusic",
+            "time": 0,
+            "avatarDetail": {
+                "userType": 2,
+                "identityLevel": 1,
+                "identityIconUrl": "https://p5.music.126.net/obj/wo3DlcOGw6DClTvDisK1/4788940880/1a1f/68f5/b59a/b444b81b88567108ba88194fa29144f5.png"
+            },
+            "userType": 2,
+            "mutual": false,
+            "nickname": "JacobCollierMusic",
+            "follows": 1,
+            "accountStatus": 0,
+            "followeds": 50198,
+            "remarkName": null,
+            "avatarUrl": "http://p1.music.126.net/lNHLsUD483NXKAq5SMkjgQ==/109951172132963088.jpg",
+            "gender": 1,
+            "expertTags": null,
+            "experts": null,
+            "authStatus": 1,
+            "vipType": 0,
+            "followed": true,
+            "userId": 7906375096,
+            "signature": "The Light For Days, my new album, out October 10th💡",
+            "vipRights": {
+                "associator": null,
+                "musicPackage": null,
+                "redplus": null,
+                "redVipAnnualCount": -1,
+                "redVipLevel": 0,
+                "relationType": 0,
+                "memberLogo": null,
+                "extInfo": {}
+            },
+            "blacklist": false,
+            "eventCount": 108,
+            "playlistCount": 2
+        },
+        {
+            "py": "YonderVoice",
+            "time": 0,
+            "avatarDetail": {
+                "userType": 4,
+                "identityLevel": 1,
+                "identityIconUrl": "https://p5.music.126.net/obj/wo3DlcOGw6DClTvDisK1/4874132307/4499/f228/d867/da64b9725e125943ad4e14e4c72d0884.png"
+            },
+            "userType": 4,
+            "mutual": false,
+            "nickname": "YonderVoice",
+            "follows": 11,
+            "accountStatus": 0,
+            "followeds": 40944,
+            "remarkName": null,
+            "avatarUrl": "http://p1.music.126.net/ZRkGK-Ub_HagrIHEVeQV4g==/1399678304282301.jpg",
+            "gender": 1,
+            "expertTags": null,
+            "experts": null,
+            "authStatus": 1,
+            "vipType": 0,
+            "followed": true,
+            "userId": 77891034,
+            "signature": "ラボメン 东方刷屏注意 同人音樂社團Yonder Voice代表、Vocal担当 yondervoice.net 例大祭16新单『蛍標』",
+            "vipRights": {
+                "associator": null,
+                "musicPackage": null,
+                "redplus": null,
+                "redVipAnnualCount": -1,
+                "redVipLevel": 0,
+                "relationType": 0,
+                "memberLogo": null,
+                "extInfo": {}
+            },
+            "blacklist": false,
+            "eventCount": 73,
+            "playlistCount": 29
+        }
+    ],
+    "touchCount": 0,
+    "more": false,
+    "code": 200
+}

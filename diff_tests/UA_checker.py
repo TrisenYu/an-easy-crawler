@@ -17,12 +17,25 @@
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
 
 import unittest
+import random
 
 from fake_useragent import UserAgent
-from misc_utils.header import (
-	fetch_browser_fp_from_ua,
-	fetch_os_name
-)
+from user_agents import parse
+
+
+def fetch_browser_fp_from_ua(inp: str) -> str:
+	return parse(inp).browser.family.lower().split(' ')[0]
+
+
+def fetch_os_name(inp: str) -> str:
+	name = parse(inp).get_os().split(' ')[0]
+	if name in ['Ubuntu']:
+		return 'Linux'
+	elif name == 'Chrome':
+		return random.choice(['Chrome OS', 'Chromium OS'])
+	elif name == 'Mac':
+		return random.choice(["macOS", "iOS"])
+	return name
 
 
 class MyTestCase(unittest.TestCase):
@@ -50,6 +63,6 @@ class MyTestCase(unittest.TestCase):
 
 # Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15
 # Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36
-
+# Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
 if __name__ == '__main__':
 	unittest.main()

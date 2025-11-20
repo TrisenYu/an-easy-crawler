@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 # (c) Author: <kisfg@hotmail.com in 2024,2025>
 # SPDX-LICENSE-IDENTIFIER: GPL2.0-ONLY
-# Last modified at 2025/10/04 星期六 20:46:44
+# Last modified at 2025/10/26 星期日 21:56:22
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -15,8 +15,17 @@
 #
 # You should have received a copy of the GNU Library General Public
 # License along with this library; if not, see <https://www.gnu.org/licenses/>.
+# 
+# TODO: 如果线程执行过程中遇到任何异常，直接通知其它线程结束
+#       管理线程的父进程等待并妥善检查后再退出
+#       另外在测试过程中发现ctrl+C不好使，可能是进度条导致的，需要换用终止信号的机制
+#       还有数据库的回滚，这里一执行出错就必须把sqlite临时生成的journal日志给自动删了
+# TODO: 如果改一下数据库表段的定义，那这里一堆函数不就炸了吗？另外能不能用一个异步的任务队列？
+# TODO: 考虑整个项目的入口怎么写，这个文件最好移到multtp.easynet存放
+# TODO: 如果没有先进的IDE，人怎么读写第三方提供的代码？
+# NOTE<开放性问题>: 有冇图灵机能直接从机器码/混淆文本中读出这些api？
 """
-本程序只用于个人爬取网易云歌单的歌曲名等信息以用于留存备份。
+本程序仅只用于个人对云服务器**道德**地爬取歌单的歌曲名等信息以用于本地留存备份。
 使用方式：
 	通过浏览器提供自身登录后得到的 cookie、歌单 id，然后运行获取。
 
@@ -24,151 +33,286 @@
 
 命令行传参必要的参数：
 	- login_dummy: 傀儡账号。其中 token 和 cookie 必要。
-	- songslist_author: 目标歌单。list-id 必要，
-						且目前 $(sys.platform)-backup-dir 也必要。
+	- songslist_author: 目标歌单。list-id 必要
 
-有关访问数据库、组织建表的逻辑仍在施工中🚧，仍不能保证前后向兼容
-配置好以后至少保证能跑。
+每次提交不保证前后向兼容，正确配置后至少保证能跑。
 """
 
-import sys
 import random
 import threading
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import cpu_count
+from pathlib import Path
 from queue import Queue
 from typing import Optional
-from io import TextIOWrapper
-from functools import partial
-from multiprocessing import cpu_count
-from concurrent.futures import ThreadPoolExecutor
 
+from curl_cffi import Response
+from loguru import logger
 from rich.progress import Progress, TaskID
 
-from misc_utils.file_operator import (
-	write_in_given_mode,
-	append_from_ro_file,
-	seek_to_remove_file,
-	dir2file
-)
-from misc_utils.wrappers.err_wrap import seize_err_if_any
-from misc_utils.http_meths.man import getter, poster
-from misc_utils.opts.json.conf_reader import (
-	PRIVATE_CONFIG,
-	load_json_from_str,
-	deserialize_json_or_die
-)
-from misc_utils.logger import DEBUG_LOGGER
-from misc_utils.header import HEADER
-from misc_utils.ref_types import (
-	SongsResp,
-	SongDetails,
-	PlaylistDetail,
-	PlaylistTrackInfo
-)
-from misc_utils.time_aux import (
-	unix_time,
-	unix_ts_to_time,
-	US_TIME_FORMAT, 
-	unix_ms
-)
-from misc_utils.args_loader import PARSER
-from misc_utils.str_aux import dic2json_str
-from misc_utils.opts.db.sqlite import DBfd
-from misc_utils.diff_calc import myers_diff_comparer, DiffOp
+from configs.args_loader import PARSER
 from crypto_aux.manual_deobfus import netease_encryptor
+from datatypes import *
+from datatypes.easynet.sqlite_types import netease_db_tbl_refs
+from misc_utils import *
+from multtp import *
 
-# TODO: 如果线程执行过程中遇到任何异常，直接通知其它线程结束，管理线程的父进程等待并妥善检查后再退出
+logger.remove()
+logger.add(
+	GLOB_MAIN_LOG_PATH,
+	level='DEBUG',
+	colorize=True,
+	format=GLOB_LOG_FORMAT,
+	rotation="16MB",
+	compression='zip',
+	encoding='utf-8'
+)
 
 _args = PARSER.parse_args()
 del PARSER
 
 _HTTPS: str = 'https://'
-host: str = "music.163.com"
-interface_prefix: str = f'{_HTTPS}interface.{host}'
+MSP: str = "music.163.com"  # music service provider
+# TODO: APIs shall access from configuration
+INTERFACE_PREFIX: str = f'{_HTTPS}interface.{MSP}'
 # just GET
 SONGSLIST_API: str = '/api/v6/playlist/detail?id='
 SONG_SKIM_API: str = '/api/song/detail?ids='
 # POST it
 CONTENT_OF_SONG_PAPI: str = "/weapi/rep/ugc/song/get?csrf_token="
 # useful urls
-target_songslist_url: str = f'{interface_prefix}{SONGSLIST_API}'
-target_songs_url: str = f"{interface_prefix}{SONG_SKIM_API}"
-song_sniper_url: str = f'{_HTTPS}{host}{CONTENT_OF_SONG_PAPI}'
-# concurrency control
+TARGET_SONGSLIST_URL: str = INTERFACE_PREFIX + SONGSLIST_API
+TARGET_SONGS_URL: str = INTERFACE_PREFIX + SONG_SKIM_API
+SONG_SNIPER_URL: str = _HTTPS + MSP + CONTENT_OF_SONG_PAPI
+## 并发控制
 _reveal_queue = Queue(maxsize=_args.threadpool_size)
 _reveal_sema = threading.Semaphore(
 	# 单核 CPU 还有人用吗?
-	min(cpu_count(), _args.threadpool_size//2)
+	min(max(cpu_count() // 2, 1), _args.threadpool_size // 2)
 )
 # database handle
-database_fd: Optional[DBfd] = DBfd(_args.database_path)
+### 看起来比较糟糕，里面是在用动态类型声明出来的表
+## 后续将继续进一步分离与数据库交互的定义，只要发起顺序不影响，
+## 就将代指关系抽象为任务，将其送到并发队列里让数据库一个一个执行
+database_fd: Optional[DBfd] = DBfd(_args.database_path, netease_db_tbl_refs)
+assert database_fd is not None
 
 
-def song_sniper(sid: int, tok: str) -> any:
+def song_sniper(sid: int, cooken: dict[str, str]) -> Optional[Response]:
 	"""
-	返回一个比较庞大的结构
+	提供song_id和token，对单曲精准嗅探
+	如果正常工作，返回结构比较斯蒂庞克的字典
 	"""
-	global host, song_sniper_url
-	origin_payload = dic2json_str({
-		"songId": sid, "csrf_token": tok
+	global MSP, SONG_SNIPER_URL
+	origin_payload = dic2ease_json_str({
+		"songId": sid, "csrf_token": cooken["token"]
 	})
-	assert 'Cookie' in HEADER and			\
-			len(HEADER['Cookie']) != 0 and	\
-			tok in HEADER['Cookie']
-	changed_domains = {
-		"Accept"			: "*/*",
-		"Referer"			: f"{_HTTPS}{host}/reveal/song?songId={sid}&type=2",
-		"Content-Type"		: "application/x-www-form-urlencoded",
-		"Cookie"			: HEADER['Cookie'],
-		"Host"				: host,
-		"Origin"			: _HTTPS + host,
-		"Priority"			: "u=1, i",
-		"Sec-Fetch-Dest"	: "iframe",
-		"TE"				: "trailers",
-		"X-Requested-With"	: "XMLHttpRequest",
-	}
-	encrypted_payload, _ = netease_encryptor(origin_payload)
-	ret = poster(
-		url=song_sniper_url+tok,
-		payload=encrypted_payload,
-		alter_map=changed_domains
+	host_name = _HTTPS + MSP
+	return poster(
+		url=SONG_SNIPER_URL + cooken["token"],
+		payload=netease_encryptor(origin_payload)[0],
+		alter_dict={
+			"Accept"          : "*/*",
+			"Referer"         : host_name + f"/reveal/song?songId={sid}&type=2",
+			"Content-Type"    : "application/x-www-form-urlencoded",
+			"Cookie"          : cooken['cookie'],
+			"Host"            : MSP,
+			"Origin"          : host_name,
+			"Priority"        : "u=1, i",
+			"Sec-Fetch-Dest"  : "iframe",
+			"TE"              : "trailers",
+			"X-Requested-With": "XMLHttpRequest",
+		}
 	)
+
+
+def _extract_hidden_sinfo(sid: int, cooken: dict[str, str]) -> list:
+	"""
+	从云服务器获取单曲的附加信息，将其写入数据库中
+	如果配置有本地保存需求，则视存在情况而尝试获取
+	"""
+	global _reveal_sema, _args, database_fd
+	ret = [None, '', '', '', '', '']
+	texer = lambda x: x if isinstance(x, str) else ''
+
+	_reveal_sema.acquire()
+	threading.Event().wait(timeout=random.uniform(3, 6))
+	# 需要注意并发请求的频率和规模
+	song_obj = song_sniper(sid, cooken)
+	_reveal_sema.release()
+
+
+	if song_obj is None or len(song_obj.text) == 0 or song_obj.status_code != 200:
+		return ret
+	tmp = load_json_from_str(song_obj.text)
+	if tmp is None or 'data' not in tmp:
+		logger.warning(
+			f'No data field was found in response json object when fetching for {sid}'
+		)
+		return ret
+
+	tdat = tmp['data']
+	del tmp, song_obj
+	# TODO: 还有种情况是有但 vip 才能听
+	#       但是还没从混淆js看出什么为什么它懂得无版权的所以然来，这里先鸽
+	# 		另外底下几行的校验有点太丑了
+	flag = None if tdat is None or 'playUrl' not in tdat else (tdat['playUrl'] is not None)
+	tr_url = tdat['playUrl'] if flag is not None and flag else ''
+	_jud = lambda x: tdat is None or x not in tdat or tdat[x] is None
+	_muxer = lambda x: [] if _jud(x) else tdat[x]
+	texpecter = lambda x: texer(_muxer(x))
+	_name_conc = lambda x: ', '.join([_['artistName'] for _ in _muxer(x)])
+	ret = [
+		int(flag) if isinstance(flag, bool) else None,
+		texpecter('lyricContent'), texpecter('transLyricContent'),
+		_name_conc('composeArtists'), _name_conc('arrangeArtists'),
+		_name_conc('lyricArtists')
+	]
+	tmp = texer(_muxer('songName')) + '-' + str(sid)
+	
+	local_tr_path = str(Path(_args.tracks_path).joinpath(streplacer(tmp)+'.mp3').absolute())
+	if tmp != '-' + str(sid):
+		database_fd.update_item_in_tbl(
+			'songs', {'song_id': sid},
+			{'download_path': local_tr_path }
+		)
+	if len(tr_url) <= 0 or not _args.need_download or is_path_ok(local_tr_path):
+		# 如果没有track_url、不需要下载或已经有过音轨的，直接返回
+		return ret
+
+	_reveal_sema.acquire()
+	# 有些音轨大小很大，这里爬虫必须要把时间尽可能放大
+	threading.Event().wait(timeout=random.uniform(6, 18))
+	snd_tr_wrp = getter(url=tr_url, no_header=True)
+	_reveal_sema.release()
+
+	if snd_tr_wrp is None or snd_tr_wrp.status_code != 200:
+		return ret
+	snd_tr = snd_tr_wrp.content
+	del snd_tr_wrp
+	write_in_given_mode(
+		path=local_tr_path,
+		payload=snd_tr, mode='wb'
+	)
+	del snd_tr
 	return ret
 
 
-def _exam_hidden_sinfo(sid: int, tok: str) -> list:
-	global _reveal_sema
-	while True:
-		_reveal_sema.acquire()
-		threading.Event().wait(timeout=random.uniform(3, 6))
-		# 因为数量问题这里不太好完整地收集下来，
-		# 此外需要注意并发请求的频率和规模
-		song_obj = song_sniper(sid, tok)
-		if song_obj is None or len(song_obj.text) == 0:
-			threading.Event().wait(timeout=random.uniform(3, 6))
-			_reveal_sema.release()
-			continue
-		elif song_obj.status_code != 200:
-			return [None, '', '', '', '', '']
-		tmp = load_json_from_str(song_obj.text)
-		if tmp is None or 'data' not in tmp:
-			return [None, '', '', '', '', '']
+@seize_err_if_any()
+def _song_info_to_db(
+	soid: int,
+	a_song: SongDetails,
+	tr_info: PlaylistTrackInfo,
+	final_dura: str,
+	attacher: list
+) -> None:
+	"""
+	soid: 歌单在数据库(目前为sqlite)内的观测ID
+	a_song: 上一阶段获得的歌曲详情json
+	tr_info: 在歌单内的歌曲信息
+	final_dura: 最终计算出的歌曲时长
+	attacher: [play_url_is_available, lyric, translation, composer, arranger, lyricist]
+	"""
+	global _reveal_sema, _args, database_fd
+	# TODO: 后续做分布式同步的话cover域就不要同步，但要能基于这个域来传实际的cover
+	covers_path = Path(_args.covers_path)
+	curr_cover_name = streplacer(
+		a_song['album']['name'] + '-' + str(a_song['album']['id'])
+	)
+	local_cv_path = str(covers_path / curr_cover_name)
+	if _args.need_download and a_song['album']['picUrl'] is not None and \
+		len(list(covers_path.rglob(f'{curr_cover_name}.'))) == 0:
 
-		tdat = tmp['data']
-		if 'playUrl' not in tdat:
-			flag = None
+		_reveal_sema.acquire()
+		threading.Event().wait(timeout=random.uniform(3, 12))
+		_wrapper = getter(url=a_song['album']['picUrl'], no_header=True)
+		_reveal_sema.release()
+	else:
+		_wrapper = None
+	database_fd.renew_if_exist_else_insert(
+		'albums', {'album_id': a_song['album']['id']}, {
+			"company"     : a_song['album']['company'],
+			'name'        : a_song['album']['name'],
+			"publish_time": unix_ts_to_time(a_song['album']['publishTime'] / 1000)
+		}
+	)
+
+	if _wrapper is None or _wrapper.status_code != 200:
+		pic_bytes = b''
+		local_cv_path = local_cv_path[:-4] + '.null'
+		logger.warning(f'unable to fetch {soid}, url: {a_song["album"]["picUrl"]}.')
+	else:
+		pic_bytes = _wrapper.content
+		_header = pic_bytes[:8].hex().lower() if len(pic_bytes) >= 8 else pic_bytes.hex()
+		if _header == 'ffd8ffe000104a46':
+			local_cv_path += '.jpg'
+		elif _header == '89504e470d0a1a0a':
+			local_cv_path += '.png'
 		else:
-			# TODO: 还有种情况是有，但 vip 才能听
-			# 但是还没从混淆js看出什么为什么它懂得无版权的所以然来，这里先鸽
-			flag = tdat['playUrl'] is not None
-		_jud = lambda x: x not in tdat or tdat[x] is None
-		_muxer = lambda x: [] if _jud(x) else tdat[x]
-		_texer = lambda x: x if isinstance(x, str) else ''
-		lyric = _texer(_muxer('lyricContent'))
-		trans = _texer(_muxer('transLyricContent'))
-		composers = ', '.join([_['artistName'] for _ in _muxer('composeArtists')])
-		arrangers = ', '.join([_['artistName'] for _ in _muxer('arrangeArtists')])
-		lyricists = ', '.join([_['artistName'] for _ in _muxer('lyricArtists')])
-		return [flag, lyric, trans, composers, arrangers, lyricists]
+			logger.warning(f'unknown file preamble:`{pic_bytes}` was found for {soid}')
+			local_cv_path += '.unk'
+
+	if _args.need_download and not is_path_ok(local_cv_path):
+		# TODO: 这里只是简单以路径名来判断文件是否存在
+		#       如果文件相比云上获取的文件不同，是不是要验证哈希？留本地还是留云端传过来的？
+		#       如何判断和你说话的那个人是你认识的那个人
+		write_in_given_mode(
+			local_cv_path,
+			payload=pic_bytes,
+			mode='wb'
+		)
+	del _wrapper, pic_bytes
+	database_fd.update_item_in_tbl(
+		'albums', {'album_id': a_song['album']['id']},
+		{"cover": local_cv_path}
+	)
+	# 这两个域出现在json就有点太割裂了
+	_pos, _num = a_song['position'], a_song['no']
+	assert isinstance(_pos, int) and isinstance(_num, int)
+	if _pos == _num:
+		position = 1 if _num == 0 else _num
+	elif _num > _pos:
+		position = _num
+	else:
+		position = _pos
+	del _pos, _num
+	database_fd.update_item_in_tbl(
+		"songs", {"song_id": a_song['id']}, {
+			'tr_pos'     : position,
+			'album_id'   : a_song['album']['id'],
+			"name"       : a_song['name'],
+			'duration'   : final_dura,
+			"fetchable"  : attacher[0],
+			"lyrics"     : attacher[1].replace('\n', '\\n'),
+			"translatext": attacher[2].replace('\n', '\\n'),
+			"arrangers"  : attacher[3],
+			"composers"  : attacher[4],
+			"lyricists"  : attacher[5],
+			"vocals"     : ', '.join([v['name'] for v in a_song['artists']]),
+			"subtitle"   : ', '.join(a_song['alias']),
+		}
+	)
+	by_whom = tr_info['uid']
+	database_fd.renew_if_exist_else_insert(
+		'users', {'user_id': by_whom}
+	)
+	_ubid = database_fd.renew_if_exist_else_insert(
+		'user_behaviors', {'soid': soid, 'user_id': by_whom}
+	)
+	if isinstance(_ubid, int):
+		ubid = _ubid
+		logger.debug(f'apply for a new ubid: {ubid}')
+	elif _ubid is not None:
+		assert isinstance(_ubid, list) and len(_ubid) == 1
+		ubid: int = _ubid[0]['ubid']
+		logger.debug(f'ubid is not None: {ubid}')
+	else:
+		raise ValueError('unable to properly generate ubid!')
+	database_fd.update_item_in_tbl(
+		'songs_status_in_songslists',
+		{'song_id': a_song['id'], 'ubid': ubid},
+		{"op_time": unix_ts_to_time(tr_info['at'] / 1_000.0, US_TIME_FORMAT)}
+	)
 
 
 @seize_err_if_any()
@@ -177,83 +321,19 @@ def process_song_info_in_chunk(
 	songs_detail: list[SongDetails],
 	play_list: list[PlaylistTrackInfo]
 ) -> None:
-	global _reveal_sema, _reveal_queue, database_fd
-
-	st_pos = integrated_conf['st_pos']
+	global _reveal_queue
 	soid = integrated_conf['soid']
-	bar_id = integrated_conf['taskID']
 	for idx, a_song in enumerate(songs_detail):
-		
 		duration = a_song['duration']
 		mins, ms = duration // 60_000, duration % 1_000
-		sec = (duration - mins * 60_000 - ms) % 1_000
+		sec = (duration - mins * 60_000 - ms) // 1_000
 		final_dura = f'{mins}:{sec:02d}.{ms:03d}'
 		del mins, sec, ms, duration
 
-		song_id = a_song['id']
-		# TODO: 如果数据库里能找而且信息都是全的，就没必要去再次请求，想办法保证这一点并给个优化
-		attacher = _exam_hidden_sinfo(song_id, integrated_conf['token'])
-		copyleft = attacher[0]
-		_lyc, _trl = attacher[1], attacher[2]
-		arrangers, composers = attacher[3], attacher[4]
-		lyricists = attacher[5]
+		attacher = _extract_hidden_sinfo(a_song['id'], integrated_conf)
+		_song_info_to_db(soid, a_song, play_list[idx], final_dura, attacher)
 		del attacher
-		_reveal_sema.release()
-
-		# 一些内容可以直接传给数据库来做
-		album_publish_time: int = a_song['album']['publishTime']
-		database_fd.insert_if_not_exist_else_renew(
-			'albums', {'album_id': a_song['album']['id'] }, { 
-				"company": a_song['album']['company'],
-				'name': a_song['album']['name'],
-				"publish_time": unix_ts_to_time(album_publish_time/1000)
-			}
-		)
-		# 有些歌的歌词和翻译可能在后面会加入进来
-		# 最好还是先插入然后再更新这两个域
-		database_fd.update_item_in_tbl(
-			"songs", { "song_id": song_id }, {
-				'tr_pos': a_song['position'], 
-				'album_id': a_song['album']['id'],
-				"name": a_song['name'],
-				'duration': final_dura,
-				"lyrics": _lyc.replace('\n', '\\n'),
-				"translatext": _trl.replace('\n', '\\n'),
-				"vocals": ', '.join([v['name'] for v in a_song['artists']]), 
-				"arrangers": arrangers, "lyricists": lyricists, 
-				"composers": composers, "fetchable": copyleft, 
-				"subtitle": ', '.join(a_song["alias"])
-		})
-		by_whom = play_list[idx]['uid']
-		status, _ = database_fd.is_item_in_tbl(
-			('user_id',), (by_whom,), 'users'
-		)
-		if not status:
-			database_fd.insert_to_tbl(
-				'users', { 'user_id': by_whom }
-			)
-		_tmp_ubid = database_fd.insert_if_not_exist_else_renew(
-			'users_behaviors', { 'soid': soid, 'user_id': by_whom }
-		)
-		if _tmp_ubid is not None:
-			ubid = _tmp_ubid
-		else:
-			status, row = database_fd.is_item_in_tbl(
-				('soid', 'user_id'), (soid, by_whom),
-				'users_behaviors'
-			)
-			# 没有出现过的项目，这个时候才应该要插入
-			ubid = row["ubid"] \
-				if status else database_fd.insert_if_not_exist_else_renew(
-				'users_behaviors', { 'soid': soid, 'user_id': by_whom }
-			)
-			del status, row
-		database_fd.update_item_in_tbl(
-			'songs_status_in_songslists',
-			{ 'song_id': song_id, 'ubid': ubid },
-			{ "op_time": unix_ts_to_time(play_list[idx]['at']/1_000, US_TIME_FORMAT) }
-		)
-		_reveal_queue.put((bar_id, 0.6))
+		_reveal_queue.put((integrated_conf['taskID'], 1))
 
 
 @seize_err_if_any()
@@ -264,47 +344,51 @@ def query_song_detail_in_range(
 	play_list: list[PlaylistTrackInfo]
 ) -> None:
 	"""
-	{
-		"res-song-get": {
-			type: "GET",
-			url: "/api/song/detail",
-			format: function(m1x, e1x) {
-				if (!!m1x.songs && m1x.songs.length > 0)
-					m1x.song = m1x.songs[0];
-				else
-					m1x.song = bqK0x;
-				delete m1x.songs;
-				return xr5w(m1x, e1x)
-			},
-			filter: function(e1x) {
-				e1x.data.ids = "[" + e1x.data.id + "]"
-			}
+	"res-song-get": {
+		type: "GET",
+		url: "/api/song/detail",
+		format: function(m1x, e1x) {
+			if (!!m1x.songs && m1x.songs.length > 0)
+				m1x.song = m1x.songs[0];
+			else
+				m1x.song = bqK0x;
+			delete m1x.songs;
+			return xr5w(m1x, e1x)
+		},
+		filter: function(e1x) {
+			e1x.data.ids = "[" + e1x.data.id + "]"
 		}
 	}
-	:return: None
 	"""
-	global target_songs_url, _reveal_sema, _reveal_queue
-	# 随机等 1 ～ 10 秒
-	threading.Event().wait(timeout=random.randint(1, 10))
+	global TARGET_SONGS_URL, _reveal_sema, _reveal_queue, MSP, _HTTPS
+	# 随机等 5~9 秒
+	threading.Event().wait(timeout=random.uniform(5, 9))
 	res = getter(
-		url=f'{target_songs_url}{[_s["id"] for _s in play_list]}',
-		err_info=f'Catch an Exception in range [{l}, {r}): '
+		url=f'{TARGET_SONGS_URL}{[_s["id"] for _s in play_list]}',
+		err_info=f'Catch an Exception in range [{l}, {r}): ',
+		alter_dict={
+			'Cookie'    : integrated_conf['cookie'],
+			'Host'      : MSP,
+			'Referer'   : _HTTPS + MSP + '/',
+			'Connection': 'keep-alive'
+		}
 	)
 	_check = lambda x: x is None or len(x.text) == 0 or x.status_code != 200
-	songs_detail: Optional[SongsResp] = \
-			None if _check(res) else	\
-			load_json_from_str(res.text)
+	songs_detail: Optional[SongsResp] = None if _check(res) else \
+		load_json_from_str(res.text)
+	# logger.debug(f'{songs_detail}')
+	if songs_detail is None:
+		logger.warning(f'songs_detail is None at {l} - {r}, the res.text is: {res.text}')
+		return
 	del res
-
-	nxt_merger = {
-		'token': integrated_conf['token'],
-		'taskID': bar_id,
-		'st_pos': l,
-		'soid': integrated_conf['soid'],
-	}
-	process_song_info_in_chunk(nxt_merger, songs_detail['songs'], play_list)
-	_reveal_queue.put((bar_id, 0.4*(r-l)))
-	return
+	process_song_info_in_chunk(
+		{
+			'cookie': integrated_conf['cookie'],
+			'token' : integrated_conf['token'],
+			'soid'  : integrated_conf['soid'],
+			'taskID': bar_id
+		}, songs_detail['songs'], play_list
+	)
 
 
 def check_progress_state(prog_man: Progress) -> None:
@@ -331,233 +415,311 @@ def songs_tasks_distributor(
 	split_size = integrated_conf['split_size']
 
 	lena = len(task_list)
+	if lena == 0:
+		return
 	other, reminder = lena // split_size, lena % split_size
-	tasks_queue = [(_*split_size, (_+1)*split_size) for _ in range(0, other)]
-	tasks_queue.append((other*split_size, (other*split_size)+reminder))
+	tasks_queue = [(_ * split_size, (_ + 1) * split_size) for _ in range(0, other)]
+	tasks_queue.append((other * split_size, (other * split_size) + reminder))
 
-	# 缩进多了就成了横躺着的shxt
+	# NOTE: 缩进多了就成了横躺着的shxt
 	with Progress() as progress_man:
-		_prog_rec = []
-		for _ in range(len(tasks_queue)):
-			tup = tasks_queue[_]
-			_tmp = progress_man.add_task(
-				# 这辈子把十万首歌整理到一个常听的歌单里很难
-				# 特别是定期的观测会让这种数量级的数据爆炸式增长
-				f"Range:[{tup[0]:>4d},{tup[1]:>4d})",
-				total=tup[1]-tup[0]
+		prog_rec = [
+			progress_man.add_task(
+				f"Range:[{lp:>4d},{rp:>4d})",
+				total=rp - lp
 			)
-			_prog_rec.append(_tmp)
-		# 由于加了进度条，线程池需要多扩一个给进度条线程
-		nxt_merger = {
-			'token': integrated_conf['token'],
-			'soid': integrated_conf['soid'],
+			for lp, rp in tasks_queue
+		]
+		nxt_dict = {
+			'cookie': integrated_conf['cookie'],
+			'token' : integrated_conf['token'],
+			'soid'  : integrated_conf['soid'],
 		}
-		with ThreadPoolExecutor(max_workers=workers+1) as per_mission:
+		# 由于加了进度条，线程池需要多扩一个给进度条线程
+		with ThreadPoolExecutor(max_workers=workers + 1) as per_mission:
 			per_mission.submit(check_progress_state, progress_man)
 			for i, choice in enumerate(tasks_queue):
 				per_mission.submit(
-					fn, # 要调用的函数
-					_prog_rec[i], nxt_merger,
+					fn,  # 要调用的函数
+					prog_rec[i], nxt_dict,
 					choice[0], choice[1],
 					task_list[choice[0]:choice[1]]
 				)
 			del task_list
 
 
+# TODO: 如果爬取失败，必须要有一个判断的机制来确定要不要commit数据库，不然就commit了不完整的数据
+
+
+@seize_err_if_any()
+def _renew_songslist_status(
+	soid: int,
+	creator_id: int,
+	updatime: str,
+	differs: list
+) -> tuple[list, int]:
+	global database_fd
+	_ubid = database_fd.query_items_in_tbl(
+		'user_behaviors',
+		{'soid': soid, 'user_id': creator_id},
+		{'ubid': 'DESC'}, ['ubid'],
+		limit_num=1
+	)
+	if _ubid is None or (isinstance(_ubid, list) and len(_ubid) == 0):
+		ubid = database_fd.insert_to_tbl(
+			'user_behaviors',
+			{'soid': soid, 'user_id': creator_id}
+		)
+	else:
+		assert isinstance(_ubid, list) and len(_ubid) == 1
+		logger.debug(str(type(_ubid)) + str(len(_ubid)) + str(_ubid[0]))
+		ubid = _ubid[0]['ubid']
+
+	retlist, upd_songs, songstatus = [], [], []
+	for idx, edit_item in enumerate(differs):
+		if edit_item[0] == DiffOp.keep:
+			retlist.append(edit_item[1][0])
+			continue
+		song_id, pos = edit_item[1][0], edit_item[1][1] + 1
+		upd_songs.append((song_id,))
+		songstatus.append(
+			# song_id, attr, pos
+			(song_id, f'{str(edit_item[0]).split(".")[-1]}', pos)
+		)
+		if edit_item[0] == DiffOp.delete:
+			continue
+		retlist.append(song_id)
+
+	merge_dict = {}
+	for song_id, attr, pos in songstatus:
+		if song_id not in merge_dict:
+			merge_dict[song_id] = {'delete_pos': None, 'insert_pos': None}
+		merge_dict[song_id][f'{attr}_pos'] = pos
+	songstatus = [
+		(ubid, *(song_id, val['delete_pos'], val['insert_pos']), updatime)
+		for song_id, val in merge_dict.items()
+	]
+	del merge_dict
+
+	database_fd.insert_multivals_to_tbl(
+		'songs', ('song_id',),
+		upd_songs, ['song_id']
+	)
+	database_fd.insert_multivals_to_tbl(
+		'songs_status_in_songslists',
+		('ubid', 'song_id', 'delete_pos', 'insert_pos', 'op_time'),
+		songstatus, ['song_id', 'ubid']
+	)
+	del upd_songs, songstatus, differs
+	return retlist, ubid
+
+
+@seize_err_if_any()
+def _update_current_songslist(
+	slid: int,
+	songslist_ids: list[int],
+	len_ret: int  # 数据库内的长度
+) -> None:
+	"""
+	根据给定的歌单id和歌单内变动的歌曲id列表来更新整个歌单内容
+	"""
+	global database_fd
+	database_fd.insert_multivals_to_tbl(
+		'curr_songslists', ('pos_val', "songslist_id", 'song_id'),
+		[(idx + 1, slid, item) for idx, item in enumerate(songslist_ids)],
+		['songslist_id', 'pos_val']
+	)
+	logger.debug(f'{len(songslist_ids)}')
+	for idx in range(len(songslist_ids), len_ret):
+		database_fd.remove_item_in_tbl(
+			'curr_songslists',
+			{'pos_val': idx + 1, 'songslist_id': slid}
+		)
+
+
+@die_if_err()
+def _main_thread_db_ops(
+	inpict: PlaylistDetail
+) -> tuple[int, list[PlaylistTrackInfo]]:
+	"""
+	:param inpict: input_dict
+	解释起来比较复杂，自己看代码吧
+	"""
+	global database_fd
+
+	creator_info = inpict['creator']
+	creator_id = creator_info['userId']
+	slid = inpict['id']
+	print(f'For songslist {slid}')
+	st_time = unix_time()
+	database_fd.renew_if_exist_else_insert(
+		'users',
+		{'user_id': creator_id}, {
+			'name' : creator_info['nickname'],
+			'brief': creator_info['signature'].replace('\n', '\\n')
+		}
+	)
+	del creator_info
+	database_fd.renew_if_exist_else_insert(
+		'songslists',
+		{'songslist_id': slid, 'creator_id': creator_id},
+		{'birthday': unix_ts_to_time(inpict['createTime'] / 1_000.0)}
+	)
+	soid = database_fd.insert_to_tbl(
+		'songslists_observations', {
+			'songslist_id'    : slid,
+			'observer_id'     : creator_id,
+			'observation_time': unix_ts_to_time(unix_ms() / 1_000.0)
+		}
+	)
+	assert soid is not None
+
+	def _init_sl_attr_tbl(name: str, val: int | str) -> None:
+		# initiate songslist attributes-related tables
+		database_fd.renew_if_exist_else_insert(
+			name + '_rec', {'soid': soid}, {name: val}
+		)
+
+	_init_sl_attr_tbl('ref_hit', inpict['playCount'])
+	_init_sl_attr_tbl('liker', inpict['subscribedCount'])
+	_init_sl_attr_tbl('share_cnt', inpict['shareCount'])
+	_init_sl_attr_tbl('description', inpict['description'])
+	_init_sl_attr_tbl('title', inpict['name'])
+	print(f'{unix_time() - st_time} after sl_attrs')
+
+	records = database_fd.query_items_in_tbl(
+		"curr_songslists",
+		{"songslist_id": slid},
+		{'pos_val': ''},
+		["song_id"]
+	)
+
+	songslist_ids = [] if records is None else [_["song_id"] for _ in records]
+	len_ret = -1 if records is None else len(records)
+	playlist, updatime = inpict["trackIds"], inpict["updateTime"]
+	print('playlist len is', len(playlist))
+	del records, inpict
+
+	differs = myers_diff_comparer(songslist_ids, [_["id"] for _ in playlist])
+	print(f'{unix_time() - st_time} after myers-algorithm, diff-len is {len(differs)}')
+
+	songslist_ids, ubid = _renew_songslist_status(
+		soid, creator_id,
+		unix_ts_to_time(updatime / 1000), differs
+	)
+	print(f'{unix_time() - st_time} after _renew_songslist_status')
+	del differs
+
+	_update_current_songslist(slid, songslist_ids, len_ret)
+	# 已经有的就不用再去请，只请求没有备份过的
+	rows = database_fd.query_null_items_in_tbl(
+		'songs_status_in_songslists',
+		# 通过行为表选当前新插入到歌单里的歌曲列表
+		{'ubid': ubid}, ['delete_pos']
+	)
+	# TODO: 或者也看因为位置调整而产生变动的？
+	print(f'Time-consumption-on-setup-Tables: {unix_time() - st_time}s. Begin Tasks...')
+	inpict = set() if rows is None else set([_['song_id'] for _ in rows])
+	songslist_ids = list(filter(lambda x: x['id'] in inpict, playlist))
+	del playlist, inpict, rows, ubid
+	return soid, songslist_ids
+
+
 @seize_err_if_any()
 def songslist_info_gen(
-	tok: str,
-	workersnum: int,
+	cooken: dict[str, str],
+	worker_num: int,
 	crawl_conf: dict,
-	split_size: int=100
+	split_size: int = 100
 ) -> None:
 	"""
 	分析：core_52f85c5f5153a7880e60155739395661.js^[1]下
-	第 69 行匿名函数 (function()) 里有
+	的某个匿名函数 (function()) 里有
 
-	{
-		"res-playlist-get": {
-			type: "GET",
-			url: "/api/v6/playlist/detail",
-			format: function(m1x, e1x) {
-				var res = j1x.bsN0x(m1x);
-				res.playlist = res.result;
-				delete res.result;
-				return xr5w(res, e1x)
-			}
+	"res-playlist-get": {
+		type: "GET",
+		url: "/api/v6/playlist/detail",
+		format: function(m1x, e1x) {
+			var res = j1x.bsN0x(m1x);
+			res.playlist = res.result;
+			delete res.result;
+			return xr5w(res, e1x)
 		}
 	}
 
 	只需传 id 列表就可以获取到列表内的所有歌曲。
 	列表长度不能定得太大，否则后果自负
 
-	- [1]: 2025/02/08: core_70d0eefb570184a2b62021346460be95.js，
+	- [1]: 2025/02/08: core_70d0eefb570184a2b62021346460be95.js
 	       反正理解为 core.js。
 	"""
-	global interface_prefix, target_songslist_url, database_fd
-
-	response =getter(
-		url=f"{target_songslist_url}{crawl_conf['list-id']}",
-		err_info='fatal error while fetching songslist: '
+	global TARGET_SONGSLIST_URL, database_fd, MSP, _HTTPS
+	response = getter(
+		url=f"{TARGET_SONGSLIST_URL}{crawl_conf['list-id']}",
+		err_info='fatal error while fetching songslist: ',
+		no_header=True
 	)
 
 	if response is None:
-		DEBUG_LOGGER.error('unable to fetch any songslist info')
+		logger.error(f'unable to fetch any songslist info for {crawl_conf["list-id"]}')
 		return
 	elif response.status_code != 200:
-		DEBUG_LOGGER.error(response.status_code, response.text)
+		logger.error(f'{response.status_code}, {response.text}')
 		exit(1)
-
-	serializer = response.text
-	tmp: PlaylistDetail = deserialize_json_or_die(serializer, 'playlist')
-	curr_time = unix_ms()
-	del serializer, response
-
-	songslist_updatetime = unix_ts_to_time(tmp["updateTime"]/1_000)
-	songslist_birthday = unix_ts_to_time(tmp["createTime"]/1_000)
-	slid = tmp["id"] # songslist_id
-	track_cnt, share_cnt = tmp["trackCount"], tmp["shareCount"]
-	likers_num, ref_hits = tmp["subscribedCount"], tmp["playCount"]
-	description = tmp["description"]
-	songslist_title = tmp["name"]
-
-	creator_info = tmp["creator"]
-	creator_id = creator_info["userId"]
-	creator_name = creator_info["nickname"]
-	creator_brief = creator_info['signature'].replace('\n', '\\n')
-	del creator_info
-	playlist = tmp['trackIds']
-	del tmp
-	print(f'For songslist-id {slid}')
-	st_time = unix_time()
-	# DB insert operations
-	database_fd.insert_if_not_exist_else_renew(
-		'users',
-		{ 'user_id': creator_id },
-		{ 'name': creator_name, 'brief': creator_brief }
-	)
-	database_fd.insert_if_not_exist_else_renew(
-		'songslists',
-		{ 'songslist_id': slid, 'user_id': creator_id },
-		{ 'birthday': songslist_birthday }
-	)
-	soid = database_fd.insert_to_tbl(
-		'songslists_observation', {
-		'songslist_id': slid, 'user_id': creator_id, 
-		'observation_time': unix_ts_to_time(curr_time/1000)
-	})
-	assert soid is not None
-	def _songslist_attr_tbl_init(name: str, val: int | str) -> None:
-		database_fd.insert_if_not_exist_else_renew(name+'_rec', { 'soid': soid }, { name: val })
-	_songslist_attr_tbl_init('ref_hits', ref_hits)
-	_songslist_attr_tbl_init('likers', likers_num)
-	_songslist_attr_tbl_init('share_cnt', share_cnt)
-	_songslist_attr_tbl_init('description', description)
-	_songslist_attr_tbl_init('titles', songslist_title)
-	ubid = database_fd.query_items_in_tbl(
-		'users_behaviors',
-		{ 'soid': soid, 'user_id': creator_id },
-		'ubid', True
-	)
-	if ubid is None or len(ubid) == 0:
-		ubid = database_fd.insert_to_tbl(
-			'users_behaviors', 
-			{ 'soid': soid, 'user_id': creator_id }
-		)
-	curr_idxs = [_["id"] for _ in playlist]
-	sql_records = database_fd.query_items_in_tbl(
-		"curr_songslists",
-		{ "songslist_id": slid },
-		'pos_val'
-	)
-	songslist_ids = [_["song_id"] for _ in sql_records] if sql_records is not None else []
-	# 先查是否已有歌单的维护记录
-	# 如果有直接拿来像git diff一样比较差异
-	# 需要看的是上一次的内容？
-	# 但是上一次内容是差异，如果要看，每次就都需要在这里算第一次看积累到现在的差异
-	# 不妨将这个内容单独记录为位置信息表
-	# 每次只需要联合查询，这样就不用折腾来折腾去了，不单独记录
-	len_ret = len(sql_records) if sql_records is not None else -1
-	del sql_records, creator_id, creator_name, creator_brief
-	del description, songslist_title, share_cnt, likers_num, ref_hits
-	differs = myers_diff_comparer(songslist_ids, curr_idxs)
-	songslist_ids = []
-	for idx, edit_item in enumerate(differs):
-		if edit_item[0] == DiffOp.keep:
-			songslist_ids.append(edit_item[1][0])
-			continue
-		database_fd.insert_if_not_exist_else_renew('songs', { 'song_id': edit_item[1][0] })
-		database_fd.insert_if_not_exist_else_renew(
-			'songs_status_in_songslists', {
-				'song_id': edit_item[1][0], 
-				'ubid': ubid
-			}, { f'{str(edit_item[0]).split(".")[-1]}_pos': edit_item[1][1]+1 }
-		)
-		if edit_item[0] == DiffOp.delete:
-			continue
-		songslist_ids.append(edit_item[1][0])
-	del differs, curr_idxs
-	for idx, item in enumerate(songslist_ids):
-		if idx < len_ret:
-			database_fd.update_item_in_tbl(
-				"curr_songslists",
-				{ "pos_val": idx+1, "songslist_id": slid }, 
-				{ 'song_id': item }
-			)
-		else:
-			database_fd.insert_to_tbl(
-				'curr_songslists', 
-				{ 'pos_val': idx+1, "songslist_id": slid, 'song_id': item }
-			)
-	for idx in range(len(songslist_ids), len_ret):
-		database_fd.remove_item_in_tbl(
-			'curr_songslists',
-			{ 'pos_val': idx+1, 'songslist_id': slid }
-		)
-	ed_time = unix_time()
-	# 已经有的不用再去请，只请求没有备份过的
-	rows = database_fd.query_null_items_in_tbl(
-		'songs_status_in_songslists', 
-		{ 'ubid': ubid },
-		['delete_pos']
-	)
-	tmp = set([_['song_id'] for _ in rows ]) if rows is not None else set()
-	adjust_playlist = []
-	del rows, ubid, songslist_ids
-	# 除非是什么也没有才完全获取
-	for p in playlist:
-		if p['id'] not in tmp:
-			continue
-		adjust_playlist.append(p)
-	del playlist
-
+	# NOTE: 怎么可能不想用pydantic？只是这里用会导致奇怪的死循环，所以暂时用弱一点的类型dict
+	songslist_info: PlaylistDetail = deserialize_json_or_die(response.text, 'playlist')
+	del response
+	soid, adjust_playlist = _main_thread_db_ops(songslist_info)
+	del songslist_info
 	integrated_conf = {
-		'token': tok,
+		'cookie'    : cooken['cookie'],
+		'token'     : cooken['token'],
 		'split_size': split_size,
-		'soid': soid,
-		'worker_num': workersnum
+		'soid'      : soid,
+		'worker_num': worker_num
 	}
-
-	print(f'Time-consumption-on-setup-Tables: {ed_time - st_time}s. Begin Tasks...')
 	songs_tasks_distributor(integrated_conf, adjust_playlist)
+	database_fd.commit()
+	database_fd.close()
 
 
 if __name__ == '__main__':
 	spyon: str = _args.songslist_author
 	dummy: str = _args.login_dummy
-	workload = _args.threadpool_size
-	assert 1 <= workload  # 不设上限，但至少要有。
-	del _args
+	assert 1 <= _args.threadpool_size  # 不设上限，但至少要有。
+	dummy_cooken = {
+		'cookie': PRIVATE_CONFIG['netease'][dummy]['cookie'],
+		'token' : PRIVATE_CONFIG['netease'][dummy]['csrf_token']
+	}
+	assert len(dummy_cooken["token"]) == 32 and \
+	       f'__csrf={dummy_cooken["token"]}' in dummy_cooken["cookie"]
+	songslist_info_gen(
+		dummy_cooken, _args.threadpool_size,
+		PRIVATE_CONFIG['netease'][spyon]
+	)
 
-	dummy_conf: dict[str, str] = PRIVATE_CONFIG[dummy]
-	victim_conf: dict[str, str] = PRIVATE_CONFIG[spyon]
 
-	csrf_token, _cookie = dummy_conf["csrf_token"], dummy_conf["cookie"]
-	del dummy_conf
-	assert len(csrf_token) == 32 and f'__csrf={csrf_token}' in _cookie
+	"""
+	### 如果想跑局部，下面提供两个例子
+	## 案例1
+	_resp = song_sniper(2754489208, dummy_cooken)
+	print((_resp.status_code, _resp.text) if _resp is not None else None)
 
-	HEADER["Cookie"] = _cookie
-	HEADER["Host"] = host
-	HEADER["Referer"] = f"{_HTTPS}{host}/"
-	HEADER["Connection"] = "keep-alive"
-	songslist_info_gen(csrf_token, workload, victim_conf)
+	## 案例2
+	for sid in [2757833873]:
+		print(sid)
+		_attacher = _extract_hidden_sinfo(sid, dummy_cooken)
+		database_fd.update_item_in_tbl(
+			"songs",
+			{"song_id": sid}, {
+			"fetchable"  : _attacher[0],
+			"lyrics"     : _attacher[1].replace('\n', '\\n'),
+			"translatext": _attacher[2].replace('\n', '\\n'),
+			"arrangers"  : _attacher[3],
+			"composers"  : _attacher[4],
+			"lyricists"  : _attacher[5]
+		}
+	)
+	database_fd.commit()
+	database_fd.close()
+	"""

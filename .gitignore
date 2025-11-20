@@ -1,38 +1,39 @@
 # 文件
+draft.*
+*.env
 *.tmp
 *.dll
 *.so
 *.exe
 *.mp3
 *.pyc
-uv.lock
+tmp*
 configs/config.json
 workspace.xml
 wtf.txt
 
 # 目录
-assets/stat/bot_hits.log
-assets/stat/bot_refs.log
-assets/stat/outputs/*
-!assets/stat/outputs/.gitkeep
 assets/dyn/*
 !assets/dyn/.gitkeep
 assets/stat/logs/*
 !assets/stat/logs/.gitkeep
+assets/stat/tracks/*
+!assets/stat/tracks/.gitkeep
+assets/stat/covers/*
+!assets/stat/covers/.gitkeep
+# 虚拟环境需要用户自己生成
 .venv/
 refs/*
 tmp/
-tmp*
-js_utils/ref/
-diff_tests/js_src_testcase/obfus
+_js_utils/ref/
+diff_tests/js_src_testcase/obfus/*
 diff_tests/_trial_temp/
+
+
+# 代码编辑工具或者操作系统生成的乱七八糟的东西
 __pycache__/
-
-# 代码编辑工具等乱七八糟的东西
-
 .idea
 .vscode
 .dist
 .pytest_cache
 .DS_Store
-shelf/

@@ -5,3 +5,6 @@
 # Created at 2025/09/28 星期日 19:51:00
 # Last modified at 2025/09/28 星期日 19:51:03
 
+__author__ = 'kisfg@hotmail.com'
+__date__ = '2024/09 - 2025'
+__license__ = 'GPL2.0-ONLY'

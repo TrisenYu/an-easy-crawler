@@ -1,0 +1,141 @@
+{
+    "# GLOBAL-API": "/api/song/detail?ids=[id1, id2, id3]",
+    "# HTTP-METH": "get",
+    "# HEADER-REQUIRE": false,
+    "# MP3 Url": "有时效性，需要现场获取类似的json后再根据url来获取320kBits采样率的MP3文件",
+    "# RESP-SPLITE-LINE": "-----------------------------------------------------------",
+    "message": "提交成功",
+    "data": {
+        "songId": 2644531376,
+        "songName": "モリヤスワコ (feat. Tracy × らっぷびと × miko)",
+        "artistRepVos": [
+            {
+                "artistId": 149088,
+                "artistName": "Tracy",
+                "alias": null,
+                "headPicUrl": null,
+                "area": null,
+                "type": null,
+                "desc": null,
+                "production": null,
+                "avatarPicUrl": null,
+                "transName": null
+            },
+            {
+                "artistId": 61534939,
+                "artistName": "みゅい",
+                "alias": null,
+                "headPicUrl": null,
+                "area": null,
+                "type": null,
+                "desc": null,
+                "production": null,
+                "avatarPicUrl": null,
+                "transName": null
+            },
+            {
+                "artistId": 15245,
+                "artistName": "らっぷびと",
+                "alias": null,
+                "headPicUrl": null,
+                "area": null,
+                "type": null,
+                "desc": null,
+                "production": null,
+                "avatarPicUrl": null,
+                "transName": null
+            },
+            {
+                "artistId": 16114,
+                "artistName": "Alternative ending",
+                "alias": null,
+                "headPicUrl": null,
+                "area": null,
+                "type": null,
+                "desc": null,
+                "production": null,
+                "avatarPicUrl": null,
+                "transName": null
+            }
+        ],
+        "songSubTitle": "",
+        "company": null,
+        "publishTime": 0,
+        "language": "日语",
+        "originalCover": 0,
+        "originalSong": null,
+        "no": null,
+        "disc": "01",
+        "lyricArtists": [
+            {
+                "artistId": 96478188,
+                "artistName": "まろん (IOSYS) / らっぷびと",
+                "alias": null,
+                "headPicUrl": null,
+                "area": null,
+                "type": null,
+                "desc": null,
+                "production": null,
+                "avatarPicUrl": null,
+                "transName": null
+            }
+        ],
+        "composeArtists": [
+            {
+                "artistId": 735070,
+                "artistName": "ZUN",
+                "alias": null,
+                "headPicUrl": null,
+                "area": null,
+                "type": null,
+                "desc": null,
+                "production": null,
+                "avatarPicUrl": null,
+                "transName": null
+            }
+        ],
+        "arrangeArtists": [
+            {
+                "artistId": 149088,
+                "artistName": "Tracy",
+                "alias": null,
+                "headPicUrl": null,
+                "area": null,
+                "type": null,
+                "desc": null,
+                "production": null,
+                "avatarPicUrl": null,
+                "transName": null
+            }
+        ],
+        "roleArtists": null,
+        "songTags": null,
+        "albumRepVo": {
+            "albumId": 253210138,
+            "albumName": "THE ANTHEM",
+            "artistRepVos": null,
+            "albumPicUrl": null,
+            "albumSubTitle": null,
+            "company": null,
+            "publishTime": null,
+            "songRepVos": null,
+            "songTags": null,
+            "production": null,
+            "language": null,
+            "type": null,
+            "transName": null
+        },
+        "transName": null,
+        "mvIds": null,
+        "lyricContent": null,
+        "transLyricContent": null,
+        "playUrl": "http://m701.music.126.net/20250620221625/8d601bf8f8f4d05c53cdc440f5d479c2/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/57232603318/21da/7fd6/b5b0/6eaad182115363869e13e9131ed95e9c.mp3?vuutv=5qFa4yHj+CakNlBn3G428qcvSgEbNfr9XJ0d/tNfKCV4tTo7Jt13DpGxU02WOzv8iylNYSXKX0WZ5BJthxRKNfcJJXd02eAg32wcXk7jqoY=",
+        "forTransLyric": 1,
+        "noNeedLyric": 0,
+        "lyricLock": 0,
+        "transLyricLock": 0,
+        "lyricIsEdited": 0,
+        "duration": 173198
+    },
+    "code": 200
+}
